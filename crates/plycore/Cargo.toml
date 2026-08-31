@@ -1,0 +1,13 @@
+[package]
+name = "plycore"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+description = "Shared types for plychart and plycompute"
+repository = "https://github.com/WyattAu/plychart"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[lints.rust]

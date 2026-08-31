@@ -1,0 +1,15 @@
+[package]
+name = "plycompute"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+description = "Quantitative computation library — portfolio analytics, risk metrics, signal processing"
+repository = "https://github.com/WyattAu/plychart"
+
+[dependencies]
+plycore = { path = "../plycore" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }

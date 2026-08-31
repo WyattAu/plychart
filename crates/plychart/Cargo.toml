@@ -1,0 +1,45 @@
+[package]
+name = "plychart"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+description = "Full-featured graphing library for Rust/WASM — Canvas2D rendering, zero dependencies, zero watermarks"
+repository = "https://github.com/WyattAu/plychart"
+keywords = ["charting", "canvas", "wasm", "visualization", "data"]
+categories = ["wasm", "visualization", "graphics"]
+readme = "README.md"
+authors = ["Wyatt Au"]
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+plycore = { path = "../plycore" }
+wasm-bindgen = "0.2"
+js-sys = "0.3"
+web-sys = { version = "0.3", features = [
+    "Document",
+    "Element",
+    "HtmlCanvasElement",
+    "CanvasRenderingContext2d",
+    "Window",
+    "console",
+    "ImageData",
+    "Performance",
+] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+console_error_panic_hook = "0.1"
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+proptest = "1"
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+
+[[bench]]
+name = "chart_render"
+harness = false
