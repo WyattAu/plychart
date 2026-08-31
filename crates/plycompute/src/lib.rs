@@ -20,6 +20,9 @@ pub mod stress;
 pub mod volatility;
 pub mod yieldcurve;
 
+#[cfg(target_arch = "wasm32")]
+pub mod wasm;
+
 #[cfg(test)]
 mod integration_tests {
     use super::*;

@@ -173,6 +173,37 @@ impl ChartInteraction {
         }
     }
 
+    /// Handle touch start event.
+    pub fn on_touch_start(&mut self, x: f64, y: f64, total_data_points: usize) {
+        self.on_mouse_down(x, y, total_data_points);
+    }
+
+    /// Handle touch move event.
+    pub fn on_touch_move(&mut self, x: f64, y: f64, total_data_points: usize) {
+        self.on_mouse_move(x, y, total_data_points);
+        if self.dragging {
+            self.on_mouse_drag(x, total_data_points);
+        }
+    }
+
+    /// Handle touch end event.
+    pub fn on_touch_end(&mut self) {
+        self.on_mouse_up();
+    }
+
+    /// Handle pinch-to-zoom.
+    /// `scale`: pinch scale factor (>1 = zoom in, <1 = zoom out).
+    pub fn on_pinch(&mut self, scale: f64, total_data_points: usize) {
+        let zoom_factor = 1.0 / scale;
+        let new_count = (self.viewport.count as f64 * zoom_factor)
+            .max(10.0)
+            .min(total_data_points.max(1) as f64) as usize;
+        let start = (self.viewport.start + self.viewport.count.saturating_sub(new_count))
+            .min(total_data_points.saturating_sub(new_count));
+        self.viewport.count = new_count;
+        self.viewport.start = start;
+    }
+
     /// Toggle log scale.
     pub fn toggle_log_scale(&mut self) {
         self.viewport.log_scale = !self.viewport.log_scale;
