@@ -1,4 +1,3 @@
-
 /// Drawdown analysis from a price series.
 /// Returns the underwater curve, max drawdown stats, and recovery periods.
 pub fn analyze_drawdowns(prices: &[f64]) -> DrawdownResult {
@@ -32,12 +31,7 @@ pub fn analyze_drawdowns(prices: &[f64]) -> DrawdownResult {
         if p > peak {
             // New high - check if we were in a drawdown
             if in_drawdown {
-                recoveries.push((
-                    dd_trough_idx,
-                    i,
-                    dd_trough_value,
-                    i - dd_start_idx,
-                ));
+                recoveries.push((dd_trough_idx, i, dd_trough_value, i - dd_start_idx));
                 in_drawdown = false;
             }
             peak = p;

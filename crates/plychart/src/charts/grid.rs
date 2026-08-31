@@ -53,6 +53,10 @@ pub fn draw_time_grid(
         let total_secs = timestamps[i] as i64;
         let hours = (total_secs / 3600) % 24;
         let mins = (total_secs / 60) % 60;
-        let _ = ctx.fill_text(&format!("{:02}:{:02}", hours, mins), x - 15.0, area.y + area.h + 14.0);
+        let _ = ctx.fill_text(
+            &format!("{:02}:{:02}", hours, mins),
+            x - 15.0,
+            area.y + area.h + 14.0,
+        );
     }
 }

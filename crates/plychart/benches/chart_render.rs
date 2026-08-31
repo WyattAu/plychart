@@ -1,4 +1,4 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{Criterion, black_box, criterion_group, criterion_main};
 
 fn bench_candle_render(c: &mut Criterion) {
     let data: Vec<plycore::CandleData> = (0..1000)

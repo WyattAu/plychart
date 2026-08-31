@@ -12,5 +12,9 @@ pub fn theme_from_css() -> ChartTheme {
 /// Get the appropriate theme for the current context.
 #[must_use]
 pub fn get_theme(is_dark: bool) -> ChartTheme {
-    if is_dark { ChartTheme::dark() } else { ChartTheme::light() }
+    if is_dark {
+        ChartTheme::dark()
+    } else {
+        ChartTheme::light()
+    }
 }

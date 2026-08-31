@@ -86,14 +86,14 @@ fn inverse_normal_cdf(p: f64) -> f64 {
     let q = p - 0.5;
     if q.abs() <= p_low {
         let num = ((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5];
-        let den = (((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1.0 ;
+        let den = (((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1.0;
         num / den
     } else {
         let pp = if q < 0.0 { p } else { 1.0 - p };
         let pp = pp.max(1e-300);
         let t = (-2.0 * pp.ln()).sqrt();
-        let num = ((((a[0] * t + a[1]) * t + a[2]) * t + a[3]) * t + a[4]) * t + a[5] ;
-        let den = ((((b[0] * t + b[1]) * t + b[2]) * t + b[3]) * t + b[4]) * t + 1.0 ;
+        let num = ((((a[0] * t + a[1]) * t + a[2]) * t + a[3]) * t + a[4]) * t + a[5];
+        let den = ((((b[0] * t + b[1]) * t + b[2]) * t + b[3]) * t + b[4]) * t + 1.0;
         let r = -(num / den);
         if q < 0.0 { r } else { -r }
     }
@@ -126,7 +126,8 @@ pub fn max_drawdown(prices: &[f64]) -> (f64, usize, usize) {
 /// Underwater curve: drawdown at each point in time.
 pub fn drawdown_series(prices: &[f64]) -> Vec<f64> {
     let mut peak = prices[0];
-    prices.iter()
+    prices
+        .iter()
         .map(|&p| {
             if p > peak {
                 peak = p;
@@ -138,7 +139,10 @@ pub fn drawdown_series(prices: &[f64]) -> Vec<f64> {
 
 /// Sharpe ratio (annualized).
 pub fn sharpe_ratio(returns: &[f64], risk_free: f64, periods_per_year: u32) -> f64 {
-    let excess: Vec<f64> = returns.iter().map(|r| r - risk_free / periods_per_year as f64).collect();
+    let excess: Vec<f64> = returns
+        .iter()
+        .map(|r| r - risk_free / periods_per_year as f64)
+        .collect();
     let m = montecarlo::mean(&excess);
     let s = montecarlo::std_dev(&excess);
     if s > 0.0 {
@@ -217,7 +221,11 @@ mod tests {
     fn test_sharpe_positive() {
         let returns = vec![0.001, 0.002, -0.001, 0.003, 0.001, 0.002, -0.001, 0.004];
         let s = sharpe_ratio(&returns, 0.04, 252);
-        assert!(s > 0.0, "Sharpe should be positive for positive mean: {}", s);
+        assert!(
+            s > 0.0,
+            "Sharpe should be positive for positive mean: {}",
+            s
+        );
     }
 
     #[test]

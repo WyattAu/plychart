@@ -16,7 +16,8 @@ pub fn draw(
     ctx.set_stroke_style(&"rgba(255,255,255,0.1)".into());
     ctx.set_line_width(8.0);
     ctx.begin_path();
-    ctx.arc(cx, cy, radius, std::f64::consts::PI, 0.0).unwrap_or_default();
+    ctx.arc(cx, cy, radius, std::f64::consts::PI, 0.0)
+        .unwrap_or_default();
     ctx.stroke();
 
     // Value arc
@@ -24,7 +25,14 @@ pub fn draw(
     ctx.set_stroke_style(&color.into());
     ctx.set_line_width(8.0);
     ctx.begin_path();
-    ctx.arc(cx, cy, radius, std::f64::consts::PI, std::f64::consts::PI + ratio * std::f64::consts::PI).unwrap_or_default();
+    ctx.arc(
+        cx,
+        cy,
+        radius,
+        std::f64::consts::PI,
+        std::f64::consts::PI + ratio * std::f64::consts::PI,
+    )
+    .unwrap_or_default();
     ctx.stroke();
 
     // Value text

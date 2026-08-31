@@ -11,8 +11,15 @@ pub fn draw(
         return;
     }
 
-    let min_p = bars.iter().map(|c| c.close).fold(f64::INFINITY, f64::min).min(0.0);
-    let max_p = bars.iter().map(|c| c.close).fold(f64::NEG_INFINITY, f64::max);
+    let min_p = bars
+        .iter()
+        .map(|c| c.close)
+        .fold(f64::INFINITY, f64::min)
+        .min(0.0);
+    let max_p = bars
+        .iter()
+        .map(|c| c.close)
+        .fold(f64::NEG_INFINITY, f64::max);
     let range = (max_p - min_p).max(1.0);
     let bar_w = (area.w / bars.len() as f64 * 0.7).max(1.0);
 

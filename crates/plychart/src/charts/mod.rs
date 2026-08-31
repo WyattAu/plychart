@@ -2,25 +2,25 @@
 
 use serde::{Deserialize, Serialize};
 
-pub mod candlestick;
-pub mod line;
 pub mod area;
-pub mod bar;
-pub mod heatmap;
-pub mod scatter;
-pub mod gauge;
-pub mod radar;
-pub mod treemap;
-pub mod waterfall;
-pub mod order_book;
 pub mod backtest;
+pub mod bar;
+pub mod candlestick;
 pub mod correlation;
-pub mod grid;
 pub mod crosshair;
+pub mod gauge;
+pub mod grid;
+pub mod heatmap;
+pub mod line;
+pub mod order_book;
+pub mod radar;
+pub mod scatter;
+pub mod treemap;
 pub mod volume;
+pub mod waterfall;
 
 /// Re-export core types from plycore for convenience.
-pub use plycore::{CandleData, BarData, ChartArea, ChartTheme, ChartViewport};
+pub use plycore::{BarData, CandleData, ChartArea, ChartTheme, ChartViewport};
 
 /// Supported chart types.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -63,10 +63,19 @@ impl ChartType {
     #[must_use]
     pub const fn all() -> &'static [Self] {
         &[
-            Self::Candlestick, Self::Line, Self::Area, Self::Bar,
-            Self::Heatmap, Self::Scatter, Self::Gauge, Self::Radar,
-            Self::Treemap, Self::Waterfall, Self::OrderBook,
-            Self::Backtest, Self::Correlation,
+            Self::Candlestick,
+            Self::Line,
+            Self::Area,
+            Self::Bar,
+            Self::Heatmap,
+            Self::Scatter,
+            Self::Gauge,
+            Self::Radar,
+            Self::Treemap,
+            Self::Waterfall,
+            Self::OrderBook,
+            Self::Backtest,
+            Self::Correlation,
         ]
     }
 }

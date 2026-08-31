@@ -56,7 +56,8 @@ pub fn covariance_matrix(returns: &[f64], n_assets: usize, n_periods: usize) -> 
         for j in i..n_assets {
             let mut s = 0.0;
             for t in 0..n_periods {
-                s += (returns[i * n_periods + t] - means[i]) * (returns[j * n_periods + t] - means[j]);
+                s += (returns[i * n_periods + t] - means[i])
+                    * (returns[j * n_periods + t] - means[j]);
             }
             let v = s / (n_periods as f64 - 1.0);
             cov[i * n_assets + j] = v;
@@ -83,7 +84,11 @@ pub fn linear_regression(x: &[f64], y: &[f64]) -> (f64, f64, f64) {
     }
     let beta = if sxx > 0.0 { sxy / sxx } else { 0.0 };
     let alpha = my - beta * mx;
-    let r_sq = if syy > 0.0 { (sxy * sxy) / (sxx * syy) } else { 0.0 };
+    let r_sq = if syy > 0.0 {
+        (sxy * sxy) / (sxx * syy)
+    } else {
+        0.0
+    };
     (alpha, beta, r_sq)
 }
 
@@ -189,7 +194,11 @@ pub fn evaluate_portfolio(
     let cov_w = matvec(cov, weights, n_assets);
     let var: f64 = (0..n_assets).map(|i| weights[i] * cov_w[i]).sum();
     let risk = var.max(0.0).sqrt();
-    let sharpe = if risk > 0.0 { (ret - risk_free) / risk } else { 0.0 };
+    let sharpe = if risk > 0.0 {
+        (ret - risk_free) / risk
+    } else {
+        0.0
+    };
     (ret, risk, sharpe)
 }
 

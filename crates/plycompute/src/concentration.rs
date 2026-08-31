@@ -154,6 +154,10 @@ mod tests {
     #[test]
     fn test_gini_equal() {
         let weights = vec![0.25, 0.25, 0.25, 0.25];
-        assert!(gini_coefficient(&weights) < 0.1, "gini for equal weight should be small: {}", gini_coefficient(&weights));
+        assert!(
+            gini_coefficient(&weights) < 0.1,
+            "gini for equal weight should be small: {}",
+            gini_coefficient(&weights)
+        );
     }
 }

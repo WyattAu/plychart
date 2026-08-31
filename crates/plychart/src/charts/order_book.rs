@@ -10,7 +10,8 @@ pub fn draw(
         return;
     }
 
-    let max_size: f64 = bids.iter()
+    let max_size: f64 = bids
+        .iter()
         .chain(asks.iter())
         .map(|(_, s)| *s)
         .fold(f64::NEG_INFINITY, f64::max)
@@ -29,8 +30,18 @@ pub fn draw(
         ctx.set_fill_style(&theme.up.into());
         ctx.fill_rect(mid_x - w, y, w, level_h - 1.0);
         ctx.set_fill_style(&theme.text.into());
-        ctx.fill_text(&format!("{:.2}", price), mid_x - w - 48.0, y + level_h * 0.7).ok();
-        ctx.fill_text(&format!("{:.4}", size), mid_x - w - 48.0 + 48.0, y + level_h * 0.7).ok();
+        ctx.fill_text(
+            &format!("{:.2}", price),
+            mid_x - w - 48.0,
+            y + level_h * 0.7,
+        )
+        .ok();
+        ctx.fill_text(
+            &format!("{:.4}", size),
+            mid_x - w - 48.0 + 48.0,
+            y + level_h * 0.7,
+        )
+        .ok();
     }
 
     for (i, &(price, size)) in asks.iter().enumerate() {
@@ -39,8 +50,10 @@ pub fn draw(
         ctx.set_fill_style(&theme.down.into());
         ctx.fill_rect(mid_x, y, w, level_h - 1.0);
         ctx.set_fill_style(&theme.text.into());
-        ctx.fill_text(&format!("{:.2}", price), mid_x + 4.0, y + level_h * 0.7).ok();
-        ctx.fill_text(&format!("{:.4}", size), mid_x + 52.0, y + level_h * 0.7).ok();
+        ctx.fill_text(&format!("{:.2}", price), mid_x + 4.0, y + level_h * 0.7)
+            .ok();
+        ctx.fill_text(&format!("{:.4}", size), mid_x + 52.0, y + level_h * 0.7)
+            .ok();
     }
 
     ctx.set_stroke_style(&theme.grid.into());

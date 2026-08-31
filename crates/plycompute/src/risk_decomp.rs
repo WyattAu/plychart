@@ -58,7 +58,8 @@ pub fn component_var(
         for t in 0..n_periods {
             for i in 0..n_assets {
                 if i != excluded {
-                    reduced_returns[t] += (weights[i] / remaining_weight) * returns[i * n_periods + t];
+                    reduced_returns[t] +=
+                        (weights[i] / remaining_weight) * returns[i * n_periods + t];
                 }
             }
         }

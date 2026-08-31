@@ -4,7 +4,9 @@
 #[cfg(target_arch = "wasm32")]
 #[must_use]
 pub fn device_pixel_ratio() -> f64 {
-    web_sys::window().map(|w| w.device_pixel_ratio()).unwrap_or(1.0)
+    web_sys::window()
+        .map(|w| w.device_pixel_ratio())
+        .unwrap_or(1.0)
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -19,17 +21,22 @@ pub fn create_chart(canvas_id: &str, width: u32, height: u32) -> Result<(), crat
     use wasm_bindgen::JsCast;
     use web_sys::CanvasRenderingContext2d;
     let window = web_sys::window().ok_or(crate::ChartError::CanvasNotFound("No window".into()))?;
-    let document = window.document().ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;
-    let element = document.get_element_by_id(canvas_id)
+    let document = window
+        .document()
+        .ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;
+    let element = document
+        .get_element_by_id(canvas_id)
         .ok_or_else(|| crate::ChartError::CanvasNotFound(format!("'{canvas_id}' not found")))?;
-    let canvas: web_sys::HtmlCanvasElement = element.dyn_into()
+    let canvas: web_sys::HtmlCanvasElement = element
+        .dyn_into()
         .map_err(|_| crate::ChartError::CanvasNotFound(format!("'{canvas_id}' is not a canvas")))?;
 
     canvas.set_width(width);
     canvas.set_height(height);
 
     let dpr = device_pixel_ratio();
-    let ctx = canvas.get_context("2d")
+    let ctx = canvas
+        .get_context("2d")
         .and_then(|c| c.dyn_into::<CanvasRenderingContext2d>().ok())
         .ok_or(crate::ChartError::RenderError("No 2D context".into()))?;
     ctx.scale(dpr, dpr).unwrap_or_default();
@@ -54,27 +61,40 @@ pub fn clear_canvas(ctx: &web_sys::CanvasRenderingContext2d, bg: &str, w: f64, h
 
 /// Update chart with OHLCV candle data.
 #[cfg(target_arch = "wasm32")]
-pub fn update_candles(canvas_id: &str, data: &[plycore::CandleData]) -> Result<(), crate::ChartError> {
+pub fn update_candles(
+    canvas_id: &str,
+    data: &[plycore::CandleData],
+) -> Result<(), crate::ChartError> {
     use wasm_bindgen::JsCast;
     use web_sys::CanvasRenderingContext2d;
     let window = web_sys::window().ok_or(crate::ChartError::CanvasNotFound("No window".into()))?;
-    let document = window.document().ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;
-    let element = document.get_element_by_id(canvas_id)
+    let document = window
+        .document()
+        .ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;
+    let element = document
+        .get_element_by_id(canvas_id)
         .ok_or_else(|| crate::ChartError::CanvasNotFound(format!("'{canvas_id}' not found")))?;
-    let canvas: web_sys::HtmlCanvasElement = element.dyn_into()
+    let canvas: web_sys::HtmlCanvasElement = element
+        .dyn_into()
         .map_err(|_| crate::ChartError::CanvasNotFound("Not a canvas".into()))?;
 
     let width = canvas.width() as f64;
     let height = canvas.height() as f64;
     let dpr = device_pixel_ratio();
-    let ctx = canvas.get_context("2d")
+    let ctx = canvas
+        .get_context("2d")
         .and_then(|c| c.dyn_into::<CanvasRenderingContext2d>().ok())
         .ok_or(crate::ChartError::RenderError("No 2D context".into()))?;
     ctx.scale(dpr, dpr).unwrap_or_default();
 
     clear_canvas(&ctx, "#0a0a0a", width, height);
 
-    let area = plycore::ChartArea { x: 0.0, y: 0.0, w: width, h: height };
+    let area = plycore::ChartArea {
+        x: 0.0,
+        y: 0.0,
+        w: width,
+        h: height,
+    };
     let theme = plycore::ChartTheme::dark();
 
     match data.len() {
@@ -84,7 +104,8 @@ pub fn update_candles(canvas_id: &str, data: &[plycore::CandleData]) -> Result<(
             let y = area.y + area.h / 2.0;
             ctx.set_fill_style(&theme.accent.into());
             ctx.begin_path();
-            ctx.arc(x, y, 4.0, 0.0, std::f64::consts::TAU).unwrap_or_default();
+            ctx.arc(x, y, 4.0, 0.0, std::f64::consts::TAU)
+                .unwrap_or_default();
             ctx.fill();
         }
         _ => {
@@ -97,7 +118,10 @@ pub fn update_candles(canvas_id: &str, data: &[plycore::CandleData]) -> Result<(
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub fn update_candles(_canvas_id: &str, _data: &[plycore::CandleData]) -> Result<(), crate::ChartError> {
+pub fn update_candles(
+    _canvas_id: &str,
+    _data: &[plycore::CandleData],
+) -> Result<(), crate::ChartError> {
     Ok(())
 }
 
@@ -107,23 +131,33 @@ pub fn update_line(canvas_id: &str, data: &[plycore::CandleData]) -> Result<(), 
     use wasm_bindgen::JsCast;
     use web_sys::CanvasRenderingContext2d;
     let window = web_sys::window().ok_or(crate::ChartError::CanvasNotFound("No window".into()))?;
-    let document = window.document().ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;
-    let element = document.get_element_by_id(canvas_id)
+    let document = window
+        .document()
+        .ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;
+    let element = document
+        .get_element_by_id(canvas_id)
         .ok_or_else(|| crate::ChartError::CanvasNotFound(format!("'{canvas_id}' not found")))?;
-    let canvas: web_sys::HtmlCanvasElement = element.dyn_into()
+    let canvas: web_sys::HtmlCanvasElement = element
+        .dyn_into()
         .map_err(|_| crate::ChartError::CanvasNotFound("Not a canvas".into()))?;
 
     let width = canvas.width() as f64;
     let height = canvas.height() as f64;
     let dpr = device_pixel_ratio();
-    let ctx = canvas.get_context("2d")
+    let ctx = canvas
+        .get_context("2d")
         .and_then(|c| c.dyn_into::<CanvasRenderingContext2d>().ok())
         .ok_or(crate::ChartError::RenderError("No 2D context".into()))?;
     ctx.scale(dpr, dpr).unwrap_or_default();
 
     clear_canvas(&ctx, "#0a0a0a", width, height);
 
-    let area = plycore::ChartArea { x: 0.0, y: 0.0, w: width, h: height };
+    let area = plycore::ChartArea {
+        x: 0.0,
+        y: 0.0,
+        w: width,
+        h: height,
+    };
     let theme = plycore::ChartTheme::dark();
     crate::charts::line::draw(&ctx, data, &area, theme.accent);
 
@@ -131,7 +165,104 @@ pub fn update_line(canvas_id: &str, data: &[plycore::CandleData]) -> Result<(), 
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub fn update_line(_canvas_id: &str, _data: &[plycore::CandleData]) -> Result<(), crate::ChartError> {
+pub fn update_line(
+    _canvas_id: &str,
+    _data: &[plycore::CandleData],
+) -> Result<(), crate::ChartError> {
+    Ok(())
+}
+
+/// Update chart with bar data (uses bar renderer, not candlestick).
+#[cfg(target_arch = "wasm32")]
+pub fn update_bar(canvas_id: &str, data: &[plycore::CandleData]) -> Result<(), crate::ChartError> {
+    use wasm_bindgen::JsCast;
+    use web_sys::CanvasRenderingContext2d;
+    let window = web_sys::window().ok_or(crate::ChartError::CanvasNotFound("No window".into()))?;
+    let document = window
+        .document()
+        .ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;
+    let element = document
+        .get_element_by_id(canvas_id)
+        .ok_or_else(|| crate::ChartError::CanvasNotFound(format!("'{canvas_id}' not found")))?;
+    let canvas: web_sys::HtmlCanvasElement = element
+        .dyn_into()
+        .map_err(|_| crate::ChartError::CanvasNotFound("Not a canvas".into()))?;
+
+    let width = canvas.width() as f64;
+    let height = canvas.height() as f64;
+    let dpr = device_pixel_ratio();
+    let ctx = canvas
+        .get_context("2d")
+        .and_then(|c| c.dyn_into::<CanvasRenderingContext2d>().ok())
+        .ok_or(crate::ChartError::RenderError("No 2D context".into()))?;
+    ctx.scale(dpr, dpr).unwrap_or_default();
+
+    clear_canvas(&ctx, "#0a0a0a", width, height);
+
+    let area = plycore::ChartArea {
+        x: 0.0,
+        y: 0.0,
+        w: width,
+        h: height,
+    };
+    let theme = plycore::ChartTheme::dark();
+    crate::charts::bar::draw(&ctx, data, &area, &theme);
+
+    Ok(())
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn update_bar(
+    _canvas_id: &str,
+    _data: &[plycore::CandleData],
+) -> Result<(), crate::ChartError> {
+    Ok(())
+}
+
+/// Update chart with area data (uses area renderer, not candlestick).
+#[cfg(target_arch = "wasm32")]
+pub fn update_area(canvas_id: &str, data: &[plycore::CandleData]) -> Result<(), crate::ChartError> {
+    use wasm_bindgen::JsCast;
+    use web_sys::CanvasRenderingContext2d;
+    let window = web_sys::window().ok_or(crate::ChartError::CanvasNotFound("No window".into()))?;
+    let document = window
+        .document()
+        .ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;
+    let element = document
+        .get_element_by_id(canvas_id)
+        .ok_or_else(|| crate::ChartError::CanvasNotFound(format!("'{canvas_id}' not found")))?;
+    let canvas: web_sys::HtmlCanvasElement = element
+        .dyn_into()
+        .map_err(|_| crate::ChartError::CanvasNotFound("Not a canvas".into()))?;
+
+    let width = canvas.width() as f64;
+    let height = canvas.height() as f64;
+    let dpr = device_pixel_ratio();
+    let ctx = canvas
+        .get_context("2d")
+        .and_then(|c| c.dyn_into::<CanvasRenderingContext2d>().ok())
+        .ok_or(crate::ChartError::RenderError("No 2D context".into()))?;
+    ctx.scale(dpr, dpr).unwrap_or_default();
+
+    clear_canvas(&ctx, "#0a0a0a", width, height);
+
+    let area = plycore::ChartArea {
+        x: 0.0,
+        y: 0.0,
+        w: width,
+        h: height,
+    };
+    let theme = plycore::ChartTheme::dark();
+    crate::charts::area::draw(&ctx, data, &area, theme.accent);
+
+    Ok(())
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn update_area(
+    _canvas_id: &str,
+    _data: &[plycore::CandleData],
+) -> Result<(), crate::ChartError> {
     Ok(())
 }
 
@@ -141,16 +272,21 @@ pub fn update_heatmap(canvas_id: &str, data_json: &str) -> Result<(), crate::Cha
     use wasm_bindgen::JsCast;
     use web_sys::CanvasRenderingContext2d;
     let window = web_sys::window().ok_or(crate::ChartError::CanvasNotFound("No window".into()))?;
-    let document = window.document().ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;
-    let element = document.get_element_by_id(canvas_id)
+    let document = window
+        .document()
+        .ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;
+    let element = document
+        .get_element_by_id(canvas_id)
         .ok_or_else(|| crate::ChartError::CanvasNotFound(format!("'{canvas_id}' not found")))?;
-    let canvas: web_sys::HtmlCanvasElement = element.dyn_into()
+    let canvas: web_sys::HtmlCanvasElement = element
+        .dyn_into()
         .map_err(|_| crate::ChartError::CanvasNotFound("Not a canvas".into()))?;
 
     let width = canvas.width() as f64;
     let height = canvas.height() as f64;
     let dpr = device_pixel_ratio();
-    let ctx = canvas.get_context("2d")
+    let ctx = canvas
+        .get_context("2d")
         .and_then(|c| c.dyn_into::<CanvasRenderingContext2d>().ok())
         .ok_or(crate::ChartError::RenderError("No 2D context".into()))?;
     ctx.scale(dpr, dpr).unwrap_or_default();
@@ -160,7 +296,12 @@ pub fn update_heatmap(canvas_id: &str, data_json: &str) -> Result<(), crate::Cha
     let matrix: Vec<Vec<f64>> = serde_json::from_str(data_json)
         .map_err(|e| crate::ChartError::DataParseError(e.to_string()))?;
     if !matrix.is_empty() {
-        let area = plycore::ChartArea { x: 0.0, y: 0.0, w: width, h: height };
+        let area = plycore::ChartArea {
+            x: 0.0,
+            y: 0.0,
+            w: width,
+            h: height,
+        };
         crate::charts::heatmap::draw(&ctx, &matrix, &area);
     }
 
@@ -178,16 +319,21 @@ pub fn update_order_book(canvas_id: &str, data_json: &str) -> Result<(), crate::
     use wasm_bindgen::JsCast;
     use web_sys::CanvasRenderingContext2d;
     let window = web_sys::window().ok_or(crate::ChartError::CanvasNotFound("No window".into()))?;
-    let document = window.document().ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;
-    let element = document.get_element_by_id(canvas_id)
+    let document = window
+        .document()
+        .ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;
+    let element = document
+        .get_element_by_id(canvas_id)
         .ok_or_else(|| crate::ChartError::CanvasNotFound(format!("'{canvas_id}' not found")))?;
-    let canvas: web_sys::HtmlCanvasElement = element.dyn_into()
+    let canvas: web_sys::HtmlCanvasElement = element
+        .dyn_into()
         .map_err(|_| crate::ChartError::CanvasNotFound("Not a canvas".into()))?;
 
     let width = canvas.width() as f64;
     let height = canvas.height() as f64;
     let dpr = device_pixel_ratio();
-    let ctx = canvas.get_context("2d")
+    let ctx = canvas
+        .get_context("2d")
         .and_then(|c| c.dyn_into::<CanvasRenderingContext2d>().ok())
         .ok_or(crate::ChartError::RenderError("No 2D context".into()))?;
     ctx.scale(dpr, dpr).unwrap_or_default();
@@ -196,20 +342,37 @@ pub fn update_order_book(canvas_id: &str, data_json: &str) -> Result<(), crate::
 
     let v: serde_json::Value = serde_json::from_str(data_json)
         .map_err(|e| crate::ChartError::DataParseError(e.to_string()))?;
-    let bids = v.get("bids").and_then(|b| b.as_array()).map(|a| {
-        a.iter().filter_map(|p| {
-            let arr = p.as_array()?;
-            Some((arr.get(0)?.as_f64()?, arr.get(1)?.as_f64()?))
-        }).collect::<Vec<_>>()
-    }).unwrap_or_default();
-    let asks = v.get("asks").and_then(|a| a.as_array()).map(|a| {
-        a.iter().filter_map(|p| {
-            let arr = p.as_array()?;
-            Some((arr.get(0)?.as_f64()?, arr.get(1)?.as_f64()?))
-        }).collect::<Vec<_>>()
-    }).unwrap_or_default();
+    let bids = v
+        .get("bids")
+        .and_then(|b| b.as_array())
+        .map(|a| {
+            a.iter()
+                .filter_map(|p| {
+                    let arr = p.as_array()?;
+                    Some((arr.get(0)?.as_f64()?, arr.get(1)?.as_f64()?))
+                })
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+    let asks = v
+        .get("asks")
+        .and_then(|a| a.as_array())
+        .map(|a| {
+            a.iter()
+                .filter_map(|p| {
+                    let arr = p.as_array()?;
+                    Some((arr.get(0)?.as_f64()?, arr.get(1)?.as_f64()?))
+                })
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
 
-    let area = plycore::ChartArea { x: 0.0, y: 0.0, w: width, h: height };
+    let area = plycore::ChartArea {
+        x: 0.0,
+        y: 0.0,
+        w: width,
+        h: height,
+    };
     let theme = plycore::ChartTheme::dark();
     crate::charts::order_book::draw(&ctx, &bids, &asks, &area, &theme);
 
@@ -227,16 +390,21 @@ pub fn update_scatter(canvas_id: &str, data_json: &str) -> Result<(), crate::Cha
     use wasm_bindgen::JsCast;
     use web_sys::CanvasRenderingContext2d;
     let window = web_sys::window().ok_or(crate::ChartError::CanvasNotFound("No window".into()))?;
-    let document = window.document().ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;
-    let element = document.get_element_by_id(canvas_id)
+    let document = window
+        .document()
+        .ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;
+    let element = document
+        .get_element_by_id(canvas_id)
         .ok_or_else(|| crate::ChartError::CanvasNotFound(format!("'{canvas_id}' not found")))?;
-    let canvas: web_sys::HtmlCanvasElement = element.dyn_into()
+    let canvas: web_sys::HtmlCanvasElement = element
+        .dyn_into()
         .map_err(|_| crate::ChartError::CanvasNotFound("Not a canvas".into()))?;
 
     let width = canvas.width() as f64;
     let height = canvas.height() as f64;
     let dpr = device_pixel_ratio();
-    let ctx = canvas.get_context("2d")
+    let ctx = canvas
+        .get_context("2d")
         .and_then(|c| c.dyn_into::<CanvasRenderingContext2d>().ok())
         .ok_or(crate::ChartError::RenderError("No 2D context".into()))?;
     ctx.scale(dpr, dpr).unwrap_or_default();
@@ -245,7 +413,12 @@ pub fn update_scatter(canvas_id: &str, data_json: &str) -> Result<(), crate::Cha
 
     let points: Vec<(f64, f64)> = serde_json::from_str(data_json)
         .map_err(|e| crate::ChartError::DataParseError(e.to_string()))?;
-    let area = plycore::ChartArea { x: 0.0, y: 0.0, w: width, h: height };
+    let area = plycore::ChartArea {
+        x: 0.0,
+        y: 0.0,
+        w: width,
+        h: height,
+    };
     let theme = plycore::ChartTheme::dark();
     crate::charts::scatter::draw(&ctx, &points, &area, theme.accent);
 
@@ -259,53 +432,82 @@ pub fn update_scatter(_canvas_id: &str, _data_json: &str) -> Result<(), crate::C
 
 /// Update chart with gauge value.
 #[cfg(target_arch = "wasm32")]
-pub fn update_gauge(canvas_id: &str, value: f64, max: f64, color: &str) -> Result<(), crate::ChartError> {
+pub fn update_gauge(
+    canvas_id: &str,
+    value: f64,
+    max: f64,
+    color: &str,
+) -> Result<(), crate::ChartError> {
     use wasm_bindgen::JsCast;
     use web_sys::CanvasRenderingContext2d;
     let window = web_sys::window().ok_or(crate::ChartError::CanvasNotFound("No window".into()))?;
-    let document = window.document().ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;
-    let element = document.get_element_by_id(canvas_id)
+    let document = window
+        .document()
+        .ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;
+    let element = document
+        .get_element_by_id(canvas_id)
         .ok_or_else(|| crate::ChartError::CanvasNotFound(format!("'{canvas_id}' not found")))?;
-    let canvas: web_sys::HtmlCanvasElement = element.dyn_into()
+    let canvas: web_sys::HtmlCanvasElement = element
+        .dyn_into()
         .map_err(|_| crate::ChartError::CanvasNotFound("Not a canvas".into()))?;
 
     let width = canvas.width() as f64;
     let height = canvas.height() as f64;
     let dpr = device_pixel_ratio();
-    let ctx = canvas.get_context("2d")
+    let ctx = canvas
+        .get_context("2d")
         .and_then(|c| c.dyn_into::<CanvasRenderingContext2d>().ok())
         .ok_or(crate::ChartError::RenderError("No 2D context".into()))?;
     ctx.scale(dpr, dpr).unwrap_or_default();
 
     clear_canvas(&ctx, "#0a0a0a", width, height);
 
-    let area = plycore::ChartArea { x: 0.0, y: 0.0, w: width, h: height };
+    let area = plycore::ChartArea {
+        x: 0.0,
+        y: 0.0,
+        w: width,
+        h: height,
+    };
     crate::charts::gauge::draw(&ctx, value, max, color, &area);
 
     Ok(())
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub fn update_gauge(_canvas_id: &str, _value: f64, _max: f64, _color: &str) -> Result<(), crate::ChartError> {
+pub fn update_gauge(
+    _canvas_id: &str,
+    _value: f64,
+    _max: f64,
+    _color: &str,
+) -> Result<(), crate::ChartError> {
     Ok(())
 }
 
 /// Update chart with backtest equity + drawdown data.
 #[cfg(target_arch = "wasm32")]
-pub fn update_backtest(canvas_id: &str, equity_json: &str, drawdown_json: &str) -> Result<(), crate::ChartError> {
+pub fn update_backtest(
+    canvas_id: &str,
+    equity_json: &str,
+    drawdown_json: &str,
+) -> Result<(), crate::ChartError> {
     use wasm_bindgen::JsCast;
     use web_sys::CanvasRenderingContext2d;
     let window = web_sys::window().ok_or(crate::ChartError::CanvasNotFound("No window".into()))?;
-    let document = window.document().ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;
-    let element = document.get_element_by_id(canvas_id)
+    let document = window
+        .document()
+        .ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;
+    let element = document
+        .get_element_by_id(canvas_id)
         .ok_or_else(|| crate::ChartError::CanvasNotFound(format!("'{canvas_id}' not found")))?;
-    let canvas: web_sys::HtmlCanvasElement = element.dyn_into()
+    let canvas: web_sys::HtmlCanvasElement = element
+        .dyn_into()
         .map_err(|_| crate::ChartError::CanvasNotFound("Not a canvas".into()))?;
 
     let width = canvas.width() as f64;
     let height = canvas.height() as f64;
     let dpr = device_pixel_ratio();
-    let ctx = canvas.get_context("2d")
+    let ctx = canvas
+        .get_context("2d")
         .and_then(|c| c.dyn_into::<CanvasRenderingContext2d>().ok())
         .ok_or(crate::ChartError::RenderError("No 2D context".into()))?;
     ctx.scale(dpr, dpr).unwrap_or_default();
@@ -317,7 +519,12 @@ pub fn update_backtest(canvas_id: &str, equity_json: &str, drawdown_json: &str) 
     let drawdown: Vec<f64> = serde_json::from_str(drawdown_json)
         .map_err(|e| crate::ChartError::DataParseError(e.to_string()))?;
 
-    let area = plycore::ChartArea { x: 0.0, y: 0.0, w: width, h: height };
+    let area = plycore::ChartArea {
+        x: 0.0,
+        y: 0.0,
+        w: width,
+        h: height,
+    };
     let theme = plycore::ChartTheme::dark();
     crate::charts::backtest::draw(&ctx, &equity, &drawdown, &area, &theme);
 
@@ -325,26 +532,40 @@ pub fn update_backtest(canvas_id: &str, equity_json: &str, drawdown_json: &str) 
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub fn update_backtest(_canvas_id: &str, _equity_json: &str, _drawdown_json: &str) -> Result<(), crate::ChartError> {
+pub fn update_backtest(
+    _canvas_id: &str,
+    _equity_json: &str,
+    _drawdown_json: &str,
+) -> Result<(), crate::ChartError> {
     Ok(())
 }
 
 /// Update chart with radar data.
 #[cfg(target_arch = "wasm32")]
-pub fn update_radar(canvas_id: &str, values_json: &str, labels_json: &str, color: &str) -> Result<(), crate::ChartError> {
+pub fn update_radar(
+    canvas_id: &str,
+    values_json: &str,
+    labels_json: &str,
+    color: &str,
+) -> Result<(), crate::ChartError> {
     use wasm_bindgen::JsCast;
     use web_sys::CanvasRenderingContext2d;
     let window = web_sys::window().ok_or(crate::ChartError::CanvasNotFound("No window".into()))?;
-    let document = window.document().ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;
-    let element = document.get_element_by_id(canvas_id)
+    let document = window
+        .document()
+        .ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;
+    let element = document
+        .get_element_by_id(canvas_id)
         .ok_or_else(|| crate::ChartError::CanvasNotFound(format!("'{canvas_id}' not found")))?;
-    let canvas: web_sys::HtmlCanvasElement = element.dyn_into()
+    let canvas: web_sys::HtmlCanvasElement = element
+        .dyn_into()
         .map_err(|_| crate::ChartError::CanvasNotFound("Not a canvas".into()))?;
 
     let width = canvas.width() as f64;
     let height = canvas.height() as f64;
     let dpr = device_pixel_ratio();
-    let ctx = canvas.get_context("2d")
+    let ctx = canvas
+        .get_context("2d")
         .and_then(|c| c.dyn_into::<CanvasRenderingContext2d>().ok())
         .ok_or(crate::ChartError::RenderError("No 2D context".into()))?;
     ctx.scale(dpr, dpr).unwrap_or_default();
@@ -357,14 +578,24 @@ pub fn update_radar(canvas_id: &str, values_json: &str, labels_json: &str, color
         .map_err(|e| crate::ChartError::DataParseError(e.to_string()))?;
     let label_refs: Vec<&str> = labels.iter().map(|s| s.as_str()).collect();
 
-    let area = plycore::ChartArea { x: 0.0, y: 0.0, w: width, h: height };
+    let area = plycore::ChartArea {
+        x: 0.0,
+        y: 0.0,
+        w: width,
+        h: height,
+    };
     crate::charts::radar::draw(&ctx, &values, &label_refs, color, &area);
 
     Ok(())
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub fn update_radar(_canvas_id: &str, _values_json: &str, _labels_json: &str, _color: &str) -> Result<(), crate::ChartError> {
+pub fn update_radar(
+    _canvas_id: &str,
+    _values_json: &str,
+    _labels_json: &str,
+    _color: &str,
+) -> Result<(), crate::ChartError> {
     Ok(())
 }
 
@@ -374,16 +605,21 @@ pub fn update_treemap(canvas_id: &str, data_json: &str) -> Result<(), crate::Cha
     use wasm_bindgen::JsCast;
     use web_sys::CanvasRenderingContext2d;
     let window = web_sys::window().ok_or(crate::ChartError::CanvasNotFound("No window".into()))?;
-    let document = window.document().ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;
-    let element = document.get_element_by_id(canvas_id)
+    let document = window
+        .document()
+        .ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;
+    let element = document
+        .get_element_by_id(canvas_id)
         .ok_or_else(|| crate::ChartError::CanvasNotFound(format!("'{canvas_id}' not found")))?;
-    let canvas: web_sys::HtmlCanvasElement = element.dyn_into()
+    let canvas: web_sys::HtmlCanvasElement = element
+        .dyn_into()
         .map_err(|_| crate::ChartError::CanvasNotFound("Not a canvas".into()))?;
 
     let width = canvas.width() as f64;
     let height = canvas.height() as f64;
     let dpr = device_pixel_ratio();
-    let ctx = canvas.get_context("2d")
+    let ctx = canvas
+        .get_context("2d")
         .and_then(|c| c.dyn_into::<CanvasRenderingContext2d>().ok())
         .ok_or(crate::ChartError::RenderError("No 2D context".into()))?;
     ctx.scale(dpr, dpr).unwrap_or_default();
@@ -393,7 +629,12 @@ pub fn update_treemap(canvas_id: &str, data_json: &str) -> Result<(), crate::Cha
     let items: Vec<(String, f64)> = serde_json::from_str(data_json)
         .map_err(|e| crate::ChartError::DataParseError(e.to_string()))?;
 
-    let area = plycore::ChartArea { x: 0.0, y: 0.0, w: width, h: height };
+    let area = plycore::ChartArea {
+        x: 0.0,
+        y: 0.0,
+        w: width,
+        h: height,
+    };
     crate::charts::treemap::draw(&ctx, &items, &area);
 
     Ok(())
@@ -410,16 +651,21 @@ pub fn update_waterfall(canvas_id: &str, data_json: &str) -> Result<(), crate::C
     use wasm_bindgen::JsCast;
     use web_sys::CanvasRenderingContext2d;
     let window = web_sys::window().ok_or(crate::ChartError::CanvasNotFound("No window".into()))?;
-    let document = window.document().ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;
-    let element = document.get_element_by_id(canvas_id)
+    let document = window
+        .document()
+        .ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;
+    let element = document
+        .get_element_by_id(canvas_id)
         .ok_or_else(|| crate::ChartError::CanvasNotFound(format!("'{canvas_id}' not found")))?;
-    let canvas: web_sys::HtmlCanvasElement = element.dyn_into()
+    let canvas: web_sys::HtmlCanvasElement = element
+        .dyn_into()
         .map_err(|_| crate::ChartError::CanvasNotFound("Not a canvas".into()))?;
 
     let width = canvas.width() as f64;
     let height = canvas.height() as f64;
     let dpr = device_pixel_ratio();
-    let ctx = canvas.get_context("2d")
+    let ctx = canvas
+        .get_context("2d")
         .and_then(|c| c.dyn_into::<CanvasRenderingContext2d>().ok())
         .ok_or(crate::ChartError::RenderError("No 2D context".into()))?;
     ctx.scale(dpr, dpr).unwrap_or_default();
@@ -429,7 +675,12 @@ pub fn update_waterfall(canvas_id: &str, data_json: &str) -> Result<(), crate::C
     let bars: Vec<(String, f64)> = serde_json::from_str(data_json)
         .map_err(|e| crate::ChartError::DataParseError(e.to_string()))?;
 
-    let area = plycore::ChartArea { x: 0.0, y: 0.0, w: width, h: height };
+    let area = plycore::ChartArea {
+        x: 0.0,
+        y: 0.0,
+        w: width,
+        h: height,
+    };
     let theme = plycore::ChartTheme::dark();
     crate::charts::waterfall::draw(&ctx, &bars, &area, &theme);
 
@@ -443,20 +694,29 @@ pub fn update_waterfall(_canvas_id: &str, _data_json: &str) -> Result<(), crate:
 
 /// Update chart with correlation matrix.
 #[cfg(target_arch = "wasm32")]
-pub fn update_correlation(canvas_id: &str, matrix_json: &str, labels_json: &str) -> Result<(), crate::ChartError> {
+pub fn update_correlation(
+    canvas_id: &str,
+    matrix_json: &str,
+    labels_json: &str,
+) -> Result<(), crate::ChartError> {
     use wasm_bindgen::JsCast;
     use web_sys::CanvasRenderingContext2d;
     let window = web_sys::window().ok_or(crate::ChartError::CanvasNotFound("No window".into()))?;
-    let document = window.document().ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;
-    let element = document.get_element_by_id(canvas_id)
+    let document = window
+        .document()
+        .ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;
+    let element = document
+        .get_element_by_id(canvas_id)
         .ok_or_else(|| crate::ChartError::CanvasNotFound(format!("'{canvas_id}' not found")))?;
-    let canvas: web_sys::HtmlCanvasElement = element.dyn_into()
+    let canvas: web_sys::HtmlCanvasElement = element
+        .dyn_into()
         .map_err(|_| crate::ChartError::CanvasNotFound("Not a canvas".into()))?;
 
     let width = canvas.width() as f64;
     let height = canvas.height() as f64;
     let dpr = device_pixel_ratio();
-    let ctx = canvas.get_context("2d")
+    let ctx = canvas
+        .get_context("2d")
         .and_then(|c| c.dyn_into::<CanvasRenderingContext2d>().ok())
         .ok_or(crate::ChartError::RenderError("No 2D context".into()))?;
     ctx.scale(dpr, dpr).unwrap_or_default();
@@ -469,14 +729,23 @@ pub fn update_correlation(canvas_id: &str, matrix_json: &str, labels_json: &str)
         .map_err(|e| crate::ChartError::DataParseError(e.to_string()))?;
     let label_refs: Vec<&str> = labels.iter().map(|s| s.as_str()).collect();
 
-    let area = plycore::ChartArea { x: 0.0, y: 0.0, w: width, h: height };
+    let area = plycore::ChartArea {
+        x: 0.0,
+        y: 0.0,
+        w: width,
+        h: height,
+    };
     crate::charts::correlation::draw(&ctx, &matrix, &label_refs, &area);
 
     Ok(())
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub fn update_correlation(_canvas_id: &str, _matrix_json: &str, _labels_json: &str) -> Result<(), crate::ChartError> {
+pub fn update_correlation(
+    _canvas_id: &str,
+    _matrix_json: &str,
+    _labels_json: &str,
+) -> Result<(), crate::ChartError> {
     Ok(())
 }
 
@@ -490,7 +759,8 @@ pub fn destroy_chart(canvas_id: &str) -> Result<(), crate::ChartError> {
                 if let Ok(canvas) = element.dyn_into::<web_sys::HtmlCanvasElement>() {
                     let width = canvas.width();
                     let height = canvas.height();
-                    if let Some(ctx) = canvas.get_context("2d")
+                    if let Some(ctx) = canvas
+                        .get_context("2d")
                         .and_then(|c| c.dyn_into::<web_sys::CanvasRenderingContext2d>().ok())
                     {
                         ctx.clear_rect(0.0, 0.0, width as f64, height as f64);

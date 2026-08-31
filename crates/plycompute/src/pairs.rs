@@ -88,10 +88,16 @@ mod tests {
     fn test_signal_generation() {
         // Create two cointegrated series with a diverging spread at the end
         let n = 200;
-        let x: Vec<f64> = (0..n).map(|i| 100.0 + (i as f64 * 0.01).sin() * 5.0).collect();
-        let y: Vec<f64> = x.iter().enumerate().map(|(i, &xi)| {
-            2.0 * xi + ((i as f64 * 0.1).sin() * 2.0) // y = 2x + oscillating noise
-        }).collect();
+        let x: Vec<f64> = (0..n)
+            .map(|i| 100.0 + (i as f64 * 0.01).sin() * 5.0)
+            .collect();
+        let y: Vec<f64> = x
+            .iter()
+            .enumerate()
+            .map(|(i, &xi)| {
+                2.0 * xi + ((i as f64 * 0.1).sin() * 2.0) // y = 2x + oscillating noise
+            })
+            .collect();
         let result = pairs_signal(&y, &x, 2.0, 0.5, 3.5);
         assert!(result.is_cointegrated);
         assert!(result.hedge_ratio > 1.5 && result.hedge_ratio < 2.5);

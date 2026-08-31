@@ -9,7 +9,7 @@ pub mod interaction;
 pub mod theme;
 pub mod types;
 
-pub use charts::{ChartType, CandleData};
+pub use charts::{CandleData, ChartType};
 pub use error::ChartError;
 pub use interaction::ChartInteraction;
 pub use theme::get_theme;
@@ -174,28 +174,56 @@ mod tests {
     #[test]
     fn canvas_update_single_candle() {
         let chart = CanvasChart::new("c");
-        let data = vec![CandleData { time: 1.0, open: 100.0, high: 105.0, low: 99.0, close: 102.0, volume: 500.0 }];
+        let data = vec![CandleData {
+            time: 1.0,
+            open: 100.0,
+            high: 105.0,
+            low: 99.0,
+            close: 102.0,
+            volume: 500.0,
+        }];
         assert!(chart.update(&data).is_ok());
     }
 
     #[test]
     fn canvas_update_line_type() {
         let chart = CanvasChart::new("c").with_chart_type(ChartType::Line);
-        let data = vec![CandleData { time: 1.0, open: 100.0, high: 105.0, low: 99.0, close: 102.0, volume: 500.0 }];
+        let data = vec![CandleData {
+            time: 1.0,
+            open: 100.0,
+            high: 105.0,
+            low: 99.0,
+            close: 102.0,
+            volume: 500.0,
+        }];
         assert!(chart.update(&data).is_ok());
     }
 
     #[test]
     fn canvas_update_area_type() {
         let chart = CanvasChart::new("c").with_chart_type(ChartType::Area);
-        let data = vec![CandleData { time: 1.0, open: 100.0, high: 105.0, low: 99.0, close: 102.0, volume: 500.0 }];
+        let data = vec![CandleData {
+            time: 1.0,
+            open: 100.0,
+            high: 105.0,
+            low: 99.0,
+            close: 102.0,
+            volume: 500.0,
+        }];
         assert!(chart.update(&data).is_ok());
     }
 
     #[test]
     fn canvas_update_bar_type() {
         let chart = CanvasChart::new("c").with_chart_type(ChartType::Bar);
-        let data = vec![CandleData { time: 1.0, open: 100.0, high: 105.0, low: 99.0, close: 102.0, volume: 500.0 }];
+        let data = vec![CandleData {
+            time: 1.0,
+            open: 100.0,
+            high: 105.0,
+            low: 99.0,
+            close: 102.0,
+            volume: 500.0,
+        }];
         assert!(chart.update(&data).is_ok());
     }
 
@@ -212,8 +240,22 @@ mod tests {
     #[test]
     fn candle_data_serialization_roundtrip() {
         let data = vec![
-            CandleData { time: 1.0, open: 100.0, high: 105.0, low: 99.0, close: 102.0, volume: 500.0 },
-            CandleData { time: 2.0, open: 102.0, high: 108.0, low: 101.0, close: 107.0, volume: 600.0 },
+            CandleData {
+                time: 1.0,
+                open: 100.0,
+                high: 105.0,
+                low: 99.0,
+                close: 102.0,
+                volume: 500.0,
+            },
+            CandleData {
+                time: 2.0,
+                open: 102.0,
+                high: 108.0,
+                low: 101.0,
+                close: 107.0,
+                volume: 600.0,
+            },
         ];
         let json = serde_json::to_string(&data).unwrap();
         let back: Vec<CandleData> = serde_json::from_str(&json).unwrap();

@@ -23,9 +23,7 @@ pub fn draw(
     let max_val = max_val + pad;
     let total_range = max_val - min_val;
 
-    let val_to_y = |v: f64| -> f64 {
-        area.y + area.h * (1.0 - (v - min_val) / total_range)
-    };
+    let val_to_y = |v: f64| -> f64 { area.y + area.h * (1.0 - (v - min_val) / total_range) };
     let bar_w = f64::max(area.w / bars.len() as f64 * 0.6, 1.0);
 
     let mut running: f64 = 0.0;
@@ -47,20 +45,30 @@ pub fn draw(
         ctx.set_line_width(0.5);
         ctx.begin_path();
         ctx.move_to(x - bar_w / 2.0, prev_y);
-        ctx.line_to(x - bar_w / 2.0, if b.value >= 0.0 { y_end } else { y_start });
+        ctx.line_to(
+            x - bar_w / 2.0,
+            if b.value >= 0.0 { y_end } else { y_start },
+        );
         ctx.stroke();
 
         ctx.set_stroke_style(&theme.text_muted.into());
         ctx.set_line_width(0.5);
         ctx.begin_path();
-        ctx.move_to(x + bar_w / 2.0, if b.value >= 0.0 { y_end } else { y_start });
-        ctx.line_to(x + bar_w / 2.0 + (area.w / bars.len() as f64 - bar_w) / 2.0, if b.value >= 0.0 { y_end } else { y_start });
+        ctx.move_to(
+            x + bar_w / 2.0,
+            if b.value >= 0.0 { y_end } else { y_start },
+        );
+        ctx.line_to(
+            x + bar_w / 2.0 + (area.w / bars.len() as f64 - bar_w) / 2.0,
+            if b.value >= 0.0 { y_end } else { y_start },
+        );
         ctx.stroke();
 
         prev_y = if b.value >= 0.0 { y_start } else { y_end };
 
         ctx.set_fill_style(&theme.text.into());
         ctx.set_font("10px sans-serif");
-        ctx.fill_text(&b.label, x - bar_w / 2.0, area.y + area.h + 12.0).ok();
+        ctx.fill_text(&b.label, x - bar_w / 2.0, area.y + area.h + 12.0)
+            .ok();
     }
 }

@@ -22,7 +22,8 @@ pub fn draw(
         let x = area.x + (x_val - min_x) / range_x * area.w;
         let y = area.y + area.h - (y_val - min_y) / range_y * area.h;
         ctx.begin_path();
-        ctx.arc(x, y, 3.0, 0.0, std::f64::consts::TAU).unwrap_or_default();
+        ctx.arc(x, y, 3.0, 0.0, std::f64::consts::TAU)
+            .unwrap_or_default();
         ctx.fill();
     }
 }

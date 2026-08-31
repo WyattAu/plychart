@@ -42,7 +42,11 @@ pub fn decompose(returns: &[f64]) -> RealizedVolDecomposition {
     // Flag jump days: days where r_t² exceeds the mean daily RV by > 3 std
     let mean_daily_rv = rv / n as f64;
     let std_daily_rv = if n > 1 {
-        let var = daily_rv.iter().map(|&x| (x - mean_daily_rv).powi(2)).sum::<f64>() / (n - 1) as f64;
+        let var = daily_rv
+            .iter()
+            .map(|&x| (x - mean_daily_rv).powi(2))
+            .sum::<f64>()
+            / (n - 1) as f64;
         var.sqrt()
     } else {
         0.0
@@ -100,17 +104,31 @@ mod tests {
         let returns: Vec<f64> = (0..n).map(|_| rng::standard_normal() * 0.01).collect();
         let result = decompose(&returns);
         // 4σ threshold should rarely flag jumps in pure noise
-        assert!(result.jump_days.len() <= 2, "At most 2 jump days for pure noise, got {}", result.jump_days.len());
+        assert!(
+            result.jump_days.len() <= 2,
+            "At most 2 jump days for pure noise, got {}",
+            result.jump_days.len()
+        );
         assert!(result.annualized_vol > 0.0);
     }
 
     #[test]
     fn test_with_jumps() {
         // Deterministic data: 100 days of small returns, day 50 is a jump
-        let returns: Vec<f64> = (0..100).map(|i| {
-            if i == 50 { 0.15 } else { ((i as f64 * 0.1).sin() * 0.005) }
-        }).collect();
+        let returns: Vec<f64> = (0..100)
+            .map(|i| {
+                if i == 50 {
+                    0.15
+                } else {
+                    ((i as f64 * 0.1).sin() * 0.005)
+                }
+            })
+            .collect();
         let result = decompose(&returns);
-        assert!(result.jump_days.contains(&50), "Should flag day 50, got {:?}", result.jump_days);
+        assert!(
+            result.jump_days.contains(&50),
+            "Should flag day 50, got {:?}",
+            result.jump_days
+        );
     }
 }

@@ -33,13 +33,22 @@ pub fn fit_nelson_siegel(maturities: &[f64], yields: &[f64]) -> NelsonSiegelFit 
     let mut lam = 0.1;
     while lam <= 10.0 {
         // Given lambda, compute factor loadings and solve OLS
-        let f1: Vec<f64> = taus.iter().map(|t| {
-            let x = t / lam;
-            if x < 1e-10 { 1.0 } else { (1.0 - (-x).exp()) / x }
-        }).collect();
-        let f2: Vec<f64> = taus.iter().enumerate().map(|(i, t)| {
-            f1[i] - (-t / lam).exp()
-        }).collect();
+        let f1: Vec<f64> = taus
+            .iter()
+            .map(|t| {
+                let x = t / lam;
+                if x < 1e-10 {
+                    1.0
+                } else {
+                    (1.0 - (-x).exp()) / x
+                }
+            })
+            .collect();
+        let f2: Vec<f64> = taus
+            .iter()
+            .enumerate()
+            .map(|(i, t)| f1[i] - (-t / lam).exp())
+            .collect();
 
         // OLS: [1, f1, f2] x [b0, b1, b2]^T = y
         // Normal equations: X^T X b = X^T y
@@ -68,7 +77,13 @@ pub fn fit_nelson_siegel(maturities: &[f64], yields: &[f64]) -> NelsonSiegelFit 
             let ll = -sse; // maximize = minimize SSE
             if ll > best_ll {
                 best_ll = ll;
-                best = NelsonSiegelFit { beta0: b0, beta1: b1, beta2: b2, lambda: lam, fitted };
+                best = NelsonSiegelFit {
+                    beta0: b0,
+                    beta1: b1,
+                    beta2: b2,
+                    lambda: lam,
+                    fitted,
+                };
             }
         }
         lam += 0.1;
@@ -93,7 +108,11 @@ fn det3_replace_col(m: &[[f64; 3]; 3], v: &[f64; 3], col: usize) -> f64 {
 /// Evaluate Nelson-Siegel at a given maturity.
 pub fn ns_evaluate(fit: &NelsonSiegelFit, tau: f64) -> f64 {
     let x = tau / fit.lambda;
-    let f1 = if x < 1e-10 { 1.0 } else { (1.0 - (-x).exp()) / x };
+    let f1 = if x < 1e-10 {
+        1.0
+    } else {
+        (1.0 - (-x).exp()) / x
+    };
     let f2 = f1 - (-tau / fit.lambda).exp();
     fit.beta0 + fit.beta1 * f1 + fit.beta2 * f2
 }
@@ -123,7 +142,13 @@ mod tests {
         // Fitted values should be close to actual
         for i in 0..yields.len() {
             let fitted = ns_evaluate(&fit, maturities[i]);
-            assert!((fitted - yields[i]).abs() < 0.30, "mismatch at {}: {} vs {}", maturities[i], fitted, yields[i]);
+            assert!(
+                (fitted - yields[i]).abs() < 0.30,
+                "mismatch at {}: {} vs {}",
+                maturities[i],
+                fitted,
+                yields[i]
+            );
         }
     }
 

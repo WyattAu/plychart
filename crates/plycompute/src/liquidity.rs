@@ -87,11 +87,7 @@ pub fn roll_spread(price_changes: &[f64]) -> f64 {
     }
     cov /= (n - 1) as f64;
 
-    if cov < 0.0 {
-        2.0 * (-cov).sqrt()
-    } else {
-        0.0
-    }
+    if cov < 0.0 { 2.0 * (-cov).sqrt() } else { 0.0 }
 }
 
 /// Kyle's lambda (price impact coefficient).
@@ -115,21 +111,16 @@ pub fn kyle_lambda(price_changes: &[f64], volumes: &[f64], returns: &[f64]) -> f
         sxy += (signed_vol[i] - m_sv) * (dp[i] - m_dp);
         sxx += (signed_vol[i] - m_sv).powi(2);
     }
-    if sxx > 0.0 {
-        (sxy / sxx).abs()
-    } else {
-        0.0
-    }
+    if sxx > 0.0 { (sxy / sxx).abs() } else { 0.0 }
 }
 
 /// Full liquidity analysis.
-pub fn analyze(
-    highs: &[f64],
-    lows: &[f64],
-    closes: &[f64],
-    volumes: &[f64],
-) -> LiquidityResult {
-    let n = closes.len().min(volumes.len()).min(highs.len()).min(lows.len());
+pub fn analyze(highs: &[f64], lows: &[f64], closes: &[f64], volumes: &[f64]) -> LiquidityResult {
+    let n = closes
+        .len()
+        .min(volumes.len())
+        .min(highs.len())
+        .min(lows.len());
     if n < 3 {
         return LiquidityResult {
             amihud: 0.0,
@@ -200,7 +191,10 @@ mod tests {
         let returns = vec![0.01; 100];
         let vols = vec![1e8; 100]; // 100M shares
         let result = amihud_illiquidity(&returns, &vols);
-        assert!(result > 0.0 && result < 1.0, "Liquid stock should have low Amihud");
+        assert!(
+            result > 0.0 && result < 1.0,
+            "Liquid stock should have low Amihud"
+        );
     }
 
     #[test]

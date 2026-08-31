@@ -5,8 +5,8 @@
 /// X is a matrix of factors (n_factors x n_obs), y is returns (n_obs).
 /// Returns alphas, betas, R-squared, F-statistic, t-statistics.
 pub fn ols_regression(
-    y: &[f64],         // dependent variable (asset returns)
-    x: &[f64],         // independent variables (factors), row-major: n_factors * n_obs
+    y: &[f64], // dependent variable (asset returns)
+    x: &[f64], // independent variables (factors), row-major: n_factors * n_obs
     n_factors: usize,
     n_obs: usize,
 ) -> RegressionResult {
@@ -149,12 +149,7 @@ pub fn rolling_regression(
     results
 }
 
-fn build_design_row(
-    x: &[f64],
-    obs_idx: usize,
-    n_factors: usize,
-    n_obs: usize,
-) -> Vec<f64> {
+fn build_design_row(x: &[f64], obs_idx: usize, n_factors: usize, n_obs: usize) -> Vec<f64> {
     let mut row = vec![1.0]; // intercept
     for f in 0..n_factors {
         row.push(x[f * n_obs + obs_idx]);
@@ -261,8 +256,16 @@ mod tests {
             y[i] = 1.0 * x1 + 0.5 * x2 + 0.001 * (i as f64 % 7.0 - 3.0);
         }
         let result = ols_regression(&y, &x, 2, n);
-        assert!((result.betas[0] - 1.0).abs() < 0.3, "beta0={}", result.betas[0]);
-        assert!((result.betas[1] - 0.5).abs() < 0.3, "beta1={}", result.betas[1]);
+        assert!(
+            (result.betas[0] - 1.0).abs() < 0.3,
+            "beta0={}",
+            result.betas[0]
+        );
+        assert!(
+            (result.betas[1] - 0.5).abs() < 0.3,
+            "beta1={}",
+            result.betas[1]
+        );
         assert!(result.r_squared > 0.99);
     }
 }

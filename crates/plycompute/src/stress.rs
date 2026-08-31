@@ -109,7 +109,12 @@ pub fn classify_asset(symbol: &str) -> &'static str {
         return "Gold";
     }
     // Bonds
-    if s.contains("TLT") || s.contains("AGG") || s.contains("BND") || s.contains("TIP") || s.contains("HYG") {
+    if s.contains("TLT")
+        || s.contains("AGG")
+        || s.contains("BND")
+        || s.contains("TIP")
+        || s.contains("HYG")
+    {
         return "US Bonds";
     }
     // USD
@@ -117,8 +122,10 @@ pub fn classify_asset(symbol: &str) -> &'static str {
         return "USD";
     }
     // Tech
-    let tech = ["AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "TSLA", "AVGO",
-                "ADBE", "NFLX", "CRM", "ORCL", "AMD", "INTC", "QCOM", "TXN", "XLK", "SMH", "QQQ"];
+    let tech = [
+        "AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "TSLA", "AVGO", "ADBE", "NFLX", "CRM",
+        "ORCL", "AMD", "INTC", "QCOM", "TXN", "XLK", "SMH", "QQQ",
+    ];
     if tech.iter().any(|t| s.starts_with(t)) {
         return "Tech";
     }
@@ -138,10 +145,7 @@ pub fn classify_asset(symbol: &str) -> &'static str {
 
 /// Apply stress test scenarios to a list of assets.
 /// Returns the estimated portfolio P&L under each scenario.
-pub fn stress_test(
-    symbols: &[String],
-    weights: &[f64],
-) -> Vec<StressResult> {
+pub fn stress_test(symbols: &[String], weights: &[f64]) -> Vec<StressResult> {
     let mut results = Vec::new();
 
     for scenario in SCENARIOS {
@@ -150,13 +154,18 @@ pub fn stress_test(
 
         for (i, symbol) in symbols.iter().enumerate() {
             let category = classify_asset(symbol);
-            let shock = scenario.shocks
+            let shock = scenario
+                .shocks
                 .iter()
                 .find(|(cat, _)| *cat == category)
                 .map(|(_, ret)| *ret)
                 .unwrap_or(-20.0); // default: assume -20% for unknown
 
-            let weight = if i < weights.len() { weights[i] } else { 1.0 / symbols.len() as f64 };
+            let weight = if i < weights.len() {
+                weights[i]
+            } else {
+                1.0 / symbols.len() as f64
+            };
             let contribution = shock * weight / 100.0;
             portfolio_pnl += contribution;
             asset_pnls.push((symbol.clone(), category.to_string(), shock, contribution));
@@ -189,13 +198,26 @@ mod tests {
 
     #[test]
     fn test_stress_2008() {
-        let symbols = vec!["SPY".to_string(), "QQQ".to_string(), "TLT".to_string(), "GLD".to_string()];
+        let symbols = vec![
+            "SPY".to_string(),
+            "QQQ".to_string(),
+            "TLT".to_string(),
+            "GLD".to_string(),
+        ];
         let weights = vec![0.4, 0.3, 0.2, 0.1];
         let results = stress_test(&symbols, &weights);
         let gfc = results.iter().find(|r| r.scenario == "2008 GFC").unwrap();
-        assert!(gfc.portfolio_pnl < -0.20, "2008 GFC should be very negative, got {}", gfc.portfolio_pnl);
+        assert!(
+            gfc.portfolio_pnl < -0.20,
+            "2008 GFC should be very negative, got {}",
+            gfc.portfolio_pnl
+        );
         // TLT should be positive
-        let tlt = gfc.asset_pnls.iter().find(|(s, _, _, _)| s == "TLT").unwrap();
+        let tlt = gfc
+            .asset_pnls
+            .iter()
+            .find(|(s, _, _, _)| s == "TLT")
+            .unwrap();
         assert!(tlt.2 > 0.0, "Bonds should be positive in GFC");
     }
 

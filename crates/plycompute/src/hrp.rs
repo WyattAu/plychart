@@ -170,8 +170,15 @@ mod tests {
         }
         let weights = hrp_allocate(&returns, n_assets, n_periods);
         let sum: f64 = weights.iter().sum();
-        assert!((sum - 1.0).abs() < 0.001, "Weights should sum to 1, got {}", sum);
-        assert!(weights.iter().all(|w| *w >= 0.0), "All weights should be non-negative");
+        assert!(
+            (sum - 1.0).abs() < 0.001,
+            "Weights should sum to 1, got {}",
+            sum
+        );
+        assert!(
+            weights.iter().all(|w| *w >= 0.0),
+            "All weights should be non-negative"
+        );
     }
 
     #[test]
@@ -190,7 +197,11 @@ mod tests {
         // HRP allocates based on sample correlations which have noise.
         // Just check weights are reasonable (no extreme concentration)
         for &w in &weights {
-            assert!(w > 0.05 && w < 0.60, "Weight should be reasonable, got {}", w);
+            assert!(
+                w > 0.05 && w < 0.60,
+                "Weight should be reasonable, got {}",
+                w
+            );
         }
     }
 }

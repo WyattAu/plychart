@@ -1,3 +1,3 @@
 //! Re-exported types from plycore for chart rendering.
 
-pub use plycore::{ChartArea, ChartViewport, ChartTheme, ChartOpts, ChartError};
+pub use plycore::{ChartArea, ChartError, ChartOpts, ChartTheme, ChartViewport};

@@ -13,19 +13,20 @@ pub fn draw(
     }
 
     let min_p = candles.iter().map(|c| c.low).fold(f64::INFINITY, f64::min);
-    let max_p = candles.iter().map(|c| c.high).fold(f64::NEG_INFINITY, f64::max);
+    let max_p = candles
+        .iter()
+        .map(|c| c.high)
+        .fold(f64::NEG_INFINITY, f64::max);
     let range = (max_p - min_p).max(0.0001);
     let pad = range * 0.05;
     let min_p = min_p - pad;
     let max_p = max_p + pad;
     let total_range = max_p - min_p;
 
-    let price_to_y = |price: f64| -> f64 {
-        area.y + area.h * (1.0 - (price - min_p) / total_range)
-    };
-    let index_to_x = |i: usize| -> f64 {
-        area.x + (i as f64 + 0.5) * (area.w / candles.len() as f64)
-    };
+    let price_to_y =
+        |price: f64| -> f64 { area.y + area.h * (1.0 - (price - min_p) / total_range) };
+    let index_to_x =
+        |i: usize| -> f64 { area.x + (i as f64 + 0.5) * (area.w / candles.len() as f64) };
 
     for (i, c) in candles.iter().enumerate() {
         let x = index_to_x(i);

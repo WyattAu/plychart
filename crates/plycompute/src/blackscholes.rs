@@ -137,15 +137,28 @@ mod tests {
         let c = bs_call_price(s, k, t, r, sig);
         let p = bs_put_price(s, k, t, r, sig);
         let parity = s - k * (-r * t).exp();
-        assert!((c - p - parity).abs() < 0.01, "parity broken: c-p={} vs {}", c - p, parity);
+        assert!(
+            (c - p - parity).abs() < 0.01,
+            "parity broken: c-p={} vs {}",
+            c - p,
+            parity
+        );
     }
 
     #[test]
     fn test_delta_bounds() {
         let (delta, _, _, _, _) = call_greeks(100.0, 100.0, 1.0, 0.05, 0.2);
-        assert!(delta > 0.0 && delta < 1.0, "call delta out of range: {}", delta);
+        assert!(
+            delta > 0.0 && delta < 1.0,
+            "call delta out of range: {}",
+            delta
+        );
         let (delta_p, _, _, _, _) = put_greeks(100.0, 100.0, 1.0, 0.05, 0.2);
-        assert!(delta_p > -1.0 && delta_p < 0.0, "put delta out of range: {}", delta_p);
+        assert!(
+            delta_p > -1.0 && delta_p < 0.0,
+            "put delta out of range: {}",
+            delta_p
+        );
     }
 
     #[test]
@@ -154,6 +167,11 @@ mod tests {
         let true_iv = 0.35;
         let price = bs_call_price(100.0, 105.0, 0.5, 0.03, true_iv);
         let recovered = implied_vol(price, 100.0, 105.0, 0.5, 0.03, true);
-        assert!((recovered - true_iv).abs() < 0.001, "recovered {} vs {}", recovered, true_iv);
+        assert!(
+            (recovered - true_iv).abs() < 0.001,
+            "recovered {} vs {}",
+            recovered,
+            true_iv
+        );
     }
 }

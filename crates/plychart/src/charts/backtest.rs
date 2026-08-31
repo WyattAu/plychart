@@ -26,7 +26,11 @@ pub fn draw(
     for (i, &val) in equity.iter().enumerate() {
         let x = (i as f64 / (equity.len() - 1).max(1) as f64) * area.w + area.x;
         let y = area.y + 30.0 + (1.0 - (val - min_eq) / eq_range) * (split_y - area.y - 40.0);
-        if i == 0 { ctx.move_to(x, y); } else { ctx.line_to(x, y); }
+        if i == 0 {
+            ctx.move_to(x, y);
+        } else {
+            ctx.line_to(x, y);
+        }
     }
     ctx.stroke();
 
@@ -42,7 +46,11 @@ pub fn draw(
         for (i, &val) in drawdown.iter().enumerate() {
             let x = (i as f64 / (drawdown.len() - 1).max(1) as f64) * area.w + area.x;
             let y = split_y + 20.0 + (1.0 - (val - min_dd) / dd_range) * dd_h;
-            if i == 0 { ctx.move_to(x, y); } else { ctx.line_to(x, y); }
+            if i == 0 {
+                ctx.move_to(x, y);
+            } else {
+                ctx.line_to(x, y);
+            }
         }
         ctx.stroke();
     }

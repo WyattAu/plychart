@@ -18,28 +18,11 @@ pub struct MousePosition {
 #[derive(Debug, Clone)]
 pub struct ChartInteraction {
     /// Current viewport (start index + count).
-    pub viewport: ViewportState,
+    pub viewport: plycore::ChartViewport,
     /// Current mouse position.
     pub mouse: MousePosition,
     /// Chart area bounds (set once on resize).
     pub area: AreaState,
-}
-
-/// Viewport state (zoom + pan).
-#[derive(Debug, Clone, Copy)]
-pub struct ViewportState {
-    /// Index of the first visible data point.
-    pub start: usize,
-    /// Number of visible data points.
-    pub count: usize,
-    /// Whether to use logarithmic Y-axis.
-    pub log_scale: bool,
-}
-
-impl Default for ViewportState {
-    fn default() -> Self {
-        Self { start: 0, count: 100, log_scale: false }
-    }
 }
 
 /// Chart area bounds (updated on resize).
@@ -80,7 +63,7 @@ impl ChartInteraction {
     #[must_use]
     pub fn new() -> Self {
         Self {
-            viewport: ViewportState::default(),
+            viewport: plycore::ChartViewport::default(),
             mouse: MousePosition::default(),
             area: AreaState::default(),
         }
@@ -89,7 +72,10 @@ impl ChartInteraction {
     /// Create with custom area state.
     #[must_use]
     pub fn with_area(area: AreaState) -> Self {
-        Self { area, ..Self::new() }
+        Self {
+            area,
+            ..Self::new()
+        }
     }
 
     /// Handle scroll wheel event for zooming.
@@ -100,9 +86,8 @@ impl ChartInteraction {
         let step = if delta_y > 0.0 { 10 } else { -10 };
         let new_count = (self.viewport.count as i64 + step).max(10) as usize;
         let count = new_count.min(total_data_points.max(1));
-        let start =
-            (self.viewport.start + self.viewport.count.saturating_sub(count))
-                .min(total_data_points.saturating_sub(count));
+        let start = (self.viewport.start + self.viewport.count.saturating_sub(count))
+            .min(total_data_points.saturating_sub(count));
         self.viewport.start = start;
         self.viewport.count = count;
     }
@@ -118,7 +103,11 @@ impl ChartInteraction {
             && y >= price_area.y
             && y <= price_area.y + price_area.h + self.area.vol_height
         {
-            self.mouse = MousePosition { x, y, in_chart: true };
+            self.mouse = MousePosition {
+                x,
+                y,
+                in_chart: true,
+            };
         } else {
             self.mouse = MousePosition::default();
         }

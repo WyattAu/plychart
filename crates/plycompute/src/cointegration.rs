@@ -88,11 +88,7 @@ fn adf_test(series: &[f64]) -> f64 {
     let se = (sigma2 * inv[1 * k + 1]).max(1e-20).sqrt();
 
     // t-statistic
-    if se > 0.0 {
-        beta_hat[1] / se
-    } else {
-        0.0
-    }
+    if se > 0.0 { beta_hat[1] / se } else { 0.0 }
 }
 
 fn matrix_inverse(m: &[f64], n: usize) -> Option<Vec<f64>> {
@@ -165,12 +161,20 @@ pub fn engle_granger(y: &[f64], x: &[f64]) -> CointegrationResult {
         rho_sum += dres * residuals[t - 1];
         lag_sum += residuals[t - 1].powi(2);
     }
-    let rho = if lag_sum > 0.0 { rho_sum / lag_sum } else { 0.0 };
+    let rho = if lag_sum > 0.0 {
+        rho_sum / lag_sum
+    } else {
+        0.0
+    };
     let half_life = if rho < 0.0 && rho > -2.0 {
         let denom = (1.0 + rho).ln();
         if denom.abs() > 1e-10 {
             let hl = -(2.0f64).ln() / denom;
-            if hl.is_finite() && hl > 0.0 { hl } else { 9999.0 }
+            if hl.is_finite() && hl > 0.0 {
+                hl
+            } else {
+                9999.0
+            }
         } else {
             9999.0
         }
@@ -179,7 +183,11 @@ pub fn engle_granger(y: &[f64], x: &[f64]) -> CointegrationResult {
     };
 
     // Spread = y - beta*x (the hedged portfolio)
-    let spread: Vec<f64> = y.iter().zip(x.iter()).map(|(&yi, &xi)| yi - alpha - beta * xi).collect();
+    let spread: Vec<f64> = y
+        .iter()
+        .zip(x.iter())
+        .map(|(&yi, &xi)| yi - alpha - beta * xi)
+        .collect();
 
     let z_score = if !spread.is_empty() {
         let mean = spread.iter().sum::<f64>() / spread.len() as f64;
@@ -224,11 +232,19 @@ mod tests {
     fn test_cointegrated_pair() {
         // Two synthetic cointegrated series: y = 2*x + noise(0, 0.1)
         let n = 200;
-        let x: Vec<f64> = (0..n).map(|i| (i as f64 * 0.01).sin() * 10.0 + 100.0).collect();
-        let y: Vec<f64> = x.iter().map(|&xi| 2.0 * xi + (xi % 3.0 - 1.5) * 0.05).collect();
+        let x: Vec<f64> = (0..n)
+            .map(|i| (i as f64 * 0.01).sin() * 10.0 + 100.0)
+            .collect();
+        let y: Vec<f64> = x
+            .iter()
+            .map(|&xi| 2.0 * xi + (xi % 3.0 - 1.5) * 0.05)
+            .collect();
         let result = engle_granger(&y, &x);
         assert!(result.is_cointegrated, "Should be cointegrated");
-        assert!((result.hedge_ratio - 2.0).abs() < 0.1, "Hedge ratio should be ~2");
+        assert!(
+            (result.hedge_ratio - 2.0).abs() < 0.1,
+            "Hedge ratio should be ~2"
+        );
         assert!(result.half_life < 50.0, "Half-life should be short");
     }
 
@@ -243,6 +259,9 @@ mod tests {
             y[i] = y[i - 1] + ((i as f64 * 11.0) % 2.0 - 1.0);
         }
         let result = engle_granger(&y, &x);
-        assert!(!result.is_cointegrated, "Random walks should not be cointegrated");
+        assert!(
+            !result.is_cointegrated,
+            "Random walks should not be cointegrated"
+        );
     }
 }

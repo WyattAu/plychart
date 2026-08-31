@@ -1,24 +1,24 @@
-pub mod rng;
-pub mod montecarlo;
 pub mod blackscholes;
-pub mod portfolio;
-pub mod risk;
-pub mod volatility;
-pub mod stats;
-pub mod yieldcurve;
-pub mod drawdown;
-pub mod concentration;
-pub mod factor;
-pub mod overlap;
 pub mod cointegration;
-pub mod liquidity;
-pub mod realizedvol;
+pub mod concentration;
 pub mod copula;
-pub mod regime;
-pub mod pairs;
-pub mod stress;
-pub mod risk_decomp;
+pub mod drawdown;
+pub mod factor;
 pub mod hrp;
+pub mod liquidity;
+pub mod montecarlo;
+pub mod overlap;
+pub mod pairs;
+pub mod portfolio;
+pub mod realizedvol;
+pub mod regime;
+pub mod risk;
+pub mod risk_decomp;
+pub mod rng;
+pub mod stats;
+pub mod stress;
+pub mod volatility;
+pub mod yieldcurve;
 
 #[cfg(test)]
 mod integration_tests {
@@ -26,7 +26,9 @@ mod integration_tests {
 
     #[test]
     fn montecarlo_pipeline() {
-        let closes: Vec<f64> = (0..60).map(|i| 100.0 + (i as f64 * 0.5).sin() * 5.0).collect();
+        let closes: Vec<f64> = (0..60)
+            .map(|i| 100.0 + (i as f64 * 0.5).sin() * 5.0)
+            .collect();
         let result = montecarlo::montecarlo_from_prices(&closes, 252, 30, 1000);
         assert!(result.volatility >= 0.0);
         assert!(result.p50.len() == 30);
@@ -35,10 +37,7 @@ mod integration_tests {
 
     #[test]
     fn stats_correlation_matrix() {
-        let returns = vec![
-            0.01, 0.02, -0.01, 0.03,
-            0.02, 0.01, -0.02, 0.04,
-        ];
+        let returns = vec![0.01, 0.02, -0.01, 0.03, 0.02, 0.01, -0.02, 0.04];
         let mat = stats::correlation_matrix(&returns, 2, 4);
         assert!((mat[0] - 1.0).abs() < 0.001);
         assert!((mat[3] - 1.0).abs() < 0.001);

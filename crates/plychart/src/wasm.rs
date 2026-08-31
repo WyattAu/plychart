@@ -61,17 +61,13 @@ pub fn update_gauge(canvas_id: &str, value: f64, max: f64, color: &str) -> Resul
 pub fn update_bar(canvas_id: &str, data_json: &str) -> Result<(), JsValue> {
     let data: Vec<CandleData> = serde_json::from_str(data_json)
         .map_err(|e| JsValue::from_str(&e.to_string()))?;
-    crate::canvas::update_candles(canvas_id, &data)
+    crate::canvas::update_bar(canvas_id, &data)
         .map_err(|e| JsValue::from_str(&e.to_string()))
 }
 
 /// Update chart with backtest equity + drawdown data.
 #[wasm_bindgen]
 pub fn update_backtest(canvas_id: &str, equity_json: &str, drawdown_json: &str) -> Result<(), JsValue> {
-    let _equity: Vec<f64> = serde_json::from_str(equity_json)
-        .map_err(|e| JsValue::from_str(&e.to_string()))?;
-    let _drawdown: Vec<f64> = serde_json::from_str(drawdown_json)
-        .map_err(|e| JsValue::from_str(&e.to_string()))?;
     crate::canvas::update_backtest(canvas_id, equity_json, drawdown_json)
         .map_err(|e| JsValue::from_str(&e.to_string()))
 }
@@ -81,7 +77,7 @@ pub fn update_backtest(canvas_id: &str, equity_json: &str, drawdown_json: &str) 
 pub fn update_area(canvas_id: &str, data_json: &str) -> Result<(), JsValue> {
     let data: Vec<CandleData> = serde_json::from_str(data_json)
         .map_err(|e| JsValue::from_str(&e.to_string()))?;
-    crate::canvas::update_candles(canvas_id, &data)
+    crate::canvas::update_area(canvas_id, &data)
         .map_err(|e| JsValue::from_str(&e.to_string()))
 }
 

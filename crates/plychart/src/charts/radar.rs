@@ -14,7 +14,11 @@ pub fn draw(
     let cx = area.x + area.w / 2.0;
     let cy = area.y + area.h / 2.0;
     let radius = area.w.min(area.h) / 2.0 * 0.85;
-    let max_val = values.iter().cloned().fold(f64::NEG_INFINITY, f64::max).max(1.0);
+    let max_val = values
+        .iter()
+        .cloned()
+        .fold(f64::NEG_INFINITY, f64::max)
+        .max(1.0);
 
     for i in 0..n {
         let angle = (i as f64 / n as f64) * std::f64::consts::TAU - std::f64::consts::FRAC_PI_2;

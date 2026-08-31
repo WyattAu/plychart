@@ -1,6 +1,6 @@
-use crate::stats;
 use crate::montecarlo;
 use crate::rng;
+use crate::stats;
 
 /// Random portfolio weights via Dirichlet distribution (simplified).
 fn random_weights(n: usize) -> Vec<f64> {
@@ -41,8 +41,14 @@ pub fn random_portfolios(
     let mut points = Vec::with_capacity(n_portfolios);
     for _ in 0..n_portfolios {
         let weights = random_weights(n_assets);
-        let (ret, risk, sharpe) = stats::evaluate_portfolio(&weights, &mean_vec, &cov, risk_free, n_assets);
-        points.push(PortfolioPoint { ret, risk, sharpe, weights });
+        let (ret, risk, sharpe) =
+            stats::evaluate_portfolio(&weights, &mean_vec, &cov, risk_free, n_assets);
+        points.push(PortfolioPoint {
+            ret,
+            risk,
+            sharpe,
+            weights,
+        });
     }
     points
 }
@@ -71,11 +77,13 @@ pub fn efficient_frontier(
 
     // Tangency portfolio
     let tan_w = stats::tangency_portfolio(&cov, &mean_vec, risk_free, n_assets);
-    let (_tan_ret, _tan_risk, _) = stats::evaluate_portfolio(&tan_w, &mean_vec, &cov, risk_free, n_assets);
+    let (_tan_ret, _tan_risk, _) =
+        stats::evaluate_portfolio(&tan_w, &mean_vec, &cov, risk_free, n_assets);
 
     // Minimum variance portfolio (approximate via equal weight perturbation)
     let min_w = find_min_variance(&cov, n_assets);
-    let (min_ret, _min_risk, _) = stats::evaluate_portfolio(&min_w, &mean_vec, &cov, risk_free, n_assets);
+    let (min_ret, _min_risk, _) =
+        stats::evaluate_portfolio(&min_w, &mean_vec, &cov, risk_free, n_assets);
 
     // Sweep from min_return to max_return
     let max_ret = mean_vec.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
@@ -90,8 +98,14 @@ pub fn efficient_frontier(
         let blended: Vec<f64> = (0..n_assets)
             .map(|j| min_w[j] * (1.0 - frac) + tan_w[j] * frac)
             .collect();
-        let (r, risk, sharpe) = stats::evaluate_portfolio(&blended, &mean_vec, &cov, risk_free, n_assets);
-        frontier.push(PortfolioPoint { ret: r, risk, sharpe, weights: blended });
+        let (r, risk, sharpe) =
+            stats::evaluate_portfolio(&blended, &mean_vec, &cov, risk_free, n_assets);
+        frontier.push(PortfolioPoint {
+            ret: r,
+            risk,
+            sharpe,
+            weights: blended,
+        });
     }
     frontier
 }

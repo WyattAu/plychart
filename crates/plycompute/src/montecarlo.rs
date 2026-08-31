@@ -89,7 +89,11 @@ pub fn percentile_bands(paths: &[f64], num_paths: usize, horizon: usize) -> [Vec
         p25[t] = col[(0.25 * n as f64) as usize];
         p50[t] = col[(0.50 * n as f64) as usize];
         p75[t] = col[(0.75 * n as f64) as usize];
-        p95[t] = if n > 1 { col[(0.95 * n as f64) as usize] } else { col[0] };
+        p95[t] = if n > 1 {
+            col[(0.95 * n as f64) as usize]
+        } else {
+            col[0]
+        };
     }
 
     [p5, p25, p50, p75, p95]
@@ -171,7 +175,10 @@ mod tests {
         let n = 100_000;
         let paths = simulate_gbm(s0, mu, sigma, horizon, n, 1.0 / 252.0);
 
-        let mean_terminal: f64 = (0..n).map(|i| paths[i * horizon + horizon - 1]).sum::<f64>() / n as f64;
+        let mean_terminal: f64 = (0..n)
+            .map(|i| paths[i * horizon + horizon - 1])
+            .sum::<f64>()
+            / n as f64;
         let expected = s0 * (mu * horizon as f64 / 252.0).exp();
 
         assert!(

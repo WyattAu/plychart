@@ -39,10 +39,20 @@ pub fn detect_regimes(returns: &[f64], max_iter: usize) -> RegimeResult {
     ];
 
     let mut variances = vec![
-        returns.iter().filter(|&&r| r >= median).map(|r| (r - means[0]).powi(2)).sum::<f64>()
-            / returns.iter().filter(|&&r| r >= median).count().max(1) as f64 + 1e-8,
-        returns.iter().filter(|&&r| r < median).map(|r| (r - means[1]).powi(2)).sum::<f64>()
-            / returns.iter().filter(|&&r| r < median).count().max(1) as f64 + 1e-8,
+        returns
+            .iter()
+            .filter(|&&r| r >= median)
+            .map(|r| (r - means[0]).powi(2))
+            .sum::<f64>()
+            / returns.iter().filter(|&&r| r >= median).count().max(1) as f64
+            + 1e-8,
+        returns
+            .iter()
+            .filter(|&&r| r < median)
+            .map(|r| (r - means[1]).powi(2))
+            .sum::<f64>()
+            / returns.iter().filter(|&&r| r < median).count().max(1) as f64
+            + 1e-8,
     ];
 
     let mut trans = vec![0.92, 0.08, 0.08, 0.92]; // [a00, a01, a10, a11]
@@ -88,7 +98,9 @@ pub fn detect_regimes(returns: &[f64], max_iter: usize) -> RegimeResult {
             for s in 0..2 {
                 let mut sum = 0.0;
                 for ns in 0..2 {
-                    sum += trans[s * 2 + ns] * gaussian(returns[t + 1], means[ns], variances[ns]) * beta[ns * n + (t + 1)];
+                    sum += trans[s * 2 + ns]
+                        * gaussian(returns[t + 1], means[ns], variances[ns])
+                        * beta[ns * n + (t + 1)];
                 }
                 beta[s * n + t] = sum / scales[t + 1].max(1e-20);
             }
@@ -189,7 +201,8 @@ pub fn detect_regimes(returns: &[f64], max_iter: usize) -> RegimeResult {
     // Ensure state 0 = low-vol, state 1 = high-vol
     let (final_states, final_means, final_var, final_trans) = if variances[0] > variances[1] {
         // Swap: state 0 should be low-vol
-        let swapped_states: Vec<usize> = states.iter().map(|&s| if s == 0 { 1 } else { 0 }).collect();
+        let swapped_states: Vec<usize> =
+            states.iter().map(|&s| if s == 0 { 1 } else { 0 }).collect();
         let swapped_probs: Vec<f64> = probs.iter().map(|&p| 1.0 - p).collect();
         return RegimeResult {
             states: swapped_states,
@@ -204,14 +217,25 @@ pub fn detect_regimes(returns: &[f64], max_iter: usize) -> RegimeResult {
 
     RegimeResult {
         states: final_states,
-        transition: vec![final_trans[0], final_trans[1], final_trans[2], final_trans[3]],
+        transition: vec![
+            final_trans[0],
+            final_trans[1],
+            final_trans[2],
+            final_trans[3],
+        ],
         means: final_means.clone(),
         variances: final_var.clone(),
         probabilities: probs,
     }
 }
 
-fn viterbi(returns: &[f64], means: &[f64], variances: &[f64], trans: &[f64], init: &[f64]) -> (Vec<usize>, Vec<f64>) {
+fn viterbi(
+    returns: &[f64],
+    means: &[f64],
+    variances: &[f64],
+    trans: &[f64],
+    init: &[f64],
+) -> (Vec<usize>, Vec<f64>) {
     let n = returns.len();
     let mut viterbi_log = vec![0.0; 2 * n];
     let mut backpointer = vec![0usize; 2 * n];
@@ -225,7 +249,8 @@ fn viterbi(returns: &[f64], means: &[f64], variances: &[f64], trans: &[f64], ini
             let mut best = f64::NEG_INFINITY;
             let mut best_prev = 0;
             for ps in 0..2 {
-                let val = viterbi_log[ps * n + (t - 1)] + trans[ps * 2 + s].ln()
+                let val = viterbi_log[ps * n + (t - 1)]
+                    + trans[ps * 2 + s].ln()
                     + gaussian_log(returns[t], means[s], variances[s]);
                 if val > best {
                     best = val;
@@ -274,7 +299,7 @@ fn gaussian_log(x: f64, mean: f64, var: f64) -> f64 {
 #[derive(Debug, Clone)]
 pub struct RegimeResult {
     pub states: Vec<usize>,
-    pub transition: Vec<f64>,  // [a00, a01, a10, a11]
+    pub transition: Vec<f64>, // [a00, a01, a10, a11]
     pub means: Vec<f64>,
     pub variances: Vec<f64>,
     pub probabilities: Vec<f64>, // P(high-vol regime) at each timestep
@@ -304,10 +329,21 @@ mod tests {
         assert_eq!(result.states.len(), n);
         // First 100 should mostly be state 0 (low-vol)
         let calm_state = result.states[..100].iter().filter(|&&s| s == 0).count();
-        assert!(calm_state > 70, "Calm period should be classified as state 0, got {} / 100", calm_state);
+        assert!(
+            calm_state > 70,
+            "Calm period should be classified as state 0, got {} / 100",
+            calm_state
+        );
         // Last 100 should mostly be state 1 (high-vol)
         let vol_state = result.states[100..].iter().filter(|&&s| s == 1).count();
-        assert!(vol_state > 70, "Volatile period should be classified as state 1, got {} / 100", vol_state);
-        assert!(result.variances[1] > result.variances[0], "State 1 should have higher variance");
+        assert!(
+            vol_state > 70,
+            "Volatile period should be classified as state 1, got {} / 100",
+            vol_state
+        );
+        assert!(
+            result.variances[1] > result.variances[0],
+            "State 1 should have higher variance"
+        );
     }
 }

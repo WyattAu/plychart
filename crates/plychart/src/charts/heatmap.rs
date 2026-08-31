@@ -14,8 +14,16 @@ pub fn draw(
     let cell_w = area.w / cols as f64;
     let cell_h = area.h / rows as f64;
 
-    let min_val = matrix.iter().flatten().cloned().fold(f64::INFINITY, f64::min);
-    let max_val = matrix.iter().flatten().cloned().fold(f64::NEG_INFINITY, f64::max);
+    let min_val = matrix
+        .iter()
+        .flatten()
+        .cloned()
+        .fold(f64::INFINITY, f64::min);
+    let max_val = matrix
+        .iter()
+        .flatten()
+        .cloned()
+        .fold(f64::NEG_INFINITY, f64::max);
     let range = (max_val - min_val).max(1.0);
 
     for (r, row) in matrix.iter().enumerate() {

@@ -76,7 +76,11 @@ pub struct ChartViewport {
 
 impl Default for ChartViewport {
     fn default() -> Self {
-        Self { start: 0, count: 100, log_scale: false }
+        Self {
+            start: 0,
+            count: 100,
+            log_scale: false,
+        }
     }
 }
 
@@ -97,29 +101,49 @@ pub struct ChartTheme {
 impl ChartTheme {
     pub const fn dark() -> Self {
         Self {
-            bg: "#0a0a0a", text: "#e0e0e0", text_muted: "#666666",
-            grid: "#1a1a1a", up: "#4ade80", down: "#f87171",
-            accent: "#c8a23c", volume: "#333333", crosshair: "#555555",
+            bg: "#0a0a0a",
+            text: "#e0e0e0",
+            text_muted: "#666666",
+            grid: "#1a1a1a",
+            up: "#4ade80",
+            down: "#f87171",
+            accent: "#c8a23c",
+            volume: "#333333",
+            crosshair: "#555555",
         }
     }
     pub const fn light() -> Self {
         Self {
-            bg: "#ffffff", text: "#1a1a1a", text_muted: "#999999",
-            grid: "#e0e0e0", up: "#22c55e", down: "#ef4444",
-            accent: "#c8a23c", volume: "#cccccc", crosshair: "#999999",
+            bg: "#ffffff",
+            text: "#1a1a1a",
+            text_muted: "#999999",
+            grid: "#e0e0e0",
+            up: "#22c55e",
+            down: "#ef4444",
+            accent: "#c8a23c",
+            volume: "#cccccc",
+            crosshair: "#999999",
         }
     }
     pub const fn midnight() -> Self {
         Self {
-            bg: "#0c0c0c", text: "#ffffff", text_muted: "#666666",
-            grid: "#1c1c1c", up: "#4ade80", down: "#ff4081",
-            accent: "#00e5ff", volume: "#2a2a2a", crosshair: "#ffffff",
+            bg: "#0c0c0c",
+            text: "#ffffff",
+            text_muted: "#666666",
+            grid: "#1c1c1c",
+            up: "#4ade80",
+            down: "#ff4081",
+            accent: "#00e5ff",
+            volume: "#2a2a2a",
+            crosshair: "#ffffff",
         }
     }
 }
 
 impl Default for ChartTheme {
-    fn default() -> Self { Self::dark() }
+    fn default() -> Self {
+        Self::dark()
+    }
 }
 
 /// Chart error type — never panics in production.
@@ -180,7 +204,14 @@ mod tests {
 
     #[test]
     fn candle_data_serde_roundtrip() {
-        let c = CandleData { time: 1.0, open: 100.0, high: 105.0, low: 99.0, close: 102.0, volume: 500.0 };
+        let c = CandleData {
+            time: 1.0,
+            open: 100.0,
+            high: 105.0,
+            low: 99.0,
+            close: 102.0,
+            volume: 500.0,
+        };
         let json = serde_json::to_string(&c).expect("serialize");
         let back: CandleData = serde_json::from_str(&json).expect("deserialize");
         assert_eq!(c.time, back.time);
@@ -257,7 +288,11 @@ mod tests {
 
     #[test]
     fn bar_data_serde_roundtrip() {
-        let b = BarData { label: "AAPL".into(), value: 150.0, color: Some("#ff0000".into()) };
+        let b = BarData {
+            label: "AAPL".into(),
+            value: 150.0,
+            color: Some("#ff0000".into()),
+        };
         let json = serde_json::to_string(&b).expect("serialize");
         let back: BarData = serde_json::from_str(&json).expect("deserialize");
         assert_eq!(b.label, back.label);
@@ -266,7 +301,12 @@ mod tests {
 
     #[test]
     fn scatter_point_serde_roundtrip() {
-        let p = ScatterPoint { x: 1.0, y: 2.0, size: 5.0, color: None };
+        let p = ScatterPoint {
+            x: 1.0,
+            y: 2.0,
+            size: 5.0,
+            color: None,
+        };
         let json = serde_json::to_string(&p).expect("serialize");
         let back: ScatterPoint = serde_json::from_str(&json).expect("deserialize");
         assert_eq!(p.x, back.x);

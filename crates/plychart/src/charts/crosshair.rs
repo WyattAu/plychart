@@ -50,7 +50,10 @@ pub fn draw_ohlc_readout(
     }
 
     let c = &candles[nearest_idx];
-    let text = format!("O:{:.2} H:{:.2} L:{:.2} C:{:.2}", c.open, c.high, c.low, c.close);
+    let text = format!(
+        "O:{:.2} H:{:.2} L:{:.2} C:{:.2}",
+        c.open, c.high, c.low, c.close
+    );
     ctx.set_font("10px 'JetBrains Mono', monospace");
     ctx.set_fill_style(&theme.text.into());
     let _ = ctx.fill_text(&text, 10.0, 16.0);

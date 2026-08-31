@@ -100,7 +100,11 @@ pub fn tail_dependence(x: &[f64], y: &[f64], q: f64) -> TailDependence {
 fn rank(data: &[f64]) -> Vec<f64> {
     let n = data.len();
     let mut indices: Vec<usize> = (0..n).collect();
-    indices.sort_by(|&a, &b| data[a].partial_cmp(&data[b]).unwrap_or(std::cmp::Ordering::Equal));
+    indices.sort_by(|&a, &b| {
+        data[a]
+            .partial_cmp(&data[b])
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
     let mut ranks = vec![0.0; n];
     for (rank_val, &idx) in indices.iter().enumerate() {
         ranks[idx] = (rank_val + 1) as f64;
@@ -166,8 +170,16 @@ mod tests {
     fn test_identical_series() {
         let x: Vec<f64> = (0..100).map(|i| (i as f64 * 0.1).sin()).collect();
         let td = tail_dependence(&x, &x, 0.05);
-        assert!((td.lower - 1.0).abs() < 0.1, "Identical series: lower ~1, got {}", td.lower);
-        assert!((td.upper - 1.0).abs() < 0.1, "Identical series: upper ~1, got {}", td.upper);
+        assert!(
+            (td.lower - 1.0).abs() < 0.1,
+            "Identical series: lower ~1, got {}",
+            td.lower
+        );
+        assert!(
+            (td.upper - 1.0).abs() < 0.1,
+            "Identical series: upper ~1, got {}",
+            td.upper
+        );
         assert!((td.kendall_tau - 1.0).abs() < 0.01);
     }
 
@@ -177,6 +189,10 @@ mod tests {
         let x: Vec<f64> = (0..100).map(|i| (i as f64 * 0.1).sin()).collect();
         let y: Vec<f64> = x.iter().map(|v| -v).collect();
         let td = tail_dependence(&x, &y, 0.05);
-        assert!(td.lower < 0.3, "Opposite series: low lower-tail, got {}", td.lower);
+        assert!(
+            td.lower < 0.3,
+            "Opposite series: low lower-tail, got {}",
+            td.lower
+        );
     }
 }

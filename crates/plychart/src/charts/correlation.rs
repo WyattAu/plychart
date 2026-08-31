@@ -36,7 +36,8 @@ pub fn draw(
                 &format!("{:.2}", val),
                 area.x + label_w + c as f64 * cell_w + 2.0,
                 area.y + r as f64 * cell_h + cell_h * 0.65,
-            ).ok();
+            )
+            .ok();
         }
     }
 
@@ -44,9 +45,18 @@ pub fn draw(
     ctx.set_font("9px sans-serif");
     for i in 0..n {
         if i < labels.len() {
-            ctx.fill_text(labels[i], area.x, area.y + i as f64 * cell_h + cell_h * 0.65).ok();
+            ctx.fill_text(
+                labels[i],
+                area.x,
+                area.y + i as f64 * cell_h + cell_h * 0.65,
+            )
+            .ok();
             ctx.save();
-            ctx.translate(area.x + label_w + i as f64 * cell_w + cell_w * 0.4, area.y + draw_h + 4.0).ok();
+            ctx.translate(
+                area.x + label_w + i as f64 * cell_w + cell_w * 0.4,
+                area.y + draw_h + 4.0,
+            )
+            .ok();
             ctx.rotate(-std::f64::consts::FRAC_PI_2).ok();
             ctx.fill_text(labels[i], 0.0, 0.0).ok();
             ctx.restore();
