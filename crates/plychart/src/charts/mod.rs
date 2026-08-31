@@ -15,6 +15,9 @@ pub mod waterfall;
 pub mod order_book;
 pub mod backtest;
 pub mod correlation;
+pub mod grid;
+pub mod crosshair;
+pub mod volume;
 
 /// Re-export core types from plycore for convenience.
 pub use plycore::{CandleData, BarData, ChartArea, ChartTheme, ChartViewport};

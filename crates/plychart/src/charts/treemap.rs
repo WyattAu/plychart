@@ -14,17 +14,17 @@ pub fn draw(
     }
 
     let palette = ["#3b82f6", "#ef4444", "#22c55e", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316"];
-    let gap = 1.0;
+    let gap: f64 = 1.0;
     let mut rects: Vec<(f64, f64, f64, f64, usize)> = Vec::new();
 
     fn slice(
         items: &[(String, f64)],
-        total: f64,
         x: f64,
         y: f64,
         w: f64,
         h: f64,
         offset: usize,
+        gap: f64,
         rects: &mut Vec<(f64, f64, f64, f64, usize)>,
     ) {
         if items.is_empty() || w <= 0.0 || h <= 0.0 {
@@ -40,17 +40,17 @@ pub fn draw(
         let left_total = left_sum + right_sum;
 
         if w >= h {
-            let split = w * (left_sum / left_total);
-            slice(items, total, x, y, split - gap, h, offset, rects);
-            slice(items, total, x + split, y, w - split, h, offset + mid, rects);
+            let split: f64 = w * (left_sum / left_total);
+            slice(items, x, y, split - gap, h, offset, gap, rects);
+            slice(items, x + split, y, w - split, h, offset + mid, gap, rects);
         } else {
-            let split = h * (left_sum / left_total);
-            slice(items, total, x, y, w, split - gap, offset, rects);
-            slice(items, total, x, y + split, w, h - split, offset + mid, rects);
+            let split: f64 = h * (left_sum / left_total);
+            slice(items, x, y, w, split - gap, offset, gap, rects);
+            slice(items, x, y + split, w, h - split, offset + mid, gap, rects);
         }
     }
 
-    slice(items, total, area.x, area.y, area.w, area.h, 0, &mut rects);
+    slice(items, area.x, area.y, area.w, area.h, 0, gap, &mut rects);
 
     for (i, (rx, ry, rw, rh, idx)) in rects.iter().enumerate() {
         let color = palette[i % palette.len()];

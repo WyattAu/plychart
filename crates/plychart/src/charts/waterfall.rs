@@ -9,15 +9,15 @@ pub fn draw(
         return;
     }
 
-    let mut cumulative = 0.0;
-    let mut min_val = 0.0;
-    let mut max_val = 0.0;
+    let mut cumulative: f64 = 0.0;
+    let mut min_val: f64 = 0.0;
+    let mut max_val: f64 = 0.0;
     for b in bars {
         cumulative += b.value;
-        min_val = min_val.min(cumulative);
-        max_val = max_val.max(cumulative);
+        min_val = f64::min(min_val, cumulative);
+        max_val = f64::max(max_val, cumulative);
     }
-    let range = (max_val - min_val).max(1.0);
+    let range = f64::max(max_val - min_val, 1.0);
     let pad = range * 0.1;
     let min_val = min_val - pad;
     let max_val = max_val + pad;
@@ -26,18 +26,18 @@ pub fn draw(
     let val_to_y = |v: f64| -> f64 {
         area.y + area.h * (1.0 - (v - min_val) / total_range)
     };
-    let bar_w = (area.w / bars.len() as f64 * 0.6).max(1.0);
+    let bar_w = f64::max(area.w / bars.len() as f64 * 0.6, 1.0);
 
-    let mut running = 0.0;
+    let mut running: f64 = 0.0;
     let mut prev_y = val_to_y(0.0);
 
     for (i, b) in bars.iter().enumerate() {
         let x = area.x + (i as f64 + 0.5) * (area.w / bars.len() as f64);
         let start = running;
         running += b.value;
-        let y_start = val_to_y(start.max(running));
-        let y_end = val_to_y(start.min(running));
-        let h = (y_end - y_start).max(1.0);
+        let y_start = val_to_y(f64::max(start, running));
+        let y_end = val_to_y(f64::min(start, running));
+        let h = f64::max(y_end - y_start, 1.0);
 
         let color = if b.value >= 0.0 { theme.up } else { theme.down };
         ctx.set_fill_style(&color.into());

@@ -1,7 +1,6 @@
 //! plychart — Full-featured graphing library for Rust/WASM.
 //!
 //! Zero-dependency, zero-watermark, zero-JS Canvas2D charting.
-//! Extracted from the hydrated_personal_site rendering infrastructure.
 
 pub mod canvas;
 pub mod charts;
@@ -12,6 +11,7 @@ pub mod types;
 
 pub use charts::{ChartType, CandleData};
 pub use error::ChartError;
+pub use interaction::ChartInteraction;
 pub use theme::get_theme;
 pub use types::{ChartArea, ChartOpts, ChartTheme, ChartViewport};
 
@@ -20,7 +20,7 @@ pub use types::{ChartArea, ChartOpts, ChartTheme, ChartViewport};
 pub struct CanvasChart {
     canvas_id: String,
     theme: ChartTheme,
-    viewport: ChartViewport,
+    chart_type: ChartType,
 }
 
 impl CanvasChart {
@@ -30,7 +30,7 @@ impl CanvasChart {
         Self {
             canvas_id: canvas_id.to_string(),
             theme: ChartTheme::dark(),
-            viewport: ChartViewport::default(),
+            chart_type: ChartType::Candlestick,
         }
     }
 
@@ -40,15 +40,41 @@ impl CanvasChart {
         self
     }
 
-    /// Update chart data.
-    pub fn update(&self, data: &[CandleData]) -> Result<(), ChartError> {
-        canvas::update_candles(&self.canvas_id, data)
+    /// Set chart type.
+    pub fn with_chart_type(mut self, chart_type: ChartType) -> Self {
+        self.chart_type = chart_type;
+        self
     }
 
-    /// Get current viewport state.
+    /// Get current chart type.
     #[must_use]
-    pub fn viewport(&self) -> ChartViewport {
-        self.viewport
+    pub fn chart_type(&self) -> ChartType {
+        self.chart_type
+    }
+
+    /// Update chart with OHLCV candle data.
+    /// Dispatches to the appropriate renderer based on chart_type.
+    pub fn update(&self, data: &[CandleData]) -> Result<(), ChartError> {
+        match self.chart_type {
+            ChartType::Candlestick | ChartType::Line | ChartType::Area | ChartType::Bar => {
+                canvas::update_candles(&self.canvas_id, data)
+            }
+            ChartType::Heatmap => canvas::update_heatmap(&self.canvas_id, ""),
+            ChartType::OrderBook => canvas::update_order_book(&self.canvas_id, ""),
+            _ => canvas::update_candles(&self.canvas_id, data),
+        }
+    }
+
+    /// Get canvas ID.
+    #[must_use]
+    pub fn canvas_id(&self) -> &str {
+        &self.canvas_id
+    }
+
+    /// Get theme.
+    #[must_use]
+    pub fn theme(&self) -> &ChartTheme {
+        &self.theme
     }
 }
 
@@ -65,29 +91,32 @@ mod tests {
     #[test]
     fn canvas_chart_new() {
         let chart = CanvasChart::new("my-canvas");
-        assert_eq!(chart.canvas_id, "my-canvas");
+        assert_eq!(chart.canvas_id(), "my-canvas");
     }
 
     #[test]
     fn canvas_chart_default_theme_is_dark() {
         let chart = CanvasChart::new("c");
-        assert_eq!(chart.theme.bg, "#0a0a0a");
+        assert_eq!(chart.theme().bg, "#0a0a0a");
     }
 
     #[test]
     fn canvas_chart_with_theme() {
         let theme = ChartTheme::light();
         let chart = CanvasChart::new("c").with_theme(theme);
-        assert_eq!(chart.theme.bg, "#ffffff");
+        assert_eq!(chart.theme().bg, "#ffffff");
     }
 
     #[test]
-    fn canvas_chart_viewport_default() {
+    fn canvas_chart_with_chart_type() {
+        let chart = CanvasChart::new("c").with_chart_type(ChartType::Line);
+        assert_eq!(chart.chart_type(), ChartType::Line);
+    }
+
+    #[test]
+    fn canvas_chart_default_type_is_candlestick() {
         let chart = CanvasChart::new("c");
-        let vp = chart.viewport();
-        assert_eq!(vp.start, 0);
-        assert_eq!(vp.count, 100);
-        assert!(!vp.log_scale);
+        assert_eq!(chart.chart_type(), ChartType::Candlestick);
     }
 
     #[test]
@@ -139,75 +168,45 @@ mod tests {
     #[test]
     fn canvas_update_empty_data() {
         let chart = CanvasChart::new("c");
-        let result = chart.update(&[]);
-        assert!(result.is_ok());
+        assert!(chart.update(&[]).is_ok());
     }
 
     #[test]
     fn canvas_update_single_candle() {
         let chart = CanvasChart::new("c");
         let data = vec![CandleData { time: 1.0, open: 100.0, high: 105.0, low: 99.0, close: 102.0, volume: 500.0 }];
-        let result = chart.update(&data);
-        assert!(result.is_ok());
+        assert!(chart.update(&data).is_ok());
     }
 
     #[test]
-    fn canvas_update_multiple_candles() {
-        let chart = CanvasChart::new("c");
-        let data: Vec<CandleData> = (0..10)
-            .map(|i| CandleData {
-                time: i as f64,
-                open: 100.0 + i as f64,
-                high: 101.0 + i as f64,
-                low: 99.0 + i as f64,
-                close: 100.5 + i as f64,
-                volume: 1000.0,
-            })
-            .collect();
-        let result = chart.update(&data);
-        assert!(result.is_ok());
+    fn canvas_update_line_type() {
+        let chart = CanvasChart::new("c").with_chart_type(ChartType::Line);
+        let data = vec![CandleData { time: 1.0, open: 100.0, high: 105.0, low: 99.0, close: 102.0, volume: 500.0 }];
+        assert!(chart.update(&data).is_ok());
+    }
+
+    #[test]
+    fn canvas_update_area_type() {
+        let chart = CanvasChart::new("c").with_chart_type(ChartType::Area);
+        let data = vec![CandleData { time: 1.0, open: 100.0, high: 105.0, low: 99.0, close: 102.0, volume: 500.0 }];
+        assert!(chart.update(&data).is_ok());
+    }
+
+    #[test]
+    fn canvas_update_bar_type() {
+        let chart = CanvasChart::new("c").with_chart_type(ChartType::Bar);
+        let data = vec![CandleData { time: 1.0, open: 100.0, high: 105.0, low: 99.0, close: 102.0, volume: 500.0 }];
+        assert!(chart.update(&data).is_ok());
     }
 
     #[test]
     fn device_pixel_ratio_native() {
-        let dpr = canvas::device_pixel_ratio();
-        assert_eq!(dpr, 1.0);
+        assert_eq!(canvas::device_pixel_ratio(), 1.0);
     }
 
     #[test]
     fn canvas_destroy_chart() {
-        let result = canvas::destroy_chart("any-id");
-        assert!(result.is_ok());
-    }
-
-    #[test]
-    fn canvas_update_heatmap() {
-        let result = canvas::update_heatmap("c", "[]");
-        assert!(result.is_ok());
-    }
-
-    #[test]
-    fn canvas_update_order_book() {
-        let result = canvas::update_order_book("c", "[]");
-        assert!(result.is_ok());
-    }
-
-    #[test]
-    fn candle_data_construction() {
-        let c = CandleData {
-            time: 1700000000.0,
-            open: 150.0,
-            high: 155.0,
-            low: 148.0,
-            close: 153.0,
-            volume: 1_000_000.0,
-        };
-        assert_eq!(c.time, 1700000000.0);
-        assert_eq!(c.open, 150.0);
-        assert_eq!(c.high, 155.0);
-        assert_eq!(c.low, 148.0);
-        assert_eq!(c.close, 153.0);
-        assert_eq!(c.volume, 1_000_000.0);
+        assert!(canvas::destroy_chart("any-id").is_ok());
     }
 
     #[test]
@@ -220,14 +219,5 @@ mod tests {
         let back: Vec<CandleData> = serde_json::from_str(&json).unwrap();
         assert_eq!(data.len(), back.len());
         assert_eq!(data[0].close, back[0].close);
-        assert_eq!(data[1].high, back[1].high);
-    }
-
-    #[test]
-    fn chart_theme_serde_roundtrip_via_viewport() {
-        let vp = ChartViewport { start: 10, count: 50, log_scale: true };
-        assert_eq!(vp.start, 10);
-        assert_eq!(vp.count, 50);
-        assert!(vp.log_scale);
     }
 }

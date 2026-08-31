@@ -10,16 +10,15 @@ pub fn draw(
         return;
     }
 
-    let max_size = bids.iter()
+    let max_size: f64 = bids.iter()
         .chain(asks.iter())
-        .map(|(_, s)| s)
-        .cloned()
+        .map(|(_, s)| *s)
         .fold(f64::NEG_INFINITY, f64::max)
         .max(0.0001);
 
     let mid_x = area.x + area.w / 2.0;
     let total_levels = bids.len().max(asks.len()).max(1);
-    let level_h = (area.h / total_levels as f64).min(20.0);
+    let level_h = f64::min(area.h / total_levels as f64, 20.0);
     let bar_max_w = area.w / 2.0 * 0.9;
 
     ctx.set_font("10px monospace");

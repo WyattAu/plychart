@@ -10,7 +10,7 @@ pub fn draw(
     }
 
     let n = matrix.len();
-    let label_w = 50.0;
+    let label_w: f64 = 50.0;
     let draw_w = area.w - label_w;
     let draw_h = area.h - label_w;
     let cell_w = draw_w / n as f64;
@@ -45,11 +45,11 @@ pub fn draw(
     for i in 0..n {
         if i < labels.len() {
             ctx.fill_text(labels[i], area.x, area.y + i as f64 * cell_h + cell_h * 0.65).ok();
-            ctx.save().ok();
+            ctx.save();
             ctx.translate(area.x + label_w + i as f64 * cell_w + cell_w * 0.4, area.y + draw_h + 4.0).ok();
             ctx.rotate(-std::f64::consts::FRAC_PI_2).ok();
             ctx.fill_text(labels[i], 0.0, 0.0).ok();
-            ctx.restore().ok();
+            ctx.restore();
         }
     }
 }
