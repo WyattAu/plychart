@@ -7,7 +7,7 @@ description = "Quantitative computation library — portfolio analytics, risk me
 repository = "https://github.com/WyattAu/plychart"
 
 [dependencies]
-plycore = { path = "../plycore" }
+plycore = { path = "../plycore", version = "0.1.0" }
 serde = { workspace = true }
 serde_json = { workspace = true }
 wasm-bindgen = { workspace = true }
