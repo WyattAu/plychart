@@ -30,7 +30,7 @@ pub struct Point2D {
 }
 
 /// Bounding rectangle for chart rendering.
-#[derive(Debug, Clone, Copy, Default)]
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
 pub struct ChartArea {
     pub x: f64,
     pub y: f64,
@@ -64,7 +64,7 @@ pub struct HeatmapCell {
 }
 
 /// Chart viewport state (zoom + pan).
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ChartViewport {
     /// Index of the first visible data point.
     pub start: usize,
@@ -147,7 +147,7 @@ impl Default for ChartTheme {
 }
 
 /// Chart error type — never panics in production.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum ChartError {
     CanvasNotFound(String),
     DataParseError(String),

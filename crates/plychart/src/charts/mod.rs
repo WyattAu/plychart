@@ -78,4 +78,24 @@ impl ChartType {
             Self::Correlation,
         ]
     }
+
+    #[must_use]
+    pub fn from_label(label: &str) -> Option<Self> {
+        match label {
+            "Candles" => Some(Self::Candlestick),
+            "Line" => Some(Self::Line),
+            "Area" => Some(Self::Area),
+            "Bars" => Some(Self::Bar),
+            "Heatmap" => Some(Self::Heatmap),
+            "Scatter" => Some(Self::Scatter),
+            "Gauge" => Some(Self::Gauge),
+            "Radar" => Some(Self::Radar),
+            "Treemap" => Some(Self::Treemap),
+            "Waterfall" => Some(Self::Waterfall),
+            "Order Book" => Some(Self::OrderBook),
+            "Backtest" => Some(Self::Backtest),
+            "Correlation" => Some(Self::Correlation),
+            _ => None,
+        }
+    }
 }

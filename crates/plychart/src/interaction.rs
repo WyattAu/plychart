@@ -23,6 +23,12 @@ pub struct ChartInteraction {
     pub mouse: MousePosition,
     /// Chart area bounds (set once on resize).
     pub area: AreaState,
+    /// Whether the user is currently dragging (for pan).
+    pub dragging: bool,
+    /// X position where drag started (for pan delta calculation).
+    pub drag_start_x: f64,
+    /// Viewport start when drag started (for pan delta calculation).
+    pub drag_start_viewport_start: usize,
 }
 
 /// Chart area bounds (updated on resize).
@@ -66,6 +72,9 @@ impl ChartInteraction {
             viewport: plycore::ChartViewport::default(),
             mouse: MousePosition::default(),
             area: AreaState::default(),
+            dragging: false,
+            drag_start_x: 0.0,
+            drag_start_viewport_start: 0,
         }
     }
 
@@ -116,6 +125,52 @@ impl ChartInteraction {
     /// Handle mouse leave event.
     pub fn on_mouse_leave(&mut self) {
         self.mouse = MousePosition::default();
+        self.dragging = false;
+    }
+
+    /// Handle mouse down event (start drag for pan).
+    pub fn on_mouse_down(&mut self, x: f64, y: f64, total_data_points: usize) {
+        let price_area = self.price_area();
+        if x >= price_area.x
+            && x <= price_area.x + price_area.w
+            && y >= price_area.y
+            && y <= price_area.y + price_area.h + self.area.vol_height
+        {
+            self.dragging = true;
+            self.drag_start_x = x;
+            self.drag_start_viewport_start = self.viewport.start;
+        }
+        let _ = total_data_points;
+    }
+
+    /// Handle mouse up event (end drag).
+    pub fn on_mouse_up(&mut self) {
+        self.dragging = false;
+    }
+
+    /// Handle mouse move with drag (for pan).
+    /// Returns true if the viewport changed.
+    pub fn on_mouse_drag(&mut self, x: f64, total_data_points: usize) -> bool {
+        if !self.dragging {
+            return false;
+        }
+
+        let price_area = self.price_area();
+        let dx = x - self.drag_start_x;
+        let pixels_per_candle = price_area.w / self.viewport.count.max(1) as f64;
+        let candle_delta = -(dx / pixels_per_candle).round() as i64;
+
+        let new_start = (self.drag_start_viewport_start as i64 + candle_delta)
+            .max(0)
+            .min(total_data_points.saturating_sub(self.viewport.count) as i64)
+            as usize;
+
+        if new_start != self.viewport.start {
+            self.viewport.start = new_start;
+            true
+        } else {
+            false
+        }
     }
 
     /// Toggle log scale.
