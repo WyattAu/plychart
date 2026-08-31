@@ -10,8 +10,6 @@ repository = "https://github.com/WyattAu/plychart"
 plycore = { path = "../plycore" }
 serde = { workspace = true }
 serde_json = { workspace = true }
-
-[target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = { workspace = true }
 
 [dev-dependencies]
