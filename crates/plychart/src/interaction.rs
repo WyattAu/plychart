@@ -204,6 +204,28 @@ impl ChartInteraction {
         self.viewport.start = start;
     }
 
+    /// Handle keyboard pan (arrow keys).
+    /// `step`: number of candles to pan (positive = right, negative = left).
+    pub fn on_key_pan(&mut self, step: i64, total_data_points: usize) {
+        let new_start = (self.viewport.start as i64 + step)
+            .max(0)
+            .min(total_data_points.saturating_sub(self.viewport.count) as i64)
+            as usize;
+        self.viewport.start = new_start;
+    }
+
+    /// Handle keyboard zoom (+/- keys).
+    /// `zoom_in`: true = zoom in (fewer candles), false = zoom out (more candles).
+    pub fn on_key_zoom(&mut self, zoom_in: bool, total_data_points: usize) {
+        let step = if zoom_in { -10 } else { 10 };
+        let new_count = (self.viewport.count as i64 + step).max(10) as usize;
+        let count = new_count.min(total_data_points.max(1));
+        let start = (self.viewport.start + self.viewport.count.saturating_sub(count))
+            .min(total_data_points.saturating_sub(count));
+        self.viewport.count = count;
+        self.viewport.start = start;
+    }
+
     /// Toggle log scale.
     pub fn toggle_log_scale(&mut self) {
         self.viewport.log_scale = !self.viewport.log_scale;
