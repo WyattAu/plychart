@@ -1,0 +1,33 @@
+/* tslint:disable */
+/* eslint-disable */
+export const memory: WebAssembly.Memory;
+export const create_chart: (a: number, b: number, c: number, d: number) => [number, number];
+export const destroy_chart: (a: number, b: number) => [number, number];
+export const get_click_data: (a: number, b: number, c: number, d: number, e: number) => [number, number, number, number];
+export const get_tooltip_data: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
+export const update_area: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
+export const update_backtest: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number];
+export const update_bar: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
+export const update_candles: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
+export const update_correlation: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number];
+export const update_gauge: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number];
+export const update_heatmap: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
+export const update_histogram: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number];
+export const update_line: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
+export const update_order_book: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
+export const update_pie: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
+export const update_radar: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number) => [number, number];
+export const update_radar_multi: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number];
+export const update_scatter: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
+export const update_scatter_multi: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
+export const update_sparkline: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number];
+export const update_treemap: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
+export const update_waterfall: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
+export const __wbindgen_exn_store: (a: number) => void;
+export const __externref_table_alloc: () => number;
+export const __wbindgen_export_2: WebAssembly.Table;
+export const __wbindgen_malloc: (a: number, b: number) => number;
+export const __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
+export const __externref_table_dealloc: (a: number) => void;
+export const __wbindgen_free: (a: number, b: number, c: number) => void;
+export const __wbindgen_start: () => void;

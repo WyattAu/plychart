@@ -7,6 +7,8 @@ pub mod charts;
 pub mod interaction;
 pub mod theme;
 pub mod types;
+#[cfg(target_arch = "wasm32")]
+pub mod wasm;
 
 pub use charts::{CandleData, ChartType};
 pub use interaction::ChartInteraction;
