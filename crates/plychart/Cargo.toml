@@ -15,7 +15,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 plycore = { path = "../plycore", version = "0.1.0" }
-wasm-bindgen = "0.2"
+wasm-bindgen = "0.2.100"
 js-sys = "0.3"
 web-sys = { version = "0.3", features = [
     "Document",
@@ -36,6 +36,9 @@ console_error_panic_hook = "0.1"
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }
 proptest = "1"
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false
 
 [profile.release]
 opt-level = "s"
