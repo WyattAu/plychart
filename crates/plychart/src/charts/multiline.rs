@@ -160,16 +160,22 @@ mod tests {
 
     #[test]
     fn single_series_constant_price() {
-        let data = vec![plycore::CandleData {
-            time: 1.0,
-            open: 100.0,
-            high: 100.0,
-            low: 100.0,
-            close: 100.0,
-            volume: 0.0,
-        }; 5];
+        let data = vec![
+            plycore::CandleData {
+                time: 1.0,
+                open: 100.0,
+                high: 100.0,
+                low: 100.0,
+                close: 100.0,
+                volume: 0.0,
+            };
+            5
+        ];
         let min = data.iter().map(|c| c.close).fold(f64::INFINITY, f64::min);
-        let max = data.iter().map(|c| c.close).fold(f64::NEG_INFINITY, f64::max);
+        let max = data
+            .iter()
+            .map(|c| c.close)
+            .fold(f64::NEG_INFINITY, f64::max);
         assert_eq!(min, max);
     }
 }

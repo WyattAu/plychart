@@ -83,7 +83,8 @@ pub fn draw(
         let pct = (value / total) * 100.0;
 
         ctx.set_fill_style(&color.into());
-        ctx.fill_rect(lx, legend_y - 6.0, 8.0, 8.0).unwrap_or_default();
+        ctx.fill_rect(lx, legend_y - 6.0, 8.0, 8.0)
+            .unwrap_or_default();
 
         ctx.set_fill_style(&theme.text_muted.into());
         ctx.set_font("9px monospace");

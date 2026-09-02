@@ -28,8 +28,7 @@ pub(crate) fn get_canvas_context(
     canvas_id: &str,
 ) -> Result<(web_sys::CanvasRenderingContext2d, f64, f64), crate::ChartError> {
     use wasm_bindgen::JsCast;
-    let window =
-        web_sys::window().ok_or(crate::ChartError::CanvasNotFound("No window".into()))?;
+    let window = web_sys::window().ok_or(crate::ChartError::CanvasNotFound("No window".into()))?;
     let document = window
         .document()
         .ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;
@@ -57,8 +56,7 @@ pub(crate) fn get_canvas_context(
 pub fn create_chart(canvas_id: &str, width: u32, height: u32) -> Result<(), crate::ChartError> {
     use wasm_bindgen::JsCast;
     use web_sys::CanvasRenderingContext2d;
-    let window =
-        web_sys::window().ok_or(crate::ChartError::CanvasNotFound("No window".into()))?;
+    let window = web_sys::window().ok_or(crate::ChartError::CanvasNotFound("No window".into()))?;
     let document = window
         .document()
         .ok_or(crate::ChartError::CanvasNotFound("No document".into()))?;

@@ -18,13 +18,8 @@ pub fn draw(
     if (max - min).abs() < f64::EPSILON {
         // All values identical — draw single bar
         ctx.set_fill_style(&theme.accent.into());
-        ctx.fill_rect(
-            area.x,
-            area.y,
-            area.w,
-            area.h,
-        )
-        .unwrap_or_default();
+        ctx.fill_rect(area.x, area.y, area.w, area.h)
+            .unwrap_or_default();
         return;
     }
 
@@ -67,8 +62,12 @@ pub fn draw(
     ctx.fill_text(&format!("{min:.2}"), area.x + 2.0, area.y + area.h - 2.0)
         .unwrap_or_default();
     ctx.set_text_align("right");
-    ctx.fill_text(&format!("{max:.2}"), area.x + area.w - 2.0, area.y + area.h - 2.0)
-        .unwrap_or_default();
+    ctx.fill_text(
+        &format!("{max:.2}"),
+        area.x + area.w - 2.0,
+        area.y + area.h - 2.0,
+    )
+    .unwrap_or_default();
 }
 
 #[cfg(test)]

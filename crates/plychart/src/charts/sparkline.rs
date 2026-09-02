@@ -56,8 +56,12 @@ pub fn draw(
     let gradient = ctx
         .create_linear_gradient(0.0, area.y, 0.0, area.y + area.h)
         .unwrap_or_default();
-    gradient.add_color_with_alpha(color, 0.15).unwrap_or_default();
-    gradient.add_color_with_alpha(color, 0.0).unwrap_or_default();
+    gradient
+        .add_color_with_alpha(color, 0.15)
+        .unwrap_or_default();
+    gradient
+        .add_color_with_alpha(color, 0.0)
+        .unwrap_or_default();
     ctx.set_fill_style(&gradient.into());
     ctx.fill();
 }
