@@ -168,28 +168,6 @@ impl std::fmt::Display for ChartError {
 
 impl std::error::Error for ChartError {}
 
-/// Configuration options for chart rendering.
-#[derive(Debug, Clone)]
-pub struct ChartOpts {
-    pub show_grid: bool,
-    pub show_crosshair: bool,
-    pub show_volume: bool,
-    pub show_axis_labels: bool,
-    pub theme: ChartTheme,
-}
-
-impl Default for ChartOpts {
-    fn default() -> Self {
-        Self {
-            show_grid: true,
-            show_crosshair: true,
-            show_volume: true,
-            show_axis_labels: true,
-            theme: ChartTheme::default(),
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -257,15 +235,6 @@ mod tests {
     fn theme_default_is_dark() {
         let t = ChartTheme::default();
         assert_eq!(t.bg, ChartTheme::dark().bg);
-    }
-
-    #[test]
-    fn chart_opts_default() {
-        let o = ChartOpts::default();
-        assert!(o.show_grid);
-        assert!(o.show_crosshair);
-        assert!(o.show_volume);
-        assert!(o.show_axis_labels);
     }
 
     #[test]

@@ -15,6 +15,7 @@ pub mod regime;
 pub mod risk;
 pub mod risk_decomp;
 pub mod rng;
+pub mod simd_utils;
 pub mod stats;
 pub mod stress;
 pub mod volatility;

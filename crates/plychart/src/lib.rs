@@ -4,16 +4,15 @@
 
 pub mod canvas;
 pub mod charts;
-pub mod error;
 pub mod interaction;
 pub mod theme;
 pub mod types;
 
 pub use charts::{CandleData, ChartType};
-pub use error::ChartError;
 pub use interaction::ChartInteraction;
+pub use plycore::ChartError;
 pub use theme::get_theme;
-pub use types::{ChartArea, ChartOpts, ChartTheme, ChartViewport};
+pub use types::{ChartArea, ChartTheme, ChartViewport};
 
 /// Core canvas chart component.
 /// Renders OHLCV data to an HTML5 Canvas element via Canvas2D.
@@ -57,11 +56,11 @@ impl CanvasChart {
     pub fn update(&self, data: &[CandleData]) -> Result<(), ChartError> {
         match self.chart_type {
             ChartType::Candlestick | ChartType::Line | ChartType::Area | ChartType::Bar => {
-                canvas::update_candles(&self.canvas_id, data)
+                canvas::update_candles(&self.canvas_id, data, &self.theme)
             }
-            ChartType::Heatmap => canvas::update_heatmap(&self.canvas_id, ""),
-            ChartType::OrderBook => canvas::update_order_book(&self.canvas_id, ""),
-            _ => canvas::update_candles(&self.canvas_id, data),
+            ChartType::Heatmap => canvas::update_heatmap(&self.canvas_id, "", &self.theme),
+            ChartType::OrderBook => canvas::update_order_book(&self.canvas_id, "", &self.theme),
+            _ => canvas::update_candles(&self.canvas_id, data, &self.theme),
         }
     }
 
@@ -139,7 +138,7 @@ mod tests {
 
     #[test]
     fn chart_type_all_count() {
-        assert_eq!(ChartType::all().len(), 13);
+        assert_eq!(ChartType::all().len(), 16);
     }
 
     #[test]

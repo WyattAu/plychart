@@ -11,10 +11,14 @@ pub mod crosshair;
 pub mod gauge;
 pub mod grid;
 pub mod heatmap;
+pub mod histogram;
 pub mod line;
+pub mod multiline;
 pub mod order_book;
+pub mod pie;
 pub mod radar;
 pub mod scatter;
+pub mod sparkline;
 pub mod treemap;
 pub mod volume;
 pub mod waterfall;
@@ -38,6 +42,9 @@ pub enum ChartType {
     OrderBook,
     Backtest,
     Correlation,
+    Pie,
+    Histogram,
+    Sparkline,
 }
 
 impl ChartType {
@@ -57,6 +64,9 @@ impl ChartType {
             Self::OrderBook => "Order Book",
             Self::Backtest => "Backtest",
             Self::Correlation => "Correlation",
+            Self::Pie => "Pie",
+            Self::Histogram => "Histogram",
+            Self::Sparkline => "Sparkline",
         }
     }
 
@@ -76,6 +86,9 @@ impl ChartType {
             Self::OrderBook,
             Self::Backtest,
             Self::Correlation,
+            Self::Pie,
+            Self::Histogram,
+            Self::Sparkline,
         ]
     }
 
@@ -95,6 +108,9 @@ impl ChartType {
             "Order Book" => Some(Self::OrderBook),
             "Backtest" => Some(Self::Backtest),
             "Correlation" => Some(Self::Correlation),
+            "Pie" => Some(Self::Pie),
+            "Histogram" => Some(Self::Histogram),
+            "Sparkline" => Some(Self::Sparkline),
             _ => None,
         }
     }
