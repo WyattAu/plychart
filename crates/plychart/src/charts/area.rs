@@ -68,7 +68,10 @@ mod tests {
 
     fn area_range(points: &[CandleData]) -> (f64, f64) {
         let min_p = points.iter().map(|c| c.close).fold(f64::INFINITY, f64::min);
-        let max_p = points.iter().map(|c| c.close).fold(f64::NEG_INFINITY, f64::max);
+        let max_p = points
+            .iter()
+            .map(|c| c.close)
+            .fold(f64::NEG_INFINITY, f64::max);
         let range = (max_p - min_p).max(0.0001);
         let pad = range * 0.05;
         (min_p - pad, max_p + pad)
@@ -83,7 +86,12 @@ mod tests {
     #[test]
     fn single_point_gradient_bounds() {
         let points = vec![CandleData {
-            time: 1.0, open: 50.0, high: 50.0, low: 50.0, close: 50.0, volume: 0.0,
+            time: 1.0,
+            open: 50.0,
+            high: 50.0,
+            low: 50.0,
+            close: 50.0,
+            volume: 0.0,
         }];
         let (min_p, max_p) = area_range(&points);
         assert!(min_p.is_finite());
@@ -96,9 +104,30 @@ mod tests {
     #[test]
     fn gradient_fill_y_range() {
         let points = vec![
-            CandleData { time: 1.0, open: 0.0, high: 0.0, low: 0.0, close: 10.0, volume: 0.0 },
-            CandleData { time: 2.0, open: 0.0, high: 0.0, low: 0.0, close: 20.0, volume: 0.0 },
-            CandleData { time: 3.0, open: 0.0, high: 0.0, low: 0.0, close: 30.0, volume: 0.0 },
+            CandleData {
+                time: 1.0,
+                open: 0.0,
+                high: 0.0,
+                low: 0.0,
+                close: 10.0,
+                volume: 0.0,
+            },
+            CandleData {
+                time: 2.0,
+                open: 0.0,
+                high: 0.0,
+                low: 0.0,
+                close: 20.0,
+                volume: 0.0,
+            },
+            CandleData {
+                time: 3.0,
+                open: 0.0,
+                high: 0.0,
+                low: 0.0,
+                close: 30.0,
+                volume: 0.0,
+            },
         ];
         let (min_p, max_p) = area_range(&points);
 
@@ -113,8 +142,22 @@ mod tests {
     #[test]
     fn area_polygon_vertices() {
         let points = vec![
-            CandleData { time: 1.0, open: 0.0, high: 0.0, low: 0.0, close: 10.0, volume: 0.0 },
-            CandleData { time: 2.0, open: 0.0, high: 0.0, low: 0.0, close: 20.0, volume: 0.0 },
+            CandleData {
+                time: 1.0,
+                open: 0.0,
+                high: 0.0,
+                low: 0.0,
+                close: 10.0,
+                volume: 0.0,
+            },
+            CandleData {
+                time: 2.0,
+                open: 0.0,
+                high: 0.0,
+                low: 0.0,
+                close: 20.0,
+                volume: 0.0,
+            },
         ];
         let bottom_y = AREA.y + AREA.h;
         let first_x = index_to_x(0, points.len());
@@ -127,9 +170,30 @@ mod tests {
     #[test]
     fn descending_prices_area() {
         let points = vec![
-            CandleData { time: 1.0, open: 0.0, high: 0.0, low: 0.0, close: 100.0, volume: 0.0 },
-            CandleData { time: 2.0, open: 0.0, high: 0.0, low: 0.0, close: 50.0, volume: 0.0 },
-            CandleData { time: 3.0, open: 0.0, high: 0.0, low: 0.0, close: 10.0, volume: 0.0 },
+            CandleData {
+                time: 1.0,
+                open: 0.0,
+                high: 0.0,
+                low: 0.0,
+                close: 100.0,
+                volume: 0.0,
+            },
+            CandleData {
+                time: 2.0,
+                open: 0.0,
+                high: 0.0,
+                low: 0.0,
+                close: 50.0,
+                volume: 0.0,
+            },
+            CandleData {
+                time: 3.0,
+                open: 0.0,
+                high: 0.0,
+                low: 0.0,
+                close: 10.0,
+                volume: 0.0,
+            },
         ];
         let (min_p, max_p) = area_range(&points);
         let y1 = price_to_y(100.0, min_p, max_p);

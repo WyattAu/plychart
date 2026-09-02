@@ -72,7 +72,12 @@ mod tests {
     #[test]
     fn single_positive_bar() {
         let bars = vec![CandleData {
-            time: 1.0, open: 0.0, high: 0.0, low: 0.0, close: 100.0, volume: 0.0,
+            time: 1.0,
+            open: 0.0,
+            high: 0.0,
+            low: 0.0,
+            close: 100.0,
+            volume: 0.0,
         }];
         let (min_p, max_p, bar_w) = bar_metrics(&bars);
         assert!(min_p <= 0.0);
@@ -86,7 +91,12 @@ mod tests {
     #[test]
     fn single_negative_bar() {
         let bars = vec![CandleData {
-            time: 1.0, open: 0.0, high: 0.0, low: 0.0, close: -50.0, volume: 0.0,
+            time: 1.0,
+            open: 0.0,
+            high: 0.0,
+            low: 0.0,
+            close: -50.0,
+            volume: 0.0,
         }];
         let (min_p, max_p, _) = bar_metrics(&bars);
         assert!(min_p < 0.0);
@@ -98,22 +108,60 @@ mod tests {
     #[test]
     fn mixed_positive_negative() {
         let bars = vec![
-            CandleData { time: 1.0, open: 0.0, high: 0.0, low: 0.0, close: 100.0, volume: 0.0 },
-            CandleData { time: 2.0, open: 0.0, high: 0.0, low: 0.0, close: -30.0, volume: 0.0 },
-            CandleData { time: 3.0, open: 0.0, high: 0.0, low: 0.0, close: 60.0, volume: 0.0 },
+            CandleData {
+                time: 1.0,
+                open: 0.0,
+                high: 0.0,
+                low: 0.0,
+                close: 100.0,
+                volume: 0.0,
+            },
+            CandleData {
+                time: 2.0,
+                open: 0.0,
+                high: 0.0,
+                low: 0.0,
+                close: -30.0,
+                volume: 0.0,
+            },
+            CandleData {
+                time: 3.0,
+                open: 0.0,
+                high: 0.0,
+                low: 0.0,
+                close: 60.0,
+                volume: 0.0,
+            },
         ];
         let (min_p, max_p, bar_w) = bar_metrics(&bars);
         assert!(min_p <= 0.0);
         assert!(max_p > 0.0);
         assert!(bar_w > 1.0);
-        assert!((min_p - (-30.0)).abs() < 1e-10, "min includes negative close");
+        assert!(
+            (min_p - (-30.0)).abs() < 1e-10,
+            "min includes negative close"
+        );
     }
 
     #[test]
     fn all_zero_values() {
         let bars = vec![
-            CandleData { time: 1.0, open: 0.0, high: 0.0, low: 0.0, close: 0.0, volume: 0.0 },
-            CandleData { time: 2.0, open: 0.0, high: 0.0, low: 0.0, close: 0.0, volume: 0.0 },
+            CandleData {
+                time: 1.0,
+                open: 0.0,
+                high: 0.0,
+                low: 0.0,
+                close: 0.0,
+                volume: 0.0,
+            },
+            CandleData {
+                time: 2.0,
+                open: 0.0,
+                high: 0.0,
+                low: 0.0,
+                close: 0.0,
+                volume: 0.0,
+            },
         ];
         let (min_p, max_p, bar_w) = bar_metrics(&bars);
         let range = (max_p - min_p).max(1.0);
@@ -124,7 +172,12 @@ mod tests {
     #[test]
     fn bar_width_max_with_one_bar() {
         let bars = vec![CandleData {
-            time: 1.0, open: 0.0, high: 0.0, low: 0.0, close: 10.0, volume: 0.0,
+            time: 1.0,
+            open: 0.0,
+            high: 0.0,
+            low: 0.0,
+            close: 10.0,
+            volume: 0.0,
         }];
         let (_, _, bar_w) = bar_metrics(&bars);
         let expected = (AREA.w / 1.0 * 0.7).max(1.0);
@@ -133,9 +186,23 @@ mod tests {
 
     #[test]
     fn bar_width_scales_with_count() {
-        let bars_1 = vec![CandleData { time: 1.0, open: 0.0, high: 0.0, low: 0.0, close: 10.0, volume: 0.0 }];
+        let bars_1 = vec![CandleData {
+            time: 1.0,
+            open: 0.0,
+            high: 0.0,
+            low: 0.0,
+            close: 10.0,
+            volume: 0.0,
+        }];
         let bars_10: Vec<CandleData> = (0..10)
-            .map(|i| CandleData { time: i as f64, open: 0.0, high: 0.0, low: 0.0, close: 10.0, volume: 0.0 })
+            .map(|i| CandleData {
+                time: i as f64,
+                open: 0.0,
+                high: 0.0,
+                low: 0.0,
+                close: 10.0,
+                volume: 0.0,
+            })
             .collect();
         let (_, _, w1) = bar_metrics(&bars_1);
         let (_, _, w10) = bar_metrics(&bars_10);
@@ -145,7 +212,12 @@ mod tests {
     #[test]
     fn bar_position_centered() {
         let bars = vec![CandleData {
-            time: 1.0, open: 0.0, high: 0.0, low: 0.0, close: 10.0, volume: 0.0,
+            time: 1.0,
+            open: 0.0,
+            high: 0.0,
+            low: 0.0,
+            close: 10.0,
+            volume: 0.0,
         }];
         let (_, _, bar_w) = bar_metrics(&bars);
         let x = AREA.x + (0.5_f64) * (AREA.w / bars.len() as f64);
@@ -155,8 +227,22 @@ mod tests {
 
     #[test]
     fn up_down_color_selection() {
-        let up = CandleData { time: 1.0, open: 10.0, high: 10.0, low: 10.0, close: 20.0, volume: 0.0 };
-        let down = CandleData { time: 2.0, open: 20.0, high: 20.0, low: 20.0, close: 10.0, volume: 0.0 };
+        let up = CandleData {
+            time: 1.0,
+            open: 10.0,
+            high: 10.0,
+            low: 10.0,
+            close: 20.0,
+            volume: 0.0,
+        };
+        let down = CandleData {
+            time: 2.0,
+            open: 20.0,
+            high: 20.0,
+            low: 20.0,
+            close: 10.0,
+            volume: 0.0,
+        };
         assert!(up.close >= up.open);
         assert!(down.close < down.open);
     }

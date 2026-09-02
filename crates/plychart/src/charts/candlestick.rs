@@ -109,9 +109,30 @@ mod tests {
     #[test]
     fn multiple_candles_price_mapping() {
         let candles = vec![
-            CandleData { time: 1.0, open: 100.0, high: 110.0, low: 95.0, close: 105.0, volume: 500.0 },
-            CandleData { time: 2.0, open: 105.0, high: 115.0, low: 100.0, close: 108.0, volume: 600.0 },
-            CandleData { time: 3.0, open: 108.0, high: 120.0, low: 102.0, close: 112.0, volume: 700.0 },
+            CandleData {
+                time: 1.0,
+                open: 100.0,
+                high: 110.0,
+                low: 95.0,
+                close: 105.0,
+                volume: 500.0,
+            },
+            CandleData {
+                time: 2.0,
+                open: 105.0,
+                high: 115.0,
+                low: 100.0,
+                close: 108.0,
+                volume: 600.0,
+            },
+            CandleData {
+                time: 3.0,
+                open: 108.0,
+                high: 120.0,
+                low: 102.0,
+                close: 112.0,
+                volume: 700.0,
+            },
         ];
         let (min_p, max_p) = candle_range(&candles);
         let total = max_p - min_p;
@@ -161,20 +182,33 @@ mod tests {
 
     #[test]
     fn nan_and_inf_guard() {
-        let candles = vec![
-            CandleData { time: 1.0, open: f64::NAN, high: f64::NAN, low: f64::NAN, close: f64::NAN, volume: 0.0 },
-        ];
+        let candles = vec![CandleData {
+            time: 1.0,
+            open: f64::NAN,
+            high: f64::NAN,
+            low: f64::NAN,
+            close: f64::NAN,
+            volume: 0.0,
+        }];
         let min_p = candles.iter().map(|c| c.low).fold(f64::INFINITY, f64::min);
-        let max_p = candles.iter().map(|c| c.high).fold(f64::NEG_INFINITY, f64::max);
+        let max_p = candles
+            .iter()
+            .map(|c| c.high)
+            .fold(f64::NEG_INFINITY, f64::max);
         assert!(min_p.is_infinite() || min_p.is_nan());
         assert!(max_p.is_infinite() || max_p.is_nan());
     }
 
     #[test]
     fn large_price_range() {
-        let candles = vec![
-            CandleData { time: 1.0, open: 0.001, high: 1_000_000.0, low: 0.0005, close: 500_000.0, volume: 1.0 },
-        ];
+        let candles = vec![CandleData {
+            time: 1.0,
+            open: 0.001,
+            high: 1_000_000.0,
+            low: 0.0005,
+            close: 500_000.0,
+            volume: 1.0,
+        }];
         let (min_p, max_p) = candle_range(&candles);
         assert!(min_p.is_finite());
         assert!(max_p.is_finite());

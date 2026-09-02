@@ -55,7 +55,12 @@ mod tests {
     #[test]
     fn zero_max_volume_no_draw() {
         let _candles = vec![CandleData {
-            time: 1.0, open: 100.0, high: 105.0, low: 95.0, close: 102.0, volume: 500.0,
+            time: 1.0,
+            open: 100.0,
+            high: 105.0,
+            low: 95.0,
+            close: 102.0,
+            volume: 500.0,
         }];
         let max_vol = 0.0;
         assert!(max_vol <= 0.0, "zero max_vol means no bars drawn");
@@ -83,8 +88,22 @@ mod tests {
     #[test]
     fn volume_ratio_clamped() {
         let candles = vec![
-            CandleData { time: 1.0, open: 100.0, high: 105.0, low: 95.0, close: 102.0, volume: 2000.0 },
-            CandleData { time: 2.0, open: 102.0, high: 108.0, low: 100.0, close: 106.0, volume: 500.0 },
+            CandleData {
+                time: 1.0,
+                open: 100.0,
+                high: 105.0,
+                low: 95.0,
+                close: 102.0,
+                volume: 2000.0,
+            },
+            CandleData {
+                time: 2.0,
+                open: 102.0,
+                high: 108.0,
+                low: 100.0,
+                close: 106.0,
+                volume: 500.0,
+            },
         ];
         let max_vol = 2000.0;
         for c in &candles {
@@ -96,8 +115,22 @@ mod tests {
 
     #[test]
     fn up_down_color_selection() {
-        let up = CandleData { time: 1.0, open: 10.0, high: 10.0, low: 10.0, close: 20.0, volume: 0.0 };
-        let down = CandleData { time: 2.0, open: 20.0, high: 20.0, low: 20.0, close: 10.0, volume: 0.0 };
+        let up = CandleData {
+            time: 1.0,
+            open: 10.0,
+            high: 10.0,
+            low: 10.0,
+            close: 20.0,
+            volume: 0.0,
+        };
+        let down = CandleData {
+            time: 2.0,
+            open: 20.0,
+            high: 20.0,
+            low: 20.0,
+            close: 10.0,
+            volume: 0.0,
+        };
         assert!(up.close >= up.open);
         assert!(down.close < down.open);
     }
@@ -111,8 +144,22 @@ mod tests {
     #[test]
     fn volume_bars_within_area_x() {
         let candles = vec![
-            CandleData { time: 1.0, open: 100.0, high: 105.0, low: 95.0, close: 102.0, volume: 500.0 },
-            CandleData { time: 2.0, open: 102.0, high: 108.0, low: 100.0, close: 106.0, volume: 600.0 },
+            CandleData {
+                time: 1.0,
+                open: 100.0,
+                high: 105.0,
+                low: 95.0,
+                close: 102.0,
+                volume: 500.0,
+            },
+            CandleData {
+                time: 2.0,
+                open: 102.0,
+                high: 108.0,
+                low: 100.0,
+                close: 106.0,
+                volume: 600.0,
+            },
         ];
         let bar_w = 8.0;
         for i in 0..candles.len() {

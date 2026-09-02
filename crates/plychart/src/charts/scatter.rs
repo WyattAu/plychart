@@ -93,7 +93,10 @@ mod tests {
             assert!(*x >= AREA.x - 1.0, "x {x} should be >= area left");
             assert!(*x <= AREA.x + AREA.w + 1.0, "x {x} should be <= area right");
             assert!(*y >= AREA.y - 1.0, "y {y} should be >= area top");
-            assert!(*y <= AREA.y + AREA.h + 1.0, "y {y} should be <= area bottom");
+            assert!(
+                *y <= AREA.y + AREA.h + 1.0,
+                "y {y} should be <= area bottom"
+            );
         }
     }
 

@@ -103,10 +103,7 @@ mod tests {
 
     #[test]
     fn multiple_cells_dimensions() {
-        let matrix = vec![
-            vec![1.0, 2.0, 3.0],
-            vec![4.0, 5.0, 6.0],
-        ];
+        let matrix = vec![vec![1.0, 2.0, 3.0], vec![4.0, 5.0, 6.0]];
         let m = heatmap_metrics(&matrix).unwrap();
         assert_eq!(m.0, 2, "rows");
         assert_eq!(m.1, 3, "cols");

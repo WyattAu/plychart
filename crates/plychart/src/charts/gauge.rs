@@ -95,7 +95,12 @@ mod tests {
 
     #[test]
     fn radius_computed_correctly() {
-        let area = ChartArea { x: 0.0, y: 0.0, w: 200.0, h: 100.0 };
+        let area = ChartArea {
+            x: 0.0,
+            y: 0.0,
+            w: 200.0,
+            h: 100.0,
+        };
         let (_, _, radius, _) = gauge_geometry(50.0, 100.0, area);
         let expected = (200.0_f64 / 2.0 - 20.0).min(100.0 * 0.7);
         assert!((radius - expected).abs() < 1e-10);
@@ -125,7 +130,12 @@ mod tests {
 
     #[test]
     fn small_area_no_nan() {
-        let tiny = ChartArea { x: 0.0, y: 0.0, w: 5.0, h: 5.0 };
+        let tiny = ChartArea {
+            x: 0.0,
+            y: 0.0,
+            w: 5.0,
+            h: 5.0,
+        };
         let (cx, cy, radius, ratio) = gauge_geometry(50.0, 100.0, tiny);
         assert!(cx.is_finite());
         assert!(cy.is_finite());

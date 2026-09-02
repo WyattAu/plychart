@@ -64,7 +64,10 @@ mod tests {
 
     fn line_range(points: &[CandleData]) -> (f64, f64) {
         let min_p = points.iter().map(|c| c.close).fold(f64::INFINITY, f64::min);
-        let max_p = points.iter().map(|c| c.close).fold(f64::NEG_INFINITY, f64::max);
+        let max_p = points
+            .iter()
+            .map(|c| c.close)
+            .fold(f64::NEG_INFINITY, f64::max);
         let range = (max_p - min_p).max(0.0001);
         let pad = range * 0.05;
         (min_p - pad, max_p + pad)
@@ -79,7 +82,12 @@ mod tests {
     #[test]
     fn single_point() {
         let points = vec![CandleData {
-            time: 1.0, open: 100.0, high: 100.0, low: 100.0, close: 100.0, volume: 0.0,
+            time: 1.0,
+            open: 100.0,
+            high: 100.0,
+            low: 100.0,
+            close: 100.0,
+            volume: 0.0,
         }];
         let (min_p, max_p) = line_range(&points);
         let total = max_p - min_p;
@@ -98,23 +106,61 @@ mod tests {
     #[test]
     fn multiple_points_index_mapping() {
         let points = vec![
-            CandleData { time: 1.0, open: 0.0, high: 0.0, low: 0.0, close: 10.0, volume: 0.0 },
-            CandleData { time: 2.0, open: 0.0, high: 0.0, low: 0.0, close: 20.0, volume: 0.0 },
-            CandleData { time: 3.0, open: 0.0, high: 0.0, low: 0.0, close: 30.0, volume: 0.0 },
+            CandleData {
+                time: 1.0,
+                open: 0.0,
+                high: 0.0,
+                low: 0.0,
+                close: 10.0,
+                volume: 0.0,
+            },
+            CandleData {
+                time: 2.0,
+                open: 0.0,
+                high: 0.0,
+                low: 0.0,
+                close: 20.0,
+                volume: 0.0,
+            },
+            CandleData {
+                time: 3.0,
+                open: 0.0,
+                high: 0.0,
+                low: 0.0,
+                close: 30.0,
+                volume: 0.0,
+            },
         ];
         let x0 = index_to_x(0, points.len());
         let x1 = index_to_x(1, points.len());
         let x2 = index_to_x(2, points.len());
         assert!(x0 < x1);
         assert!(x1 < x2);
-        assert!((x2 - AREA.x - AREA.w).abs() < 1e-10, "last point at right edge");
+        assert!(
+            (x2 - AREA.x - AREA.w).abs() < 1e-10,
+            "last point at right edge"
+        );
     }
 
     #[test]
     fn constant_price_line() {
         let points = vec![
-            CandleData { time: 1.0, open: 50.0, high: 50.0, low: 50.0, close: 50.0, volume: 0.0 },
-            CandleData { time: 2.0, open: 50.0, high: 50.0, low: 50.0, close: 50.0, volume: 0.0 },
+            CandleData {
+                time: 1.0,
+                open: 50.0,
+                high: 50.0,
+                low: 50.0,
+                close: 50.0,
+                volume: 0.0,
+            },
+            CandleData {
+                time: 2.0,
+                open: 50.0,
+                high: 50.0,
+                low: 50.0,
+                close: 50.0,
+                volume: 0.0,
+            },
         ];
         let (min_p, max_p) = line_range(&points);
         let y1 = price_to_y(50.0, min_p, max_p);
@@ -125,8 +171,22 @@ mod tests {
     #[test]
     fn price_mapping_inverses_with_screen_y() {
         let points = vec![
-            CandleData { time: 1.0, open: 0.0, high: 0.0, low: 0.0, close: 10.0, volume: 0.0 },
-            CandleData { time: 2.0, open: 0.0, high: 0.0, low: 0.0, close: 20.0, volume: 0.0 },
+            CandleData {
+                time: 1.0,
+                open: 0.0,
+                high: 0.0,
+                low: 0.0,
+                close: 10.0,
+                volume: 0.0,
+            },
+            CandleData {
+                time: 2.0,
+                open: 0.0,
+                high: 0.0,
+                low: 0.0,
+                close: 20.0,
+                volume: 0.0,
+            },
         ];
         let (min_p, max_p) = line_range(&points);
         let y_low = price_to_y(10.0, min_p, max_p);
@@ -137,8 +197,22 @@ mod tests {
     #[test]
     fn no_nan_in_outputs() {
         let points = vec![
-            CandleData { time: 1.0, open: 0.0, high: 0.0, low: 0.0, close: -100.0, volume: 0.0 },
-            CandleData { time: 2.0, open: 0.0, high: 0.0, low: 0.0, close: 100.0, volume: 0.0 },
+            CandleData {
+                time: 1.0,
+                open: 0.0,
+                high: 0.0,
+                low: 0.0,
+                close: -100.0,
+                volume: 0.0,
+            },
+            CandleData {
+                time: 2.0,
+                open: 0.0,
+                high: 0.0,
+                low: 0.0,
+                close: 100.0,
+                volume: 0.0,
+            },
         ];
         let (min_p, max_p) = line_range(&points);
         assert!(min_p.is_finite());
@@ -152,8 +226,22 @@ mod tests {
     #[test]
     fn negative_prices() {
         let points = vec![
-            CandleData { time: 1.0, open: 0.0, high: 0.0, low: 0.0, close: -50.0, volume: 0.0 },
-            CandleData { time: 2.0, open: 0.0, high: 0.0, low: 0.0, close: -10.0, volume: 0.0 },
+            CandleData {
+                time: 1.0,
+                open: 0.0,
+                high: 0.0,
+                low: 0.0,
+                close: -50.0,
+                volume: 0.0,
+            },
+            CandleData {
+                time: 2.0,
+                open: 0.0,
+                high: 0.0,
+                low: 0.0,
+                close: -10.0,
+                volume: 0.0,
+            },
         ];
         let (min_p, max_p) = line_range(&points);
         assert!(min_p < 0.0);
