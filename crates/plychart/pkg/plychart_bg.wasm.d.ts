@@ -3,8 +3,8 @@
 export const memory: WebAssembly.Memory;
 export const create_chart: (a: number, b: number, c: number, d: number) => [number, number];
 export const destroy_chart: (a: number, b: number) => [number, number];
-export const get_click_data: (a: number, b: number, c: number, d: number, e: number) => [number, number, number, number];
-export const get_tooltip_data: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
+export const get_click_data: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number, number, number];
+export const get_tooltip_data: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number, number, number];
 export const update_area: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
 export const update_backtest: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number];
 export const update_bar: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];

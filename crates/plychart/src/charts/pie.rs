@@ -73,26 +73,36 @@ pub fn draw(
     ctx.set_font("10px monospace");
     ctx.fill_text("total", cx, cy + 10.0).unwrap_or_default();
 
-    // Legend at bottom
+    // Legend at bottom with wrapping
     let legend_y = area.y + area.h - 12.0;
     let legend_x = area.x + 8.0;
     let mut lx = legend_x;
+    let mut ly = legend_y;
+    let line_height = 14.0;
+    let legend_right = area.x + area.w - 8.0;
 
     for (i, (label, value)) in items.iter().enumerate() {
         let color = palette[i % palette.len()];
         let pct = (value / total) * 100.0;
+        let text = format!("{label} {pct:.0}%");
+        let text_w = ctx.measure_text(&text).map(|m| m.width()).unwrap_or(0.0);
+        let item_w = text_w + 20.0;
+
+        if lx + item_w > legend_right && lx > legend_x {
+            lx = legend_x;
+            ly -= line_height;
+        }
 
         ctx.set_fill_style(&color.into());
-        ctx.fill_rect(lx, legend_y - 6.0, 8.0, 8.0);
+        ctx.fill_rect(lx, ly - 6.0, 8.0, 8.0);
 
         ctx.set_fill_style(&theme.text_muted.into());
         ctx.set_font("9px monospace");
         ctx.set_text_align("left");
-        let text = format!("{label} {pct:.0}%");
-        ctx.fill_text(&text, lx + 12.0, legend_y + 1.0)
+        ctx.fill_text(&text, lx + 12.0, ly + 1.0)
             .unwrap_or_default();
 
-        lx += ctx.measure_text(&text).map(|m| m.width()).unwrap_or(0.0) + 20.0;
+        lx += item_w;
     }
 }
 

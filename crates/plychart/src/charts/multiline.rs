@@ -6,6 +6,29 @@ pub struct DataSeries<'a> {
     pub data: &'a [plycore::CandleData],
 }
 
+#[cfg(target_arch = "wasm32")]
+fn global_y_range(series: &[DataSeries<'_>]) -> Option<(f64, f64, f64)> {
+    let mut min = f64::INFINITY;
+    let mut max = f64::NEG_INFINITY;
+    for s in series {
+        for c in s.data {
+            if c.close < min {
+                min = c.close;
+            }
+            if c.close > max {
+                max = c.close;
+            }
+        }
+    }
+    if (max - min).abs() < f64::EPSILON {
+        return None;
+    }
+    let pad = (max - min) * 0.05;
+    min -= pad;
+    max += pad;
+    Some((min, max, max - min))
+}
+
 /// Draw multiple overlaid line series.
 #[cfg(target_arch = "wasm32")]
 pub fn draw_lines(
@@ -17,28 +40,10 @@ pub fn draw_lines(
         return;
     }
 
-    // Compute global min/max across all series
-    let mut global_min = f64::INFINITY;
-    let mut global_max = f64::NEG_INFINITY;
-    for s in series {
-        for c in s.data {
-            if c.close < global_min {
-                global_min = c.close;
-            }
-            if c.close > global_max {
-                global_max = c.close;
-            }
-        }
-    }
-
-    if (global_max - global_min).abs() < f64::EPSILON {
-        return;
-    }
-
-    let pad = (global_max - global_min) * 0.05;
-    global_min -= pad;
-    global_max += pad;
-    let range = global_max - global_min;
+    let (global_min, global_max, range) = match global_y_range(series) {
+        Some(v) => v,
+        None => return,
+    };
 
     for s in series {
         if s.data.is_empty() {
@@ -74,28 +79,10 @@ pub fn draw_areas(
         return;
     }
 
-    // Compute global min/max across all series
-    let mut global_min = f64::INFINITY;
-    let mut global_max = f64::NEG_INFINITY;
-    for s in series {
-        for c in s.data {
-            if c.close < global_min {
-                global_min = c.close;
-            }
-            if c.close > global_max {
-                global_max = c.close;
-            }
-        }
-    }
-
-    if (global_max - global_min).abs() < f64::EPSILON {
-        return;
-    }
-
-    let pad = (global_max - global_min) * 0.05;
-    global_min -= pad;
-    global_max += pad;
-    let range = global_max - global_min;
+    let (global_min, global_max, range) = match global_y_range(series) {
+        Some(v) => v,
+        None => return,
+    };
 
     let base_y = area.y + area.h;
 

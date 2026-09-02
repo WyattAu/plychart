@@ -19,9 +19,11 @@ export function update_backtest(canvas_id: string, equity_json: string, drawdown
 export function update_sparkline(canvas_id: string, data_json: string, color: string, theme_json: string): void;
 /**
  * Get click data for a mouse position.
- * Returns JSON: `{index, x, y}` with the nearest data index.
+ * `chart_type` selects behaviour: `"pie"` uses angle, `"scatter"` finds the
+ * nearest point, and any other value returns the nearest index.
+ * Returns JSON: `{index, x, y}` (scatter also adds `distance`).
  */
-export function get_click_data(canvas_id: string, x: number, y: number, data_len: number): string;
+export function get_click_data(canvas_id: string, x: number, y: number, data_len: number, chart_type: string): string;
 /**
  * Destroy a chart and clean up resources.
  */
@@ -38,9 +40,12 @@ export function update_histogram(canvas_id: string, data_json: string, bin_count
 export function update_radar_multi(canvas_id: string, data_json: string, labels_json: string, theme_json: string): void;
 /**
  * Get tooltip data for a mouse position over a candlestick/line/area/bar chart.
+ * Supports single-series (`[{time,open,...}]`) and multi-series
+ * (`[{color, data:[{time,open,...}]}]`) formats.
+ * `series_index` selects which series in multi-series mode (default 0).
  * Returns JSON: `{index, time, open, high, low, close, volume}` or `{}` if no data.
  */
-export function get_tooltip_data(canvas_id: string, x: number, y: number, data_json: string): string;
+export function get_tooltip_data(canvas_id: string, x: number, y: number, data_json: string, series_index: number): string;
 /**
  * Update chart with area data.
  * Single series: `[{time,open,high,low,close,volume}]`
@@ -106,8 +111,8 @@ export interface InitOutput {
   readonly memory: WebAssembly.Memory;
   readonly create_chart: (a: number, b: number, c: number, d: number) => [number, number];
   readonly destroy_chart: (a: number, b: number) => [number, number];
-  readonly get_click_data: (a: number, b: number, c: number, d: number, e: number) => [number, number, number, number];
-  readonly get_tooltip_data: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
+  readonly get_click_data: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number, number, number];
+  readonly get_tooltip_data: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number, number, number];
   readonly update_area: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
   readonly update_backtest: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number];
   readonly update_bar: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];

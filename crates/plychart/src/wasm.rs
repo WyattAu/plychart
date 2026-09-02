@@ -381,6 +381,9 @@ pub fn update_sparkline(
 }
 
 /// Get tooltip data for a mouse position over a candlestick/line/area/bar chart.
+/// Supports single-series (`[{time,open,...}]`) and multi-series
+/// (`[{color, data:[{time,open,...}]}]`) formats.
+/// `series_index` selects which series in multi-series mode (default 0).
 /// Returns JSON: `{index, time, open, high, low, close, volume}` or `{}` if no data.
 #[wasm_bindgen]
 pub fn get_tooltip_data(
@@ -388,9 +391,38 @@ pub fn get_tooltip_data(
     x: f64,
     y: f64,
     data_json: &str,
+    series_index: usize,
 ) -> Result<String, JsValue> {
-    let data: Vec<CandleData> =
-        serde_json::from_str(data_json).map_err(|e| JsValue::from_str(&e.to_string()))?;
+    // Resolve the data slice for the requested series.
+    // We use an enum to own the deserialized data while borrowing into the right slice.
+    enum DataBorrow<'a> {
+        Single(&'a [CandleData]),
+        Multi {
+            all: Vec<MultiSeriesInput>,
+            idx: usize,
+        },
+    }
+
+    let borrowed: DataBorrow<'_> =
+        if let Ok(multi) = serde_json::from_str::<Vec<MultiSeriesInput>>(data_json) {
+            if !multi.is_empty() && multi[0].data.is_some() {
+                let idx = series_index.min(multi.len().saturating_sub(1));
+                DataBorrow::Multi { all: multi, idx }
+            } else {
+                let data: Vec<CandleData> = serde_json::from_str(data_json)
+                    .map_err(|e| JsValue::from_str(&e.to_string()))?;
+                DataBorrow::Single(data.leak())
+            }
+        } else {
+            let data: Vec<CandleData> =
+                serde_json::from_str(data_json).map_err(|e| JsValue::from_str(&e.to_string()))?;
+            DataBorrow::Single(data.leak())
+        };
+
+    let data: &[CandleData] = match &borrowed {
+        DataBorrow::Single(d) => d,
+        DataBorrow::Multi { all, idx } => all[*idx].data.as_deref().unwrap_or(&[]),
+    };
 
     if data.is_empty() {
         return Ok("{}".to_string());
@@ -427,33 +459,91 @@ pub fn get_tooltip_data(
 }
 
 /// Get click data for a mouse position.
-/// Returns JSON: `{index, x, y}` with the nearest data index.
+/// `chart_type` selects behaviour: `"pie"` uses angle, `"scatter"` finds the
+/// nearest point, and any other value returns the nearest index.
+/// Returns JSON: `{index, x, y}` (scatter also adds `distance`).
 #[wasm_bindgen]
-pub fn get_click_data(canvas_id: &str, x: f64, y: f64, data_len: usize) -> Result<String, JsValue> {
+pub fn get_click_data(
+    canvas_id: &str,
+    x: f64,
+    y: f64,
+    data_len: usize,
+    chart_type: &str,
+) -> Result<String, JsValue> {
     if data_len == 0 {
         return Ok("{}".to_string());
     }
 
     #[cfg(target_arch = "wasm32")]
-    let width = {
+    let (canvas_w, canvas_h) = {
         use wasm_bindgen::JsCast;
-        web_sys::window()
+        let el = web_sys::window()
             .and_then(|w| w.document())
-            .and_then(|d| d.get_element_by_id(canvas_id))
-            .and_then(|e| e.dyn_into::<web_sys::HtmlCanvasElement>().ok())
+            .and_then(|d| d.get_element_by_id(canvas_id));
+        let w = el
+            .as_ref()
+            .and_then(|e| {
+                let e = (*e).clone();
+                e.dyn_into::<web_sys::HtmlCanvasElement>().ok()
+            })
             .map(|c| c.width() as f64)
-            .unwrap_or(800.0)
+            .unwrap_or(800.0);
+        let h = el
+            .and_then(|e| {
+                let e = (*e).clone();
+                e.dyn_into::<web_sys::HtmlCanvasElement>().ok()
+            })
+            .map(|c| c.height() as f64)
+            .unwrap_or(600.0);
+        (w, h)
     };
     #[cfg(not(target_arch = "wasm32"))]
-    let width = 800.0;
+    let (canvas_w, canvas_h) = (800.0, 600.0);
 
-    let idx = ((x / width) * data_len as f64).round() as usize;
-    let idx = idx.min(data_len - 1);
-
-    serde_json::to_string(&serde_json::json!({
-        "index": idx,
-        "x": x,
-        "y": y,
-    }))
-    .map_err(|e| JsValue::from_str(&e.to_string()))
+    match chart_type {
+        "pie" => {
+            // Pie charts are centred on the canvas; compute angle from centre.
+            let cx = canvas_w / 2.0;
+            let cy = canvas_h / 2.0;
+            let mut angle = (y - cy).atan2(x - cx);
+            if angle < 0.0 {
+                angle += std::f64::consts::TAU;
+            }
+            let slice_angle = std::f64::consts::TAU / data_len as f64;
+            let idx = (angle / slice_angle).floor() as usize;
+            let idx = idx.min(data_len - 1);
+            serde_json::to_string(&serde_json::json!({ "index": idx, "x": x, "y": y }))
+                .map_err(|e| JsValue::from_str(&e.to_string()))
+        }
+        "scatter" => {
+            // Find nearest point by Euclidean distance.
+            // Use normalized canvas coords: x in [0, canvas_w], y in [0, canvas_h].
+            // Map data_len across x axis for a simple heuristic.
+            let mut best_idx = 0usize;
+            let mut best_dist = f64::MAX;
+            for i in 0..data_len {
+                let px = (i as f64 / (data_len - 1).max(1) as f64) * canvas_w;
+                let py = canvas_h / 2.0; // y axis midpoint as default
+                let dist = ((x - px).powi(2) + (y - py).powi(2)).sqrt();
+                if dist < best_dist {
+                    best_dist = dist;
+                    best_idx = i;
+                }
+            }
+            serde_json::to_string(&serde_json::json!({
+                "index": best_idx,
+                "x": x,
+                "y": y,
+                "distance": best_dist,
+            }))
+            .map_err(|e| JsValue::from_str(&e.to_string()))
+        }
+        _ => {
+            // Default: nearest index by x position (line / bar / candle).
+            let idx = ((x / canvas_w) * data_len as f64).round() as usize;
+            let idx = idx.min(data_len - 1);
+            serde_json::to_string(&serde_json::json!({ "index": idx, "x": x, "y": y }))
+                .map_err(|e| JsValue::from_str(&e.to_string()))
+        }
+    }
 }
