@@ -28,6 +28,55 @@ pub fn draw(
     }
 }
 
+/// Draw a multi-series scatter plot.
+/// `series` is an array of `(points, color)` pairs.
+#[cfg(target_arch = "wasm32")]
+pub fn draw_multi(
+    ctx: &web_sys::CanvasRenderingContext2d,
+    series: &[(&[(f64, f64)], &str)],
+    area: &crate::types::ChartArea,
+) {
+    if series.is_empty() {
+        return;
+    }
+
+    // Compute global min/max across all series
+    let mut min_x = f64::INFINITY;
+    let mut max_x = f64::NEG_INFINITY;
+    let mut min_y = f64::INFINITY;
+    let mut max_y = f64::NEG_INFINITY;
+    for (points, _) in series {
+        for &(x, y) in points.iter() {
+            if x < min_x {
+                min_x = x;
+            }
+            if x > max_x {
+                max_x = x;
+            }
+            if y < min_y {
+                min_y = y;
+            }
+            if y > max_y {
+                max_y = y;
+            }
+        }
+    }
+    let range_x = (max_x - min_x).max(1.0);
+    let range_y = (max_y - min_y).max(1.0);
+
+    for (points, color) in series {
+        ctx.set_fill_style(&(*color).into());
+        for &(x_val, y_val) in points.iter() {
+            let x = area.x + (x_val - min_x) / range_x * area.w;
+            let y = area.y + area.h - (y_val - min_y) / range_y * area.h;
+            ctx.begin_path();
+            ctx.arc(x, y, 3.0, 0.0, std::f64::consts::TAU)
+                .unwrap_or_default();
+            ctx.fill();
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use plycore::ChartArea;

@@ -94,6 +94,45 @@ pub fn update_scatter(canvas_id: &str, data_json: &str, theme_json: &str) -> Res
         .map_err(|e| JsValue::from_str(&e.to_string()))
 }
 
+/// Update chart with multi-series scatter data.
+/// data_json: `[{color: "#ff0000", points: [[x,y], [x,y], ...]}, ...]`
+#[wasm_bindgen]
+pub fn update_scatter_multi(canvas_id: &str, data_json: &str, theme_json: &str) -> Result<(), JsValue> {
+    #[derive(serde::Deserialize)]
+    struct ScatterSeries {
+        color: String,
+        points: Vec<Vec<f64>>,
+    }
+
+    let theme = parse_theme(theme_json);
+    let series: Vec<ScatterSeries> = serde_json::from_str(data_json)
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+
+    let (ctx, width, height) = crate::canvas::get_canvas_context_wasm(canvas_id)
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+    crate::canvas::clear_canvas(&ctx, theme.bg, width, height);
+
+    let area = plycore::ChartArea { x: 0.0, y: 0.0, w: width, h: height };
+    let series_refs: Vec<(&[(f64, f64)], &str)> = series
+        .iter()
+        .map(|s| {
+            let pts: Vec<(f64, f64)> = s.points.iter()
+                .filter_map(|p| {
+                    if p.len() >= 2 {
+                        Some((p[0], p[1]))
+                    } else {
+                        None
+                    }
+                })
+                .collect();
+            (pts.leak() as &[(f64, f64)], s.color.as_str())
+        })
+        .collect();
+    crate::charts::scatter::draw_multi(&ctx, &series_refs, &area);
+
+    Ok(())
+}
+
 /// Update chart with gauge value.
 #[wasm_bindgen]
 pub fn update_gauge(canvas_id: &str, value: f64, max: f64, color: &str, theme_json: &str) -> Result<(), JsValue> {
@@ -161,6 +200,37 @@ pub fn update_radar(canvas_id: &str, values_json: &str, labels_json: &str, color
     let theme = parse_theme(theme_json);
     crate::canvas::update_radar(canvas_id, values_json, labels_json, color, &theme)
         .map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Update chart with multi-series radar data.
+/// data_json: `[{color: "#ff0000", values: [v1, v2, ...]}, ...]`
+#[wasm_bindgen]
+pub fn update_radar_multi(canvas_id: &str, data_json: &str, labels_json: &str, theme_json: &str) -> Result<(), JsValue> {
+    #[derive(serde::Deserialize)]
+    struct RadarSeries {
+        color: String,
+        values: Vec<f64>,
+    }
+
+    let theme = parse_theme(theme_json);
+    let series: Vec<RadarSeries> = serde_json::from_str(data_json)
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+    let labels: Vec<String> = serde_json::from_str(labels_json)
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+    let label_refs: Vec<&str> = labels.iter().map(|s| s.as_str()).collect();
+
+    let (ctx, width, height) = crate::canvas::get_canvas_context_wasm(canvas_id)
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+    crate::canvas::clear_canvas(&ctx, theme.bg, width, height);
+
+    let area = plycore::ChartArea { x: 0.0, y: 0.0, w: width, h: height };
+    let series_refs: Vec<(&[f64], &str)> = series
+        .iter()
+        .map(|s| (s.values.as_slice(), s.color.as_str()))
+        .collect();
+    crate::charts::radar::draw_multi(&ctx, &series_refs, &label_refs, &area);
+
+    Ok(())
 }
 
 /// Update chart with treemap data.
