@@ -14,8 +14,14 @@ const CHART_TYPES = [
     { id: 'waterfall', name: 'Waterfall', fn: 'update_waterfall', dataKey: 'waterfall' },
     { id: 'orderbook', name: 'Order Book', fn: 'update_order_book', dataKey: 'orderBook' },
     { id: 'backtest', name: 'Backtest', fn: 'update_backtest', dataKey: 'backtest' },
-    { id: 'correlation', name: 'Correlation', fn: 'update_correlation', dataKey: 'correlation' }
+    { id: 'correlation', name: 'Correlation', fn: 'update_correlation', dataKey: 'correlation' },
+    { id: 'pie', name: 'Pie', fn: 'update_pie', dataKey: 'pie' },
+    { id: 'histogram', name: 'Histogram', fn: 'update_histogram', dataKey: 'histogram' },
+    { id: 'sparkline', name: 'Sparkline', fn: 'update_sparkline', dataKey: 'sparkline' },
+    { id: 'multiline', name: 'Multiline', fn: 'update_line', dataKey: 'multiline' }
 ];
+
+const DEFAULT_THEME = '{}';
 
 let wasmMod = null;
 
@@ -83,24 +89,30 @@ function initChart(chart, data) {
     }
 
     if (chart.fn === 'update_gauge') {
-        wasmMod.update_gauge(canvasId, chartData.value, chartData.max, '#c8a23c');
+        wasmMod.update_gauge(canvasId, chartData.value, chartData.max, '#c8a23c', DEFAULT_THEME);
     } else if (chart.fn === 'update_radar') {
-        wasmMod.update_radar(canvasId, JSON.stringify(chartData.values), JSON.stringify(chartData.labels), '#c8a23c');
+        wasmMod.update_radar(canvasId, JSON.stringify(chartData.values), JSON.stringify(chartData.labels), '#c8a23c', DEFAULT_THEME);
     } else if (chart.fn === 'update_backtest') {
-        wasmMod.update_backtest(canvasId, JSON.stringify(chartData.equity), JSON.stringify(chartData.drawdown));
+        wasmMod.update_backtest(canvasId, JSON.stringify(chartData.equity), JSON.stringify(chartData.drawdown), DEFAULT_THEME);
     } else if (chart.fn === 'update_correlation') {
-        wasmMod.update_correlation(canvasId, JSON.stringify(chartData.matrix), JSON.stringify(chartData.labels));
+        wasmMod.update_correlation(canvasId, JSON.stringify(chartData.matrix), JSON.stringify(chartData.labels), DEFAULT_THEME);
     } else if (chart.fn === 'update_order_book') {
-        wasmMod.update_order_book(canvasId, JSON.stringify(chartData));
+        wasmMod.update_order_book(canvasId, JSON.stringify(chartData), DEFAULT_THEME);
+    } else if (chart.fn === 'update_pie') {
+        wasmMod.update_pie(canvasId, JSON.stringify(chartData), DEFAULT_THEME);
+    } else if (chart.fn === 'update_histogram') {
+        wasmMod.update_histogram(canvasId, JSON.stringify(chartData), 20, DEFAULT_THEME);
+    } else if (chart.fn === 'update_sparkline') {
+        wasmMod.update_sparkline(canvasId, JSON.stringify(chartData), '#c8a23c', DEFAULT_THEME);
     } else if (chart.fn === 'update_treemap' || chart.fn === 'update_waterfall') {
         // These expect [[name, value], ...] format
-        wasmMod[chart.fn](canvasId, JSON.stringify(chartData));
+        wasmMod[chart.fn](canvasId, JSON.stringify(chartData), DEFAULT_THEME);
     } else if (chart.fn === 'update_heatmap') {
-        wasmMod.update_heatmap(canvasId, JSON.stringify(chartData));
+        wasmMod.update_heatmap(canvasId, JSON.stringify(chartData), DEFAULT_THEME);
     } else {
         // OHLCV-based charts: convert [ts, o, h, l, c, v] to JSON
         const json = JSON.stringify(chartData);
-        wasmMod[chart.fn](canvasId, json);
+        wasmMod[chart.fn](canvasId, json, DEFAULT_THEME);
     }
 
     updateStatus(chart.id, `Rendered ${chartData.length || Object.keys(chartData).length} points`);

@@ -44,8 +44,10 @@ pub(crate) fn get_canvas_context(
     let dpr = device_pixel_ratio();
     let ctx = canvas
         .get_context("2d")
-        .and_then(|c| c.dyn_into::<web_sys::CanvasRenderingContext2d>().ok())
-        .ok_or(crate::ChartError::RenderError("No 2D context".into()))?;
+        .map_err(|_| crate::ChartError::RenderError("get_context failed".into()))?
+        .ok_or(crate::ChartError::RenderError("No 2D context".into()))?
+        .dyn_into::<web_sys::CanvasRenderingContext2d>()
+        .map_err(|_| crate::ChartError::RenderError("Not a CanvasRenderingContext2d".into()))?;
     ctx.scale(dpr, dpr).unwrap_or_default();
 
     Ok((ctx, width, height))
@@ -73,8 +75,10 @@ pub fn create_chart(canvas_id: &str, width: u32, height: u32) -> Result<(), crat
     let dpr = device_pixel_ratio();
     let ctx = canvas
         .get_context("2d")
-        .and_then(|c| c.dyn_into::<CanvasRenderingContext2d>().ok())
-        .ok_or(crate::ChartError::RenderError("No 2D context".into()))?;
+        .map_err(|_| crate::ChartError::RenderError("get_context failed".into()))?
+        .ok_or(crate::ChartError::RenderError("No 2D context".into()))?
+        .dyn_into::<CanvasRenderingContext2d>()
+        .map_err(|_| crate::ChartError::RenderError("Not a CanvasRenderingContext2d".into()))?;
     ctx.scale(dpr, dpr).unwrap_or_default();
 
     ctx.set_fill_style(&"#0a0a0a".into());
@@ -516,8 +520,16 @@ pub fn update_waterfall(
     let (ctx, width, height) = get_canvas_context(canvas_id)?;
     clear_canvas(&ctx, theme.bg, width, height);
 
-    let bars: Vec<(String, f64)> = serde_json::from_str(data_json)
+    let raw_bars: Vec<(String, f64)> = serde_json::from_str(data_json)
         .map_err(|e| crate::ChartError::DataParseError(e.to_string()))?;
+    let bars: Vec<plycore::BarData> = raw_bars
+        .into_iter()
+        .map(|(label, value)| plycore::BarData {
+            label,
+            value,
+            color: None,
+        })
+        .collect();
 
     let area = ChartArea {
         x: 0.0,
@@ -690,11 +702,10 @@ pub fn destroy_chart(canvas_id: &str) -> Result<(), crate::ChartError> {
                 if let Ok(canvas) = element.dyn_into::<web_sys::HtmlCanvasElement>() {
                     let width = canvas.width();
                     let height = canvas.height();
-                    if let Some(ctx) = canvas
-                        .get_context("2d")
-                        .and_then(|c| c.dyn_into::<web_sys::CanvasRenderingContext2d>().ok())
-                    {
-                        ctx.clear_rect(0.0, 0.0, width as f64, height as f64);
+                    if let Ok(Some(ctx_obj)) = canvas.get_context("2d") {
+                        if let Ok(ctx) = ctx_obj.dyn_into::<web_sys::CanvasRenderingContext2d>() {
+                            ctx.clear_rect(0.0, 0.0, width as f64, height as f64);
+                        }
                     }
                 }
             }

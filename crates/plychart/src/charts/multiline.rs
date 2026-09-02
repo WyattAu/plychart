@@ -134,15 +134,9 @@ pub fn draw_areas(
         ctx.line_to(last_x, base_y);
         ctx.close_path();
 
-        let gradient = ctx
-            .create_linear_gradient(0.0, area.y, 0.0, area.y + area.h)
-            .unwrap_or_default();
-        gradient
-            .add_color_with_alpha(s.color, 0.12)
-            .unwrap_or_default();
-        gradient
-            .add_color_with_alpha(s.color, 0.0)
-            .unwrap_or_default();
+        let gradient = ctx.create_linear_gradient(0.0, area.y, 0.0, area.y + area.h);
+        gradient.add_color_stop(0.0, s.color);
+        gradient.add_color_stop(1.0, "transparent");
         ctx.set_fill_style(&gradient.into());
         ctx.fill();
     }

@@ -83,8 +83,7 @@ pub fn draw(
         let pct = (value / total) * 100.0;
 
         ctx.set_fill_style(&color.into());
-        ctx.fill_rect(lx, legend_y - 6.0, 8.0, 8.0)
-            .unwrap_or_default();
+        ctx.fill_rect(lx, legend_y - 6.0, 8.0, 8.0);
 
         ctx.set_fill_style(&theme.text_muted.into());
         ctx.set_font("9px monospace");
@@ -93,7 +92,7 @@ pub fn draw(
         ctx.fill_text(&text, lx + 12.0, legend_y + 1.0)
             .unwrap_or_default();
 
-        lx += ctx.measure_text(&text).width() + 20.0;
+        lx += ctx.measure_text(&text).map(|m| m.width()).unwrap_or(0.0) + 20.0;
     }
 }
 

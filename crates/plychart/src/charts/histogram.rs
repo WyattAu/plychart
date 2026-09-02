@@ -18,8 +18,7 @@ pub fn draw(
     if (max - min).abs() < f64::EPSILON {
         // All values identical — draw single bar
         ctx.set_fill_style(&theme.accent.into());
-        ctx.fill_rect(area.x, area.y, area.w, area.h)
-            .unwrap_or_default();
+        ctx.fill_rect(area.x, area.y, area.w, area.h);
         return;
     }
 
@@ -51,8 +50,7 @@ pub fn draw(
         let color = if is_tail { theme.down } else { theme.accent };
 
         ctx.set_fill_style(&color.into());
-        ctx.fill_rect(x + gap / 2.0, y, bar_w - gap, bar_h)
-            .unwrap_or_default();
+        ctx.fill_rect(x + gap / 2.0, y, bar_w - gap, bar_h);
     }
 
     // Axis labels
