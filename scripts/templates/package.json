@@ -1,0 +1,27 @@
+{
+  "name": "@wyattau/plychart",
+  "version": "0.2.0",
+  "description": "Canvas2D charting in Rust/WASM — 17 chart types, zero dependencies, zero watermarks",
+  "main": "plychart.js",
+  "types": "types.d.ts",
+  "files": [
+    "plychart.js",
+    "plychart.d.ts",
+    "plychart_bg.wasm",
+    "plychart_bg.wasm.d.ts",
+    "types.d.ts"
+  ],
+  "keywords": [
+    "charting",
+    "canvas",
+    "wasm",
+    "rust",
+    "visualization",
+    "finance"
+  ],
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WyattAu/plychart"
+  }
+}
