@@ -39,16 +39,20 @@ pub(crate) fn get_canvas_context(
         .dyn_into()
         .map_err(|_| crate::ChartError::CanvasNotFound(format!("'{canvas_id}' is not a canvas")))?;
 
-    let width = canvas.width() as f64;
-    let height = canvas.height() as f64;
     let dpr = device_pixel_ratio();
+    // Logical size = device pixels / dpr. Renderers work in logical coords.
+    let width = canvas.width() as f64 / dpr;
+    let height = canvas.height() as f64 / dpr;
     let ctx = canvas
         .get_context("2d")
         .map_err(|_| crate::ChartError::RenderError("get_context failed".into()))?
         .ok_or(crate::ChartError::RenderError("No 2D context".into()))?
         .dyn_into::<web_sys::CanvasRenderingContext2d>()
         .map_err(|_| crate::ChartError::RenderError("Not a CanvasRenderingContext2d".into()))?;
-    ctx.scale(dpr, dpr).unwrap_or_default();
+    // setTransform REPLACES the matrix. ctx.scale() would accumulate across
+    // every update_* call (dpr, dpr^2, dpr^3, ...) — the root cause of
+    // charts overlapping/ghosting when data changes.
+    ctx.set_transform(dpr, 0.0, 0.0, dpr, 0.0, 0.0);
 
     Ok((ctx, width, height))
 }
@@ -69,17 +73,19 @@ pub fn create_chart(canvas_id: &str, width: u32, height: u32) -> Result<(), crat
         .dyn_into()
         .map_err(|_| crate::ChartError::CanvasNotFound(format!("'{canvas_id}' is not a canvas")))?;
 
-    canvas.set_width(width);
-    canvas.set_height(height);
-
     let dpr = device_pixel_ratio();
+    // Backing store sized in device pixels for crisp HiDPI rendering.
+    canvas.set_width((width as f64 * dpr).round() as u32);
+    canvas.set_height((height as f64 * dpr).round() as u32);
+
     let ctx = canvas
         .get_context("2d")
         .map_err(|_| crate::ChartError::RenderError("get_context failed".into()))?
         .ok_or(crate::ChartError::RenderError("No 2D context".into()))?
         .dyn_into::<CanvasRenderingContext2d>()
         .map_err(|_| crate::ChartError::RenderError("Not a CanvasRenderingContext2d".into()))?;
-    ctx.scale(dpr, dpr).unwrap_or_default();
+    // Replace (not multiply) the transform — safe on repeat calls.
+    ctx.set_transform(dpr, 0.0, 0.0, dpr, 0.0, 0.0);
 
     ctx.set_fill_style(&"#0a0a0a".into());
     ctx.fill_rect(0.0, 0.0, width as f64, height as f64);
@@ -742,6 +748,8 @@ pub fn destroy_chart(canvas_id: &str) -> Result<(), crate::ChartError> {
                     let height = canvas.height();
                     if let Ok(Some(ctx_obj)) = canvas.get_context("2d") {
                         if let Ok(ctx) = ctx_obj.dyn_into::<web_sys::CanvasRenderingContext2d>() {
+                            // Reset transform so clear covers the full device canvas.
+                            ctx.set_transform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0);
                             ctx.clear_rect(0.0, 0.0, width as f64, height as f64);
                         }
                     }
