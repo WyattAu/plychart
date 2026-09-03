@@ -19,6 +19,7 @@ pub mod pie;
 pub mod radar;
 pub mod scatter;
 pub mod sparkline;
+pub mod stacked_bar;
 pub mod treemap;
 pub mod volume;
 pub mod waterfall;
@@ -45,6 +46,7 @@ pub enum ChartType {
     Pie,
     Histogram,
     Sparkline,
+    StackedBar,
 }
 
 impl ChartType {
@@ -67,6 +69,7 @@ impl ChartType {
             Self::Pie => "Pie",
             Self::Histogram => "Histogram",
             Self::Sparkline => "Sparkline",
+            Self::StackedBar => "Stacked Bar",
         }
     }
 
@@ -89,6 +92,7 @@ impl ChartType {
             Self::Pie,
             Self::Histogram,
             Self::Sparkline,
+            Self::StackedBar,
         ]
     }
 
@@ -111,6 +115,7 @@ impl ChartType {
             "Pie" => Some(Self::Pie),
             "Histogram" => Some(Self::Histogram),
             "Sparkline" => Some(Self::Sparkline),
+            "Stacked Bar" => Some(Self::StackedBar),
             _ => None,
         }
     }

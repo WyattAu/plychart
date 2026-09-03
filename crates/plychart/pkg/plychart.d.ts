@@ -13,31 +13,10 @@ export function create_chart(canvas_id: string, width: number, height: number): 
  */
 export function update_backtest(canvas_id: string, equity_json: string, drawdown_json: string, theme_json: string): void;
 /**
- * Update chart with sparkline data.
- * data_json: `[value1, value2, ...]`
- */
-export function update_sparkline(canvas_id: string, data_json: string, color: string, theme_json: string): void;
-/**
- * Get click data for a mouse position.
- * `chart_type` selects behaviour: `"pie"` uses angle, `"scatter"` finds the
- * nearest point, and any other value returns the nearest index.
- * Returns JSON: `{index, x, y}` (scatter also adds `distance`).
- */
-export function get_click_data(canvas_id: string, x: number, y: number, data_len: number, chart_type: string): string;
-/**
- * Destroy a chart and clean up resources.
- */
-export function destroy_chart(canvas_id: string): void;
-/**
  * Update chart with histogram data.
  * data_json: `[value1, value2, ...]`
  */
 export function update_histogram(canvas_id: string, data_json: string, bin_count: number, theme_json: string): void;
-/**
- * Update chart with multi-series radar data.
- * data_json: `[{color: "#ff0000", values: [v1, v2, ...]}, ...]`
- */
-export function update_radar_multi(canvas_id: string, data_json: string, labels_json: string, theme_json: string): void;
 /**
  * Get tooltip data for a mouse position over a candlestick/line/area/bar chart.
  * Supports single-series (`[{time,open,...}]`) and multi-series
@@ -46,6 +25,27 @@ export function update_radar_multi(canvas_id: string, data_json: string, labels_
  * Returns JSON: `{index, time, open, high, low, close, volume}` or `{}` if no data.
  */
 export function get_tooltip_data(canvas_id: string, x: number, y: number, data_json: string, series_index: number): string;
+/**
+ * Update chart with stacked bar data.
+ * matrix_json: `[[v1, v2, v3], [v1, v2, v3], ...]` (one inner array per bar)
+ * labels_json: `["cat1", "cat2", ...]`
+ */
+export function update_stacked_bar(canvas_id: string, matrix_json: string, labels_json: string, theme_json: string): void;
+/**
+ * Update chart with pie/donut data.
+ * data_json: `[["label", value], ...]`
+ */
+export function update_pie(canvas_id: string, data_json: string, theme_json: string): void;
+/**
+ * Update chart with multi-series radar data.
+ * data_json: `[{color: "#ff0000", values: [v1, v2, ...]}, ...]`
+ */
+export function update_radar_multi(canvas_id: string, data_json: string, labels_json: string, theme_json: string): void;
+/**
+ * Update chart with sparkline data.
+ * data_json: `[value1, value2, ...]`
+ */
+export function update_sparkline(canvas_id: string, data_json: string, color: string, theme_json: string): void;
 /**
  * Update chart with area data.
  * Single series: `[{time,open,high,low,close,volume}]`
@@ -66,10 +66,16 @@ export function update_waterfall(canvas_id: string, data_json: string, theme_jso
  */
 export function update_bar(canvas_id: string, data_json: string, theme_json: string): void;
 /**
- * Update chart with pie/donut data.
- * data_json: `[["label", value], ...]`
+ * Destroy a chart and clean up resources.
  */
-export function update_pie(canvas_id: string, data_json: string, theme_json: string): void;
+export function destroy_chart(canvas_id: string): void;
+/**
+ * Get click data for a mouse position.
+ * `chart_type` selects behaviour: `"pie"` uses angle, `"scatter"` finds the
+ * nearest point, and any other value returns the nearest index.
+ * Returns JSON: `{index, x, y}` (scatter also adds `distance`).
+ */
+export function get_click_data(canvas_id: string, x: number, y: number, data_len: number, chart_type: string): string;
 /**
  * Update chart with line data.
  * Single series: `[{time,open,high,low,close,volume}]`
@@ -129,6 +135,7 @@ export interface InitOutput {
   readonly update_scatter: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
   readonly update_scatter_multi: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
   readonly update_sparkline: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number];
+  readonly update_stacked_bar: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number];
   readonly update_treemap: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
   readonly update_waterfall: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
   readonly __wbindgen_exn_store: (a: number) => void;

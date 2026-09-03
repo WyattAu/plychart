@@ -692,6 +692,44 @@ pub fn update_sparkline(
     Ok(())
 }
 
+/// Update chart with stacked bar data.
+#[cfg(target_arch = "wasm32")]
+pub fn update_stacked_bar(
+    canvas_id: &str,
+    matrix_json: &str,
+    labels_json: &str,
+    theme: &ChartTheme,
+) -> Result<(), crate::ChartError> {
+    let (ctx, width, height) = get_canvas_context(canvas_id)?;
+    clear_canvas(&ctx, theme.bg, width, height);
+
+    let matrix: Vec<Vec<f64>> = serde_json::from_str(matrix_json)
+        .map_err(|e| crate::ChartError::DataParseError(e.to_string()))?;
+    let labels: Vec<String> = serde_json::from_str(labels_json)
+        .map_err(|e| crate::ChartError::DataParseError(e.to_string()))?;
+    let label_refs: Vec<&str> = labels.iter().map(|s| s.as_str()).collect();
+
+    let area = ChartArea {
+        x: 40.0,
+        y: 10.0,
+        w: width - 50.0,
+        h: height - 30.0,
+    };
+    crate::charts::stacked_bar::draw(&ctx, &matrix, &label_refs, &area, theme);
+
+    Ok(())
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn update_stacked_bar(
+    _canvas_id: &str,
+    _matrix_json: &str,
+    _labels_json: &str,
+    _theme: &ChartTheme,
+) -> Result<(), crate::ChartError> {
+    Ok(())
+}
+
 /// Destroy a chart and clean up resources.
 #[cfg(target_arch = "wasm32")]
 pub fn destroy_chart(canvas_id: &str) -> Result<(), crate::ChartError> {

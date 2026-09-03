@@ -140,7 +140,7 @@ mod tests {
 
     #[test]
     fn chart_type_all_count() {
-        assert_eq!(ChartType::all().len(), 16);
+        assert_eq!(ChartType::all().len(), 17);
     }
 
     #[test]

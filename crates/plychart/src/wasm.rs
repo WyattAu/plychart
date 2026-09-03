@@ -337,6 +337,21 @@ pub fn update_correlation(
         .map_err(|e| JsValue::from_str(&e.to_string()))
 }
 
+/// Update chart with stacked bar data.
+/// matrix_json: `[[v1, v2, v3], [v1, v2, v3], ...]` (one inner array per bar)
+/// labels_json: `["cat1", "cat2", ...]`
+#[wasm_bindgen]
+pub fn update_stacked_bar(
+    canvas_id: &str,
+    matrix_json: &str,
+    labels_json: &str,
+    theme_json: &str,
+) -> Result<(), JsValue> {
+    let theme = parse_theme(theme_json);
+    crate::canvas::update_stacked_bar(canvas_id, matrix_json, labels_json, &theme)
+        .map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
 /// Destroy a chart and clean up resources.
 #[wasm_bindgen]
 pub fn destroy_chart(canvas_id: &str) -> Result<(), JsValue> {

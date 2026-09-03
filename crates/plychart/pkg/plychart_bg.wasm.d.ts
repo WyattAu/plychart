@@ -21,6 +21,7 @@ export const update_radar_multi: (a: number, b: number, c: number, d: number, e:
 export const update_scatter: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
 export const update_scatter_multi: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
 export const update_sparkline: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number];
+export const update_stacked_bar: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number];
 export const update_treemap: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
 export const update_waterfall: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
 export const __wbindgen_exn_store: (a: number) => void;
