@@ -28,4 +28,10 @@ echo "export guard OK: $EXPORTS functions"
 cp "$SCRIPT_DIR/templates/package.json" "$PKG/package.json"
 cp "$SCRIPT_DIR/templates/types.d.ts" "$PKG/types.d.ts"
 
+# Content hash for cache busting: consumers embed this in their loader's
+# query string so a replaced WASM binary is never served stale.
+HASH=$(sha256sum "$PKG/plychart_bg.wasm" | cut -c1-8)
+echo "p$HASH" > "$PKG/version.txt"
+echo "version: p$HASH"
+
 echo "pkg ready: $PKG"

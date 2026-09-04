@@ -1,3 +1,5 @@
+pub mod backtest;
+pub mod json;
 pub mod blackscholes;
 pub mod cointegration;
 pub mod concentration;
