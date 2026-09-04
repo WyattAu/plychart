@@ -233,14 +233,15 @@ pub fn walk_forward(
     let buyhold: Vec<f64> = closes.iter().map(|c| c / c0).collect();
 
     // Strategy daily returns from the equity curve.
-    let rets: Vec<f64> = equity
-        .windows(2)
-        .map(|w| w[1] / w[0] - 1.0)
-        .collect();
+    let rets: Vec<f64> = equity.windows(2).map(|w| w[1] / w[0] - 1.0).collect();
     let mean = rets.iter().sum::<f64>() / rets.len() as f64;
     let var = rets.iter().map(|r| (r - mean).powi(2)).sum::<f64>() / rets.len() as f64;
     let std = var.sqrt();
-    let downside = rets.iter().filter(|r| **r < 0.0).copied().collect::<Vec<_>>();
+    let downside = rets
+        .iter()
+        .filter(|r| **r < 0.0)
+        .copied()
+        .collect::<Vec<_>>();
     let dvar = if downside.is_empty() {
         0.0
     } else {
@@ -255,8 +256,16 @@ pub fn walk_forward(
     } else {
         -1.0
     };
-    let sharpe = if std > 1e-12 { mean / std * TRADING_DAYS.sqrt() } else { 0.0 };
-    let sortino = if dstd > 1e-12 { mean / dstd * TRADING_DAYS.sqrt() } else { 0.0 };
+    let sharpe = if std > 1e-12 {
+        mean / std * TRADING_DAYS.sqrt()
+    } else {
+        0.0
+    };
+    let sortino = if dstd > 1e-12 {
+        mean / dstd * TRADING_DAYS.sqrt()
+    } else {
+        0.0
+    };
 
     let mut peak = 1.0_f64;
     let mut max_dd = 0.0_f64;

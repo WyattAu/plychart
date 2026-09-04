@@ -7,23 +7,36 @@ use wasm_bindgen::prelude::*;
 use crate::json;
 
 #[wasm_bindgen]
-pub fn quant_montecarlo(closes: &[f64],
+pub fn quant_montecarlo(
+    closes: &[f64],
     periods_per_year: u32,
     horizon_days: usize,
-    num_paths: usize,) -> String {
+    num_paths: usize,
+) -> String {
     json::quant_montecarlo(closes, periods_per_year, horizon_days, num_paths)
 }
 
 #[wasm_bindgen]
-pub fn quant_greeks(spot_min: f64,
+pub fn quant_greeks(
+    spot_min: f64,
     spot_max: f64,
     num_points: usize,
     strike: f64,
     time_to_expiry: f64,
     risk_free_rate: f64,
     implied_vol: f64,
-    is_call: bool,) -> String {
-    json::quant_greeks(spot_min, spot_max, num_points, strike, time_to_expiry, risk_free_rate, implied_vol, is_call)
+    is_call: bool,
+) -> String {
+    json::quant_greeks(
+        spot_min,
+        spot_max,
+        num_points,
+        strike,
+        time_to_expiry,
+        risk_free_rate,
+        implied_vol,
+        is_call,
+    )
 }
 
 #[wasm_bindgen]
@@ -67,14 +80,24 @@ pub fn quant_factor_regression(y: &[f64], x: &[f64], n_factors: usize, n_obs: us
 }
 
 #[wasm_bindgen]
-pub fn quant_efficient_frontier(returns: &[f64],
+pub fn quant_efficient_frontier(
+    returns: &[f64],
     n_assets: usize,
     n_periods: usize,
     risk_free: f64,
     n_random: usize,
     n_frontier: usize,
-    periods_per_year: u32,) -> String {
-    json::quant_efficient_frontier(returns, n_assets, n_periods, risk_free, n_random, n_frontier, periods_per_year)
+    periods_per_year: u32,
+) -> String {
+    json::quant_efficient_frontier(
+        returns,
+        n_assets,
+        n_periods,
+        risk_free,
+        n_random,
+        n_frontier,
+        periods_per_year,
+    )
 }
 
 #[wasm_bindgen]
@@ -118,11 +141,13 @@ pub fn quant_stress_test(symbols_json: &str, weights: &[f64]) -> String {
 }
 
 #[wasm_bindgen]
-pub fn quant_component_var(returns: &[f64],
+pub fn quant_component_var(
+    returns: &[f64],
     n_assets: usize,
     n_periods: usize,
     weights: &[f64],
-    alpha: f64,) -> String {
+    alpha: f64,
+) -> String {
     json::quant_component_var(returns, n_assets, n_periods, weights, alpha)
 }
 
@@ -147,10 +172,12 @@ pub fn quant_forward_rates(maturities: &[f64], yields: &[f64]) -> String {
 }
 
 #[wasm_bindgen]
-pub fn quant_full_overlap(tickers_a: &str,
+pub fn quant_full_overlap(
+    tickers_a: &str,
     weights_a: &[f64],
     tickers_b: &str,
-    weights_b: &[f64],) -> String {
+    weights_b: &[f64],
+) -> String {
     json::quant_full_overlap(tickers_a, weights_a, tickers_b, weights_b)
 }
 
@@ -160,33 +187,49 @@ pub fn quant_tail_matrix(returns: &[f64], n_assets: usize, n_periods: usize) -> 
 }
 
 #[wasm_bindgen]
-pub fn quant_rolling_factor(y: &[f64],
+pub fn quant_rolling_factor(
+    y: &[f64],
     x: &[f64],
     n_factors: usize,
     window: usize,
-    step: usize,) -> String {
+    step: usize,
+) -> String {
     json::quant_rolling_factor(y, x, n_factors, window, step)
 }
 
 #[wasm_bindgen]
-pub fn quant_black_litterman(returns: &[f64],
+pub fn quant_black_litterman(
+    returns: &[f64],
     n_assets: usize,
     n_periods: usize,
     views: &[f64],
     picking: &[f64],
     n_views: usize,
     risk_free: f64,
-    tau: f64,) -> String {
-    json::quant_black_litterman(returns, n_assets, n_periods, views, picking, n_views, risk_free, tau)
+    tau: f64,
+) -> String {
+    json::quant_black_litterman(
+        returns, n_assets, n_periods, views, picking, n_views, risk_free, tau,
+    )
 }
 
 #[wasm_bindgen]
-pub fn quant_backtest(closes: &[f64],
+pub fn quant_backtest(
+    closes: &[f64],
     fasts: &[usize],
     slows: &[usize],
     is_window: usize,
     oos_window: usize,
     slippage_bps: f64,
-    commission_bps: f64,) -> String {
-    json::quant_backtest(closes, fasts, slows, is_window, oos_window, slippage_bps, commission_bps)
+    commission_bps: f64,
+) -> String {
+    json::quant_backtest(
+        closes,
+        fasts,
+        slows,
+        is_window,
+        oos_window,
+        slippage_bps,
+        commission_bps,
+    )
 }

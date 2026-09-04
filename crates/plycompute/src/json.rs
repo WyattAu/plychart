@@ -3,10 +3,9 @@
 //! #[wasm_bindgen] wrappers must not collide with ours.
 
 use crate::{
-    backtest, blackscholes, cointegration, concentration, copula, drawdown, factor, hrp,
-    liquidity, montecarlo, overlap, pairs, portfolio, realizedvol, regime, risk, risk_decomp, rng,
-    stats, stress, volatility,
-    yieldcurve,
+    backtest, blackscholes, cointegration, concentration, copula, drawdown, factor, hrp, liquidity,
+    montecarlo, overlap, pairs, portfolio, realizedvol, regime, risk, risk_decomp, rng, stats,
+    stress, volatility, yieldcurve,
 };
 pub fn quant_montecarlo(
     closes: &[f64],
@@ -731,7 +730,15 @@ pub fn quant_backtest(
     slippage_bps: f64,
     commission_bps: f64,
 ) -> String {
-    match backtest::walk_forward(closes, fasts, slows, is_window, oos_window, slippage_bps, commission_bps) {
+    match backtest::walk_forward(
+        closes,
+        fasts,
+        slows,
+        is_window,
+        oos_window,
+        slippage_bps,
+        commission_bps,
+    ) {
         Ok(r) => serde_json::to_string(&r).unwrap_or_else(|_| "{}".to_string()),
         Err(e) => serde_json::to_string(&serde_json::json!({ "error": e }))
             .unwrap_or_else(|_| "{}".to_string()),

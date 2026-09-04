@@ -1,5 +1,4 @@
 pub mod backtest;
-pub mod json;
 pub mod blackscholes;
 pub mod cointegration;
 pub mod concentration;
@@ -7,6 +6,7 @@ pub mod copula;
 pub mod drawdown;
 pub mod factor;
 pub mod hrp;
+pub mod json;
 pub mod liquidity;
 pub mod montecarlo;
 pub mod overlap;
