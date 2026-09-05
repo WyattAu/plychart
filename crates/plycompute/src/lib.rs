@@ -23,6 +23,7 @@ pub mod stress;
 pub mod volatility;
 pub mod yieldcurve;
 
+#[cfg(feature = "wasm-exports")]
 pub mod wasm;
 
 #[cfg(test)]

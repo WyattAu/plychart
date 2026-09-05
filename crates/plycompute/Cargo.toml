@@ -14,3 +14,9 @@ wasm-bindgen = { workspace = true }
 
 [dev-dependencies]
 proptest = { workspace = true }
+
+[features]
+# Opt-in for building plycompute itself as a cdylib. Dependency crates
+# (hydrated-widgets) must NOT enable it: wasm-bindgen describe symbols
+# for same-named exports collide at link time.
+wasm-exports = []

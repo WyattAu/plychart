@@ -233,3 +233,16 @@ pub fn quant_backtest(
         commission_bps,
     )
 }
+
+/// Solve implied volatility from a market price via bisection.
+#[wasm_bindgen]
+pub fn quant_implied_vol(
+    market_price: f64,
+    spot: f64,
+    strike: f64,
+    t: f64,
+    r: f64,
+    is_call: bool,
+) -> f64 {
+    json::quant_implied_vol(market_price, spot, strike, t, r, is_call)
+}
