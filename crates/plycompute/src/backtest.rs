@@ -26,6 +26,8 @@ pub struct WindowParam {
 /// Full walk-forward backtest output.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BacktestResult {
+    /// Strategy family used for this run.
+    pub strategy: String,
     /// Strategy equity curve, normalized to 1.0 at start (len == n).
     pub equity: Vec<f64>,
     /// Buy-and-hold equity curve (close / close[0], len == n).
@@ -61,12 +63,102 @@ fn sma(closes: &[f64], len: usize, i: usize) -> Option<f64> {
     Some(closes[i + 1 - len..=i].iter().sum::<f64>() / len as f64)
 }
 
-/// Net Sharpe of the long/flat SMA strategy on `closes[start..end]` using
-/// the given SMA pair, charging `cost_bps` per flip. Returns (sharpe, flips).
-fn eval_pair(
+/// Net Sharpe of the long/flat strategy on `closes[start..end]` using
+
+/// Trading strategy family for the walk-forward engine.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum Strategy {
+    /// Long when fast SMA > slow SMA, else flat. Params: (fast, slow).
+    SmaCross,
+    /// Long when price rose over the lookback, else flat. Param: lookback
+    /// (stored in `fast`; `slow` unused = 0).
+    Momentum,
+    /// Long when price is <= 1 std-dev below its SMA, exit at/above SMA.
+    /// Param: lookback (stored in `fast`; `slow` unused = 0).
+    MeanReversion,
+}
+
+impl Strategy {
+    /// Parse from a JSON-facing string. Unknown names default to SmaCross.
+    #[must_use]
+    pub fn parse(s: &str) -> Self {
+        match s {
+            "momentum" | "Momentum" => Self::Momentum,
+            "mean_reversion" | "meanrev" | "MeanReversion" => Self::MeanReversion,
+            _ => Self::SmaCross,
+        }
+    }
+
+    #[must_use]
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::SmaCross => "sma_cross",
+            Self::Momentum => "momentum",
+            Self::MeanReversion => "mean_reversion",
+        }
+    }
+}
+
+/// Target position (1.0 long / 0.0 flat) for bar `i` under `strategy`.
+/// `prev_pos` enables hysteresis (mean-reversion exit rule).
+fn target_position(
+    strategy: Strategy,
+    closes: &[f64],
+    i: usize,
+    fast: usize,
+    slow: usize,
+    prev_pos: f64,
+) -> f64 {
+    match strategy {
+        Strategy::SmaCross => match (sma(closes, fast, i), sma(closes, slow, i)) {
+            (Some(fv), Some(sv)) => {
+                if fv > sv {
+                    1.0
+                } else {
+                    0.0
+                }
+            }
+            _ => 0.0,
+        },
+        Strategy::Momentum => {
+            if i >= fast && closes[i] > closes[i - fast] {
+                1.0
+            } else {
+                0.0
+            }
+        }
+        Strategy::MeanReversion => {
+            let mean = match sma(closes, fast, i) {
+                Some(m) => m,
+                None => return 0.0,
+            };
+            // Rolling std over the same window.
+            if i + 1 < fast {
+                return 0.0;
+            }
+            let win = &closes[i + 1 - fast..=i];
+            let var = win.iter().map(|c| (c - mean).powi(2)).sum::<f64>() / fast as f64;
+            let std = var.sqrt().max(1e-12);
+            let z = (closes[i] - mean) / std;
+            // Hysteresis: enter below -1 sigma, exit at or above the mean.
+            if prev_pos > 0.0 {
+                if z >= 0.0 { 0.0 } else { 1.0 }
+            } else if z <= -1.0 {
+                1.0
+            } else {
+                0.0
+            }
+        }
+    }
+}
+
+/// Net Sharpe of the long/flat strategy on `closes[start..end]` using
+/// the given parameter pair, charging `cost_bps` per flip.
+fn eval_strategy(
     closes: &[f64],
     start: usize,
     end: usize,
+    strategy: Strategy,
     fast: usize,
     slow: usize,
     cost: f64,
@@ -75,16 +167,7 @@ fn eval_pair(
     let mut position = 0.0_f64;
     let mut flips = 0usize;
     for i in (start + 1)..end {
-        let target = match (sma(closes, fast, i), sma(closes, slow, i)) {
-            (Some(f), Some(s)) => {
-                if f > s {
-                    1.0
-                } else {
-                    0.0
-                }
-            }
-            _ => 0.0,
-        };
+        let target = target_position(strategy, closes, i, fast, slow, position);
         if target != position {
             position = target;
             flips += 1;
@@ -105,10 +188,13 @@ fn eval_pair(
     (mean / std * TRADING_DAYS.sqrt(), flips)
 }
 
-/// Run a walk-forward SMA-crossover backtest.
+/// Run a walk-forward strategy backtest.
 ///
 /// * `closes` — daily close prices.
-/// * `fasts` / `slows` — candidate SMA lengths (fast < slow enforced per pair).
+/// * `strategy` — one of [`Strategy`].
+/// * `fasts` / `slows` — candidate params. For [`Strategy::SmaCross`] every
+///   (fast < slow <= is_window) pair is a candidate; for the single-param
+///   strategies only `fasts` are used as lookbacks (`slows` ignored).
 /// * `is_window` — in-sample fit length (bars).
 /// * `oos_window` — out-of-sample trade length (bars).
 /// * `slippage_bps`, `commission_bps` — per-flip costs in basis points.
@@ -118,6 +204,7 @@ fn eval_pair(
 /// Returns `InvalidData` when inputs are too short or malformed.
 pub fn walk_forward(
     closes: &[f64],
+    strategy: Strategy,
     fasts: &[usize],
     slows: &[usize],
     is_window: usize,
@@ -129,8 +216,8 @@ pub fn walk_forward(
     if n < 60 {
         return Err(format!("need >= 60 closes, got {n}"));
     }
-    if fasts.is_empty() || slows.is_empty() {
-        return Err("fast/slow grids must be non-empty".into());
+    if fasts.is_empty() || (strategy == Strategy::SmaCross && slows.is_empty()) {
+        return Err("parameter grids must be non-empty".into());
     }
     if is_window < 30 || oos_window < 5 {
         return Err("is_window >= 30 and oos_window >= 5 required".into());
@@ -147,17 +234,28 @@ pub fn walk_forward(
 
     let cost = (slippage_bps + commission_bps) / 10_000.0;
 
-    // Pairs with fast < slow, both fitting the in-sample window.
+    // Candidate parameter pairs for this strategy.
     let mut pairs: Vec<(usize, usize)> = Vec::new();
-    for &f in fasts {
-        for &s in slows {
-            if f < s && s <= is_window {
-                pairs.push((f, s));
+    match strategy {
+        Strategy::SmaCross => {
+            for &f in fasts {
+                for &s in slows {
+                    if f < s && s <= is_window {
+                        pairs.push((f, s));
+                    }
+                }
+            }
+        }
+        Strategy::Momentum | Strategy::MeanReversion => {
+            for &f in fasts {
+                if f >= 2 && f <= is_window {
+                    pairs.push((f, 0));
+                }
             }
         }
     }
     if pairs.is_empty() {
-        return Err("no valid (fast<slow<=is_window) pairs in grid".into());
+        return Err("no valid parameter candidates in grid".into());
     }
 
     // Flat (no position) during the first in-sample fit window.
@@ -173,7 +271,7 @@ pub fn walk_forward(
         // 1. Fit: best pair by net IS Sharpe (tie-break: fewer flips).
         let mut best: Option<(usize, usize, f64, usize)> = None;
         for &(f, s) in &pairs {
-            let (sharpe, iflips) = eval_pair(closes, t - is_window, t, f, s, cost);
+            let (sharpe, iflips) = eval_strategy(closes, t - is_window, t, strategy, f, s, cost);
             let better = match best {
                 None => true,
                 Some((_, _, bs, bf)) => sharpe > bs || (sharpe == bs && iflips < bf),
@@ -192,18 +290,9 @@ pub fn walk_forward(
             is_sharpe,
         });
 
-        // 2. Trade the OOS segment with the chosen pair.
+        // 2. Trade the OOS segment with the chosen parameters.
         for i in t..trade_end {
-            let target = match (sma(closes, fast, i), sma(closes, slow, i)) {
-                (Some(fv), Some(sv)) => {
-                    if fv > sv {
-                        1.0
-                    } else {
-                        0.0
-                    }
-                }
-                _ => 0.0,
-            };
+            let target = target_position(strategy, closes, i, fast, slow, position);
             let prev = *equity.last().ok_or("equity underflow")?;
             let mut day_equity = prev;
             if target != position {
@@ -308,6 +397,7 @@ pub fn walk_forward(
     };
 
     Ok(BacktestResult {
+        strategy: strategy.as_str().to_string(),
         equity,
         buyhold,
         drawdown,
@@ -340,7 +430,17 @@ mod tests {
     #[test]
     fn basic_run_shapes() {
         let closes = synthetic(400);
-        let r = walk_forward(&closes, &[5, 10], &[20, 50], 120, 40, 1.0, 1.0).unwrap();
+        let r = walk_forward(
+            &closes,
+            Strategy::SmaCross,
+            &[5, 10],
+            &[20, 50],
+            120,
+            40,
+            1.0,
+            1.0,
+        )
+        .unwrap();
         assert_eq!(r.equity.len(), 400);
         assert_eq!(r.buyhold.len(), 400);
         assert_eq!(r.drawdown.len(), 400);
@@ -355,8 +455,28 @@ mod tests {
     #[test]
     fn costs_reduce_equity() {
         let closes = synthetic(400);
-        let free = walk_forward(&closes, &[5, 10], &[20, 50], 120, 40, 0.0, 0.0).unwrap();
-        let costly = walk_forward(&closes, &[5, 10], &[20, 50], 120, 40, 5.0, 5.0).unwrap();
+        let free = walk_forward(
+            &closes,
+            Strategy::SmaCross,
+            &[5, 10],
+            &[20, 50],
+            120,
+            40,
+            0.0,
+            0.0,
+        )
+        .unwrap();
+        let costly = walk_forward(
+            &closes,
+            Strategy::SmaCross,
+            &[5, 10],
+            &[20, 50],
+            120,
+            40,
+            5.0,
+            5.0,
+        )
+        .unwrap();
         let f = *free.equity.last().unwrap();
         let c = *costly.equity.last().unwrap();
         assert!(c <= f + 1e-12, "costs must not improve equity: {c} vs {f}");
@@ -365,26 +485,36 @@ mod tests {
     #[test]
     fn too_short_rejected() {
         let closes = synthetic(50);
-        assert!(walk_forward(&closes, &[5], &[20], 120, 40, 1.0, 1.0).is_err());
+        assert!(walk_forward(&closes, Strategy::SmaCross, &[5], &[20], 120, 40, 1.0, 1.0).is_err());
     }
 
     #[test]
     fn empty_grid_rejected() {
         let closes = synthetic(400);
-        assert!(walk_forward(&closes, &[], &[20], 120, 40, 1.0, 1.0).is_err());
+        assert!(walk_forward(&closes, Strategy::SmaCross, &[], &[20], 120, 40, 1.0, 1.0).is_err());
     }
 
     #[test]
     fn nonpositive_prices_rejected() {
         let mut closes = synthetic(400);
         closes[10] = 0.0;
-        assert!(walk_forward(&closes, &[5], &[20], 120, 40, 1.0, 1.0).is_err());
+        assert!(walk_forward(&closes, Strategy::SmaCross, &[5], &[20], 120, 40, 1.0, 1.0).is_err());
     }
 
     #[test]
     fn windows_tile_the_oos_range() {
         let closes = synthetic(500);
-        let r = walk_forward(&closes, &[5, 10], &[20, 50], 120, 40, 1.0, 1.0).unwrap();
+        let r = walk_forward(
+            &closes,
+            Strategy::SmaCross,
+            &[5, 10],
+            &[20, 50],
+            120,
+            40,
+            1.0,
+            1.0,
+        )
+        .unwrap();
         assert_eq!(r.windows[0].start, 120);
         for w in r.windows.windows(2) {
             assert_eq!(w[1].start, w[0].end, "windows must be contiguous");
@@ -395,15 +525,71 @@ mod tests {
     #[test]
     fn max_drawdown_nonpositive() {
         let closes = synthetic(400);
-        let r = walk_forward(&closes, &[5, 10], &[20, 50], 120, 40, 1.0, 1.0).unwrap();
+        let r = walk_forward(
+            &closes,
+            Strategy::SmaCross,
+            &[5, 10],
+            &[20, 50],
+            120,
+            40,
+            1.0,
+            1.0,
+        )
+        .unwrap();
         assert!(r.max_drawdown <= 0.0);
         assert!(r.bh_max_drawdown <= 0.0);
     }
 
     #[test]
+    fn momentum_runs() {
+        let closes = synthetic(400);
+        let r = walk_forward(
+            &closes,
+            Strategy::Momentum,
+            &[10, 20, 30],
+            &[],
+            120,
+            40,
+            1.0,
+            1.0,
+        )
+        .unwrap();
+        assert_eq!(r.strategy, "momentum");
+        assert_eq!(r.equity.len(), 400);
+        // Single-param: slow field unused, stays 0.
+        assert_eq!(r.windows[0].slow, 0);
+        assert!((1..=30).contains(&r.windows[0].fast));
+    }
+
+    #[test]
+    fn mean_reversion_runs() {
+        let closes = synthetic(400);
+        let r = walk_forward(
+            &closes,
+            Strategy::MeanReversion,
+            &[10, 20],
+            &[],
+            120,
+            40,
+            1.0,
+            1.0,
+        )
+        .unwrap();
+        assert_eq!(r.strategy, "mean_reversion");
+        assert!(r.equity.iter().all(|e| e.is_finite() && *e > 0.0));
+    }
+
+    #[test]
+    fn strategy_parse() {
+        assert_eq!(Strategy::parse("momentum"), Strategy::Momentum);
+        assert_eq!(Strategy::parse("meanrev"), Strategy::MeanReversion);
+        assert_eq!(Strategy::parse("garbage"), Strategy::SmaCross);
+    }
+
+    #[test]
     fn serde_roundtrip() {
         let closes = synthetic(300);
-        let r = walk_forward(&closes, &[5], &[20], 100, 40, 1.0, 1.0).unwrap();
+        let r = walk_forward(&closes, Strategy::SmaCross, &[5], &[20], 100, 40, 1.0, 1.0).unwrap();
         let json = serde_json::to_string(&r).unwrap();
         let back: BacktestResult = serde_json::from_str(&json).unwrap();
         assert_eq!(back.equity.len(), r.equity.len());

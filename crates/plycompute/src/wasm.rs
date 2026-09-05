@@ -216,6 +216,7 @@ pub fn quant_black_litterman(
 #[wasm_bindgen]
 pub fn quant_backtest(
     closes: &[f64],
+    strategy: &str,
     fasts: &[usize],
     slows: &[usize],
     is_window: usize,
@@ -225,6 +226,7 @@ pub fn quant_backtest(
 ) -> String {
     json::quant_backtest(
         closes,
+        strategy,
         fasts,
         slows,
         is_window,

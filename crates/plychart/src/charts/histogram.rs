@@ -8,6 +8,31 @@ pub fn draw(
     area: &plycore::ChartArea,
     theme: &plycore::ChartTheme,
 ) {
+    draw_impl(ctx, values, bin_count, false, area, theme)
+}
+
+/// Log-scale variant: bar heights scale with log10(count), so rare tail
+/// bins stay visible next to a dominant mode.
+#[cfg(target_arch = "wasm32")]
+pub fn draw_log(
+    ctx: &web_sys::CanvasRenderingContext2d,
+    values: &[f64],
+    bin_count: usize,
+    area: &plycore::ChartArea,
+    theme: &plycore::ChartTheme,
+) {
+    draw_impl(ctx, values, bin_count, true, area, theme)
+}
+
+#[cfg(target_arch = "wasm32")]
+fn draw_impl(
+    ctx: &web_sys::CanvasRenderingContext2d,
+    values: &[f64],
+    bin_count: usize,
+    log_scale: bool,
+    area: &plycore::ChartArea,
+    theme: &plycore::ChartTheme,
+) {
     if values.is_empty() || bin_count == 0 {
         return;
     }
@@ -39,9 +64,15 @@ pub fn draw(
     let bar_area_h = area.h - padding * 2.0;
     let bar_w = bar_area_w / bin_count as f64;
     let gap = (bar_w * 0.15).max(1.0);
+    let max_log = (max_bin as f64).log10().max(1e-9);
 
     for (i, &count) in bins.iter().enumerate() {
-        let bar_h = (count as f64 / max_bin as f64) * bar_area_h;
+        let frac = if log_scale && count > 0 {
+            (count as f64).log10() / max_log
+        } else {
+            count as f64 / max_bin as f64
+        };
+        let bar_h = frac.max(0.02) * bar_area_h;
         let x = area.x + padding + i as f64 * bar_w;
         let y = area.y + padding + bar_area_h - bar_h;
 

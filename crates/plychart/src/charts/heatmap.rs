@@ -42,6 +42,51 @@ pub fn draw(
     }
 }
 
+/// Diverging heatmap — red below `center`, blue above, intensity by
+/// |value - center| relative to the matrix's max deviation. Correct for
+/// signed data (betas, z-scores, correlations) where a sequential ramp
+/// hides the sign.
+#[cfg(target_arch = "wasm32")]
+pub fn draw_diverging(
+    ctx: &web_sys::CanvasRenderingContext2d,
+    matrix: &[Vec<f64>],
+    center: f64,
+    area: &crate::types::ChartArea,
+    theme: &plycore::ChartTheme,
+) {
+    if matrix.is_empty() || matrix[0].is_empty() {
+        return;
+    }
+    let rows = matrix.len();
+    let cols = matrix[0].len();
+    let cell_w = area.w / cols as f64;
+    let cell_h = area.h / rows as f64;
+
+    let max_dev = matrix
+        .iter()
+        .flatten()
+        .map(|v| (v - center).abs())
+        .fold(0.0_f64, f64::max)
+        .max(1e-12);
+
+    for (r, row) in matrix.iter().enumerate() {
+        for (c, val) in row.iter().enumerate() {
+            let t = ((val - center) / max_dev).clamp(-1.0, 1.0);
+            // Positive: theme.accent; negative: theme.down. Intensity via alpha.
+            let base = if t >= 0.0 { theme.accent } else { theme.down };
+            let a = t.abs() * 0.9;
+            let color = format!("{base}{:02x}", (a * 255.0) as u8);
+            ctx.set_fill_style(&color.into());
+            ctx.fill_rect(
+                area.x + c as f64 * cell_w,
+                area.y + r as f64 * cell_h,
+                cell_w - 1.0,
+                cell_h - 1.0,
+            );
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use plycore::ChartArea;

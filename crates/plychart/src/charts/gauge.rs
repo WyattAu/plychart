@@ -41,6 +41,48 @@ pub fn draw(
     let _ = ctx.fill_text(&format!("{:.1}", value), cx - 20.0, cy);
 }
 
+/// Gauge with threshold tick marks (e.g. stress zones at 30/60/80).
+/// `zones` are raw values in [0, max]; each gets a tick plus a small label.
+#[cfg(target_arch = "wasm32")]
+pub fn draw_zoned(
+    ctx: &web_sys::CanvasRenderingContext2d,
+    value: f64,
+    max: f64,
+    color: &str,
+    zones: &[f64],
+    area: &crate::types::ChartArea,
+) {
+    draw(ctx, value, max, color, area);
+
+    let cx = area.x + area.w / 2.0;
+    let cy = area.y + area.h * 0.8;
+    let radius = (area.w / 2.0 - 20.0).min(area.h * 0.7);
+
+    ctx.set_stroke_style(&"rgba(255,255,255,0.4)".into());
+    ctx.set_line_width(1.0);
+    ctx.set_font("8px monospace");
+    ctx.set_fill_style(&"rgba(255,255,255,0.45)".into());
+    ctx.set_text_align("center");
+
+    for &z in zones {
+        if z <= 0.0 || z >= max {
+            continue;
+        }
+        // Gauge arc spans PI..2PI (left to right across the top).
+        let angle = std::f64::consts::PI + (z / max) * std::f64::consts::PI;
+        let inner = radius - 8.0;
+        let outer = radius + 8.0;
+        let (sin, cos) = angle.sin_cos();
+        ctx.begin_path();
+        ctx.move_to(cx + inner * cos, cy + inner * sin);
+        ctx.line_to(cx + outer * cos, cy + outer * sin);
+        ctx.stroke();
+        let lx = cx + (radius + 18.0) * cos;
+        let ly = cy + (radius + 18.0) * sin;
+        let _ = ctx.fill_text(&format!("{z:.0}"), lx, ly);
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use plycore::ChartArea;

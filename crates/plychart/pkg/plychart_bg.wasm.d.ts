@@ -11,8 +11,11 @@ export const update_bar: (a: number, b: number, c: number, d: number, e: number,
 export const update_candles: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
 export const update_correlation: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number];
 export const update_gauge: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number];
+export const update_gauge_zoned: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number) => [number, number];
 export const update_heatmap: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
+export const update_heatmap_div: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number];
 export const update_histogram: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number];
+export const update_histogram_log: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number];
 export const update_line: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
 export const update_order_book: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
 export const update_pie: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];

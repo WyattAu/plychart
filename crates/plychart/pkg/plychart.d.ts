@@ -61,15 +61,30 @@ export function update_correlation(canvas_id: string, matrix_json: string, label
 export function update_gauge(canvas_id: string, value: number, max: number, color: string, theme_json: string): void;
 
 /**
+ * Update chart with a gauge plus threshold zone ticks (zones in [0, max]).
+ */
+export function update_gauge_zoned(canvas_id: string, value: number, max: number, color: string, zones_json: string, theme_json: string): void;
+
+/**
  * Update chart with heatmap matrix data.
  */
 export function update_heatmap(canvas_id: string, data_json: string, theme_json: string): void;
+
+/**
+ * Update chart with a diverging heatmap (red below `center`, accent above).
+ */
+export function update_heatmap_div(canvas_id: string, data_json: string, center: number, theme_json: string): void;
 
 /**
  * Update chart with histogram data.
  * data_json: `[value1, value2, ...]`
  */
 export function update_histogram(canvas_id: string, data_json: string, bin_count: number, theme_json: string): void;
+
+/**
+ * Update chart with a log-scale histogram (rare tail bins stay visible).
+ */
+export function update_histogram_log(canvas_id: string, data_json: string, bin_count: number, theme_json: string): void;
 
 /**
  * Update chart with line data.
@@ -148,8 +163,11 @@ export interface InitOutput {
     readonly update_candles: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
     readonly update_correlation: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number];
     readonly update_gauge: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number];
+    readonly update_gauge_zoned: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number) => [number, number];
     readonly update_heatmap: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
+    readonly update_heatmap_div: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number];
     readonly update_histogram: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number];
+    readonly update_histogram_log: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number];
     readonly update_line: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
     readonly update_order_book: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
     readonly update_pie: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];

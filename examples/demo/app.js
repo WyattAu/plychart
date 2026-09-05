@@ -1,5 +1,5 @@
 // plychart Demo Application
-// Showcases all 13 chart types with sample data
+// Showcases all chart types with sample data
 
 const CHART_TYPES = [
     { id: 'candlestick', name: 'Candlestick', fn: 'update_candles', dataKey: 'ohlcv' },
@@ -18,7 +18,13 @@ const CHART_TYPES = [
     { id: 'pie', name: 'Pie', fn: 'update_pie', dataKey: 'pie' },
     { id: 'histogram', name: 'Histogram', fn: 'update_histogram', dataKey: 'histogram' },
     { id: 'sparkline', name: 'Sparkline', fn: 'update_sparkline', dataKey: 'sparkline' },
-    { id: 'multiline', name: 'Multiline', fn: 'update_line', dataKey: 'multiline' }
+    { id: 'multiline', name: 'Multiline', fn: 'update_line', dataKey: 'multiline' },
+    { id: 'stackedbar', name: 'Stacked Bar', fn: 'update_stacked_bar', dataKey: 'stackedBar' },
+    { id: 'scatterMulti', name: 'Scatter Multi', fn: 'update_scatter_multi', dataKey: 'scatterMulti' },
+    { id: 'radarMulti', name: 'Radar Multi', fn: 'update_radar_multi', dataKey: 'radarMulti' },
+    { id: 'heatmapDiv', name: 'Heatmap Diverging', fn: 'update_heatmap_div', dataKey: 'heatmapDiv' },
+    { id: 'gaugeZoned', name: 'Gauge Zoned', fn: 'update_gauge_zoned', dataKey: 'gauge' },
+    { id: 'histogramLog', name: 'Histogram Log', fn: 'update_histogram_log', dataKey: 'histogram' }
 ];
 
 const DEFAULT_THEME = '{}';
@@ -109,6 +115,18 @@ function initChart(chart, data) {
         wasmMod[chart.fn](canvasId, JSON.stringify(chartData), DEFAULT_THEME);
     } else if (chart.fn === 'update_heatmap') {
         wasmMod.update_heatmap(canvasId, JSON.stringify(chartData), DEFAULT_THEME);
+    } else if (chart.fn === 'update_heatmap_div') {
+        wasmMod.update_heatmap_div(canvasId, JSON.stringify(chartData), 0, DEFAULT_THEME);
+    } else if (chart.fn === 'update_gauge_zoned') {
+        wasmMod.update_gauge_zoned(canvasId, chartData.value, chartData.max, '#c8a23c', JSON.stringify([25, 50, 75]), DEFAULT_THEME);
+    } else if (chart.fn === 'update_histogram_log') {
+        wasmMod.update_histogram_log(canvasId, JSON.stringify(chartData), 20, DEFAULT_THEME);
+    } else if (chart.fn === 'update_stacked_bar') {
+        wasmMod.update_stacked_bar(canvasId, JSON.stringify(chartData.matrix), JSON.stringify(chartData.labels), DEFAULT_THEME);
+    } else if (chart.fn === 'update_scatter_multi') {
+        wasmMod.update_scatter_multi(canvasId, JSON.stringify(chartData), DEFAULT_THEME);
+    } else if (chart.fn === 'update_radar_multi') {
+        wasmMod.update_radar_multi(canvasId, JSON.stringify(chartData), JSON.stringify(data.radar.labels), DEFAULT_THEME);
     } else {
         // OHLCV-based charts: convert [ts, o, h, l, c, v] to JSON
         const json = JSON.stringify(chartData);

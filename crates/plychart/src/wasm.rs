@@ -562,3 +562,44 @@ pub fn get_click_data(
         }
     }
 }
+
+/// Update chart with a log-scale histogram (rare tail bins stay visible).
+#[wasm_bindgen]
+pub fn update_histogram_log(
+    canvas_id: &str,
+    data_json: &str,
+    bin_count: usize,
+    theme_json: &str,
+) -> Result<(), JsValue> {
+    let theme = parse_theme(theme_json);
+    crate::canvas::update_histogram_log(canvas_id, data_json, bin_count, &theme)
+        .map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Update chart with a diverging heatmap (red below `center`, accent above).
+#[wasm_bindgen]
+pub fn update_heatmap_div(
+    canvas_id: &str,
+    data_json: &str,
+    center: f64,
+    theme_json: &str,
+) -> Result<(), JsValue> {
+    let theme = parse_theme(theme_json);
+    crate::canvas::update_heatmap_div(canvas_id, data_json, center, &theme)
+        .map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Update chart with a gauge plus threshold zone ticks (zones in [0, max]).
+#[wasm_bindgen]
+pub fn update_gauge_zoned(
+    canvas_id: &str,
+    value: f64,
+    max: f64,
+    color: &str,
+    zones_json: &str,
+    theme_json: &str,
+) -> Result<(), JsValue> {
+    let theme = parse_theme(theme_json);
+    crate::canvas::update_gauge_zoned(canvas_id, value, max, color, zones_json, &theme)
+        .map_err(|e| JsValue::from_str(&e.to_string()))
+}

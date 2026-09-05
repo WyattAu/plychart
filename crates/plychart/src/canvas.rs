@@ -283,6 +283,42 @@ pub fn update_heatmap(
     Ok(())
 }
 
+/// Update chart with a diverging heatmap (signed data around `center`).
+#[cfg(target_arch = "wasm32")]
+pub fn update_heatmap_div(
+    canvas_id: &str,
+    data_json: &str,
+    center: f64,
+    theme: &ChartTheme,
+) -> Result<(), crate::ChartError> {
+    let (ctx, width, height) = get_canvas_context(canvas_id)?;
+    clear_canvas(&ctx, theme.bg, width, height);
+
+    let matrix: Vec<Vec<f64>> = serde_json::from_str(data_json)
+        .map_err(|e| crate::ChartError::DataParseError(e.to_string()))?;
+    if !matrix.is_empty() {
+        let area = ChartArea {
+            x: 0.0,
+            y: 0.0,
+            w: width,
+            h: height,
+        };
+        crate::charts::heatmap::draw_diverging(&ctx, &matrix, center, &area, theme);
+    }
+
+    Ok(())
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn update_heatmap_div(
+    _canvas_id: &str,
+    _data_json: &str,
+    _center: f64,
+    _theme: &ChartTheme,
+) -> Result<(), crate::ChartError> {
+    Ok(())
+}
+
 /// Update chart with order book data.
 #[cfg(target_arch = "wasm32")]
 pub fn update_order_book(
@@ -401,6 +437,45 @@ pub fn update_gauge(
     _value: f64,
     _max: f64,
     _color: &str,
+    _theme: &ChartTheme,
+) -> Result<(), crate::ChartError> {
+    Ok(())
+}
+
+/// Update chart with a gauge plus threshold zone ticks.
+#[cfg(target_arch = "wasm32")]
+pub fn update_gauge_zoned(
+    canvas_id: &str,
+    value: f64,
+    max: f64,
+    color: &str,
+    zones_json: &str,
+    theme: &ChartTheme,
+) -> Result<(), crate::ChartError> {
+    let (ctx, width, height) = get_canvas_context(canvas_id)?;
+    clear_canvas(&ctx, theme.bg, width, height);
+
+    let zones: Vec<f64> = serde_json::from_str(zones_json)
+        .map_err(|e| crate::ChartError::DataParseError(e.to_string()))?;
+
+    let area = ChartArea {
+        x: 0.0,
+        y: 0.0,
+        w: width,
+        h: height,
+    };
+    crate::charts::gauge::draw_zoned(&ctx, value, max, color, &zones, &area);
+
+    Ok(())
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn update_gauge_zoned(
+    _canvas_id: &str,
+    _value: f64,
+    _max: f64,
+    _color: &str,
+    _zones_json: &str,
     _theme: &ChartTheme,
 ) -> Result<(), crate::ChartError> {
     Ok(())
@@ -650,6 +725,41 @@ pub fn update_histogram(
     };
     crate::charts::histogram::draw(&ctx, &values, bin_count, &area, theme);
 
+    Ok(())
+}
+
+/// Update chart with log-scale histogram data.
+#[cfg(target_arch = "wasm32")]
+pub fn update_histogram_log(
+    canvas_id: &str,
+    data_json: &str,
+    bin_count: usize,
+    theme: &ChartTheme,
+) -> Result<(), crate::ChartError> {
+    let (ctx, width, height) = get_canvas_context(canvas_id)?;
+    clear_canvas(&ctx, theme.bg, width, height);
+
+    let values: Vec<f64> = serde_json::from_str(data_json)
+        .map_err(|e| crate::ChartError::DataParseError(e.to_string()))?;
+
+    let area = ChartArea {
+        x: 0.0,
+        y: 0.0,
+        w: width,
+        h: height,
+    };
+    crate::charts::histogram::draw_log(&ctx, &values, bin_count, &area, theme);
+
+    Ok(())
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn update_histogram_log(
+    _canvas_id: &str,
+    _data_json: &str,
+    _bin_count: usize,
+    _theme: &ChartTheme,
+) -> Result<(), crate::ChartError> {
     Ok(())
 }
 

@@ -719,10 +719,12 @@ pub fn quant_black_litterman(
     .unwrap_or_else(|_| "{}".to_string())
 }
 
-/// Walk-forward SMA-crossover backtest with slippage + commission.
+/// Walk-forward strategy backtest with slippage + commission.
+/// `strategy`: "sma_cross" | "momentum" | "mean_reversion".
 /// Returns JSON BacktestResult (equity, buyhold, drawdown, windows, stats).
 pub fn quant_backtest(
     closes: &[f64],
+    strategy: &str,
     fasts: &[usize],
     slows: &[usize],
     is_window: usize,
@@ -730,8 +732,10 @@ pub fn quant_backtest(
     slippage_bps: f64,
     commission_bps: f64,
 ) -> String {
+    let strat = backtest::Strategy::parse(strategy);
     match backtest::walk_forward(
         closes,
+        strat,
         fasts,
         slows,
         is_window,
