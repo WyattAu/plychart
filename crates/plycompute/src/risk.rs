@@ -54,7 +54,7 @@ fn inverse_normal_cdf(p: f64) -> f64 {
         return 10.0;
     }
     let a = [
-        -3.969683028665376e+01,
+        -39.69683028665376,
         2.209460984245205e+02,
         -2.759285104469687e+02,
         1.383577518672690e+02,
@@ -240,7 +240,7 @@ mod tests {
     #[test]
     fn test_histogram() {
         let data = vec![1.0, 2.0, 3.0, 4.0, 5.0];
-        let (edges, counts) = histogram(&data, 5);
+        let (_edges, counts) = histogram(&data, 5);
         assert_eq!(counts.len(), 5);
         assert_eq!(counts.iter().sum::<usize>(), 5);
     }

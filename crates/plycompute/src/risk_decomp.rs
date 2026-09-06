@@ -91,7 +91,7 @@ pub fn kelly_criterion(win_rate: f64, avg_win: f64, avg_loss: f64) -> f64 {
     let p = win_rate;
     let q = 1.0 - p;
     let kelly = (b * p - q) / b;
-    kelly.max(0.0).min(1.0) // clamp to [0, 1]
+    kelly.clamp(0.0, 1.0) // clamp to [0, 1]
 }
 
 /// Full Kelly analysis from a return series.

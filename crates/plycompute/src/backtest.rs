@@ -63,8 +63,6 @@ fn sma(closes: &[f64], len: usize, i: usize) -> Option<f64> {
     Some(closes[i + 1 - len..=i].iter().sum::<f64>() / len as f64)
 }
 
-/// Net Sharpe of the long/flat strategy on `closes[start..end]` using
-
 /// Trading strategy family for the walk-forward engine.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Strategy {

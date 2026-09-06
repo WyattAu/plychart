@@ -1,13 +1,13 @@
 [package]
 name = "plycompute"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 license = "Apache-2.0"
 description = "Quantitative computation library — portfolio analytics, risk metrics, signal processing"
 repository = "https://github.com/WyattAu/plychart"
 
 [dependencies]
-plycore = { path = "../plycore", version = "0.1.0" }
+plycore = { path = "../plycore", version = "0.2.0" }
 serde = { workspace = true }
 serde_json = { workspace = true }
 wasm-bindgen = { workspace = true }
