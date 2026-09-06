@@ -155,21 +155,34 @@ pub fn kelly_from_returns(returns: &[f64]) -> KellyResult {
 }
 
 #[derive(Debug, Clone)]
+/// Component VaR decomposition across positions.
 pub struct ComponentVarResult {
+    /// Total portfolio VaR.
     pub portfolio_var: f64,
+    /// Per-position VaR contribution (sums to portfolio_var).
     pub contributions: Vec<f64>,
+    /// Diversified VaR across all positions.
     pub total_var: f64,
 }
 
 #[derive(Debug, Clone)]
+/// Kelly-criterion position sizing analysis.
 pub struct KellyResult {
+    /// Full Kelly fraction of capital (0-1).
     pub full_kelly: f64,
+    /// Half-Kelly fraction (common risk-attenuated choice).
     pub half_kelly: f64,
+    /// Quarter-Kelly fraction.
     pub quarter_kelly: f64,
+    /// Historical win rate of the strategy.
     pub win_rate: f64,
+    /// Gross wins divided by gross losses.
     pub profit_factor: f64,
+    /// Mean winning trade (positive).
     pub avg_win: f64,
+    /// Mean losing trade (negative).
     pub avg_loss: f64,
+    /// Expected geometric growth rate at full Kelly.
     pub geometric_growth: f64,
 }
 

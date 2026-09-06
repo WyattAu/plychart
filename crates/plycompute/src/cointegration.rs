@@ -212,13 +212,21 @@ pub fn engle_granger(y: &[f64], x: &[f64]) -> CointegrationResult {
 }
 
 #[derive(Debug, Clone)]
+/// Engle-Granger cointegration test output for a pair of series.
 pub struct CointegrationResult {
+    /// OLS hedge ratio (beta of series B on series A).
     pub hedge_ratio: f64,
+    /// OLS intercept of the spread regression.
     pub intercept: f64,
+    /// ADF t-statistic of the spread (more negative = more stationary).
     pub adf_statistic: f64,
+    /// Mean-reversion half-life of the spread, in observations.
     pub half_life: f64,
+    /// Whether the ADF statistic rejects the unit-root hypothesis at 5%.
     pub is_cointegrated: bool,
+    /// The residual spread series.
     pub spread: Vec<f64>,
+    /// Current spread expressed in standard deviations from its mean.
     pub z_score: f64,
 }
 

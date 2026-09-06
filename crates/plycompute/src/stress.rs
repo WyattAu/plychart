@@ -3,13 +3,19 @@
 /// Hardcoded historical crisis scenarios (daily returns for major assets).
 /// Each scenario has: name, description, approximate dates, and representative
 /// asset returns during the crisis peak.
+/// One historical crisis scenario.
 pub struct Scenario {
+    /// Short scenario name (e.g. "2008 GFC").
     pub name: &'static str,
+    /// Human-readable description of the episode.
     pub description: &'static str,
+    /// Year the crisis occurred.
     pub year: u32,
+    /// Per-asset-class shocks as (category, return percentage).
     pub shocks: &'static [(&'static str, f64)],
 }
 
+/// Named historical crisis scenarios.
 pub const SCENARIOS: &[Scenario] = &[
     Scenario {
         name: "2008 GFC",
@@ -183,13 +189,19 @@ pub fn stress_test(symbols: &[String], weights: &[f64]) -> Vec<StressResult> {
     results
 }
 
+/// Portfolio P&L under one stress scenario.
 #[derive(Debug, Clone)]
 pub struct StressResult {
+    /// Scenario name applied.
     pub scenario: String,
+    /// Scenario description.
     pub description: String,
+    /// Year of the historical episode.
     pub year: u32,
+    /// Total portfolio P&L percentage under the scenario.
     pub portfolio_pnl: f64,
-    pub asset_pnls: Vec<(String, String, f64, f64)>, // (symbol, category, shock%, contribution)
+    /// Per-holding breakdown as (symbol, category, shock, pnl contribution).
+    pub asset_pnls: Vec<(String, String, f64, f64)>,
 }
 
 #[cfg(test)]

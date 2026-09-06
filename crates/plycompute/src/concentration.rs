@@ -73,18 +73,29 @@ pub fn gini_coefficient(weights: &[f64]) -> f64 {
 }
 
 #[derive(Debug, Clone)]
+/// Aggregated portfolio concentration analysis.
 pub struct ConcentrationResult {
+    /// Herfindahl-Hirschman Index on a 0-10000 percentage scale.
     pub hhi: f64,
+    /// HHI normalized to 0-1 (1 = single-asset portfolio).
     pub normalised_hhi: f64,
+    /// Effective number of positions: 1 / sum(w^2).
     pub effective_n: f64,
+    /// Shannon entropy of the weights (nats).
     pub entropy: f64,
+    /// Entropy of an equal-weighted portfolio with the same number of assets.
     pub max_entropy: f64,
+    /// Sum of the 5 largest weights.
     pub top5_concentration: f64,
+    /// Sum of the 10 largest weights.
     pub top10_concentration: f64,
+    /// Gini coefficient of the weight distribution (0 = equal, 1 = concentrated).
     pub gini: f64,
+    /// Human-readable classification (e.g. "Diversified", "Highly Concentrated").
     pub classification: String,
 }
 
+/// Run every concentration metric over a weight vector.
 pub fn full_analysis(weights: &[f64]) -> ConcentrationResult {
     let h = hhi(weights);
     let nh = normalised_hhi(weights);

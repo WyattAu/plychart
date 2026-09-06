@@ -213,14 +213,23 @@ fn matvec(mat: &[f64], vec: &[f64], n: usize) -> Vec<f64> {
 }
 
 #[derive(Debug, Clone)]
+/// OLS regression output (alpha + factor loadings and diagnostics).
 pub struct RegressionResult {
+    /// Intercept (Jensen's alpha for factor regressions).
     pub alpha: f64,
+    /// Coefficients on each factor column.
     pub betas: Vec<f64>,
+    /// Coefficient of determination.
     pub r_squared: f64,
+    /// R-squared adjusted for degrees of freedom.
     pub adj_r_squared: f64,
+    /// F-statistic for overall model significance.
     pub f_statistic: f64,
+    /// t-statistics for alpha and each beta.
     pub t_stats: Vec<f64>,
+    /// Standard errors for alpha and each beta.
     pub standard_errors: Vec<f64>,
+    /// Fitted-minus-actual residuals.
     pub residuals: Vec<f64>,
 }
 

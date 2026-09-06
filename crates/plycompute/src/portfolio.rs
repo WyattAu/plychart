@@ -146,10 +146,15 @@ fn matvec(mat: &[f64], vec: &[f64], n: usize) -> Vec<f64> {
 }
 
 #[derive(Debug, Clone)]
+/// One point on the efficient frontier.
 pub struct PortfolioPoint {
+    /// Expected annual return.
     pub ret: f64,
+    /// Annual volatility (standard deviation).
     pub risk: f64,
+    /// Sharpe ratio at the risk-free rate used for the optimization.
     pub sharpe: f64,
+    /// Asset weights (sums to 1, no shorting).
     pub weights: Vec<f64>,
 }
 

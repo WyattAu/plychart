@@ -70,12 +70,18 @@ pub fn analyze_overlap(
 }
 
 #[derive(Debug, Clone)]
+/// Holdings overlap between two portfolios.
 pub struct OverlapResult {
+    /// |intersection| / |union| of the two holding sets.
     pub jaccard_index: f64,
+    /// Sum of min(weight_a, weight_b) over common holdings.
     pub weighted_overlap: f64,
+    /// Number of tickers held by both portfolios.
     pub common_holdings_count: usize,
+    /// Number of tickers held by either portfolio.
     pub union_count: usize,
-    pub common_holdings: Vec<(String, f64, f64)>, // (ticker, weight_a, weight_b)
+    /// Common holdings as (ticker, weight_a, weight_b).
+    pub common_holdings: Vec<(String, f64, f64)>,
 }
 
 #[cfg(test)]

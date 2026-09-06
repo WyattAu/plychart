@@ -71,12 +71,19 @@ pub fn pairs_signal(y: &[f64], x: &[f64], entry: f64, exit: f64, stop: f64) -> P
 }
 
 #[derive(Debug, Clone)]
+/// Pairs-trading signal for a candidate pair.
 pub struct PairsResult {
+    /// OLS hedge ratio of the spread regression.
     pub hedge_ratio: f64,
+    /// Current spread in standard deviations from its mean.
     pub z_score: f64,
+    /// Trading signal: "long_spread", "short_spread", or "flat".
     pub signal: String,
+    /// Whether the pair passes the cointegration screen.
     pub is_cointegrated: bool,
+    /// Spread mean-reversion half-life, in observations.
     pub half_life: f64,
+    /// Most recent spread values (for charting).
     pub spread_tail: Vec<f64>,
 }
 

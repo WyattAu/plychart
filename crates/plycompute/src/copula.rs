@@ -155,10 +155,15 @@ pub fn tail_matrix(returns: &[f64], n_assets: usize, n_periods: usize) -> Vec<f6
 }
 
 #[derive(Debug, Clone)]
+/// Tail-dependence and rank-correlation measures for a return pair.
 pub struct TailDependence {
+    /// Lower-tail dependence coefficient (joint crash tendency, 0-1).
     pub lower: f64,
+    /// Upper-tail dependence coefficient (joint rally tendency, 0-1).
     pub upper: f64,
+    /// Kendall's tau rank correlation.
     pub kendall_tau: f64,
+    /// Spearman's rho rank correlation.
     pub spearman_rho: f64,
 }
 

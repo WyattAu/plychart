@@ -5,6 +5,10 @@ edition = "2024"
 license = "Apache-2.0"
 description = "Quantitative computation library — portfolio analytics, risk metrics, signal processing"
 repository = "https://github.com/WyattAu/plychart"
+readme = "README.md"
+keywords = ["finance", "quant", "risk", "portfolio", "wasm"]
+categories = ["finance", "mathematics", "wasm"]
+authors = ["Wyatt Au"]
 
 [dependencies]
 plycore = { path = "../plycore", version = "0.2.0" }

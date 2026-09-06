@@ -109,13 +109,21 @@ pub fn ulcer_index(prices: &[f64]) -> f64 {
 }
 
 #[derive(Debug, Clone)]
+/// Full drawdown analysis of a price series.
 pub struct DrawdownResult {
+    /// Drawdown fraction at each timestep (0 = at a high-water mark, negative in drawdown).
     pub underwater: Vec<f64>,
+    /// Maximum peak-to-trough loss as a negative fraction.
     pub max_drawdown: f64,
+    /// Index of the peak preceding the maximum drawdown.
     pub max_dd_peak_idx: usize,
+    /// Index of the trough of the maximum drawdown.
     pub max_dd_trough_idx: usize,
+    /// Length of the maximum drawdown episode, in observations.
     pub max_dd_duration: usize,
+    /// Drawdown at the end of the series.
     pub current_drawdown: f64,
+    /// Completed drawdown episodes as (peak, trough, depth, recovery index).
     pub recovery_periods: Vec<(usize, usize, f64, usize)>,
 }
 

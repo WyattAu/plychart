@@ -7,6 +7,7 @@ use crate::{
     montecarlo, overlap, pairs, portfolio, portfolio_backtest, realizedvol, regime, risk,
     risk_decomp, rng, stats, stress, svi, volatility, yieldcurve,
 };
+/// GBM Monte Carlo forecast. See [`montecarlo::montecarlo_from_prices`].
 pub fn quant_montecarlo(
     closes: &[f64],
     periods_per_year: u32,
@@ -29,6 +30,7 @@ pub fn quant_montecarlo(
 }
 
 #[allow(clippy::too_many_arguments)]
+/// Black-Scholes Greeks across a grid of spot prices.
 pub fn quant_greeks(
     spot_min: f64,
     spot_max: f64,
@@ -69,6 +71,7 @@ pub fn quant_greeks(
     .unwrap_or_else(|_| "{}".to_string())
 }
 
+/// Historical and parametric VaR/Expected Shortfall at the given alpha level.
 pub fn quant_var(returns: &[f64], alpha: f64) -> String {
     let var_hist = risk::var_historical(returns, alpha);
     let es_hist = risk::expected_shortfall(returns, alpha);
@@ -89,6 +92,7 @@ pub fn quant_var(returns: &[f64], alpha: f64) -> String {
     .unwrap_or_else(|_| "{}".to_string())
 }
 
+/// GARCH(1,1) fit with multi-step forecast, alongside an EWMA baseline.
 pub fn quant_garch(returns: &[f64], forecast_steps: usize) -> String {
     let result = volatility::fit_garch11(returns, forecast_steps);
     let ewma = volatility::ewma_volatility(returns, 0.94);
@@ -107,6 +111,7 @@ pub fn quant_garch(returns: &[f64], forecast_steps: usize) -> String {
     .unwrap_or_else(|_| "{}".to_string())
 }
 
+/// Pearson correlation matrix for a flat n_assets x n_periods return matrix.
 pub fn quant_correlation_matrix(returns: &[f64], n_assets: usize, n_periods: usize) -> String {
     let matrix = stats::correlation_matrix(returns, n_assets, n_periods);
     serde_json::to_string(&serde_json::json!({
@@ -116,6 +121,7 @@ pub fn quant_correlation_matrix(returns: &[f64], n_assets: usize, n_periods: usi
     .unwrap_or_else(|_| "{}".to_string())
 }
 
+/// Drawdown analysis plus Calmar ratio and ulcer index.
 pub fn quant_drawdown(prices: &[f64], periods_per_year: u32) -> String {
     let dd = drawdown::analyze_drawdowns(prices);
     let calmar = drawdown::calmar_ratio(prices, periods_per_year);
@@ -133,6 +139,7 @@ pub fn quant_drawdown(prices: &[f64], periods_per_year: u32) -> String {
     .unwrap_or_else(|_| "{}".to_string())
 }
 
+/// Full concentration analysis. See [`concentration::full_analysis`].
 pub fn quant_concentration(weights: &[f64]) -> String {
     let result = concentration::full_analysis(weights);
     serde_json::to_string(&serde_json::json!({
@@ -149,6 +156,7 @@ pub fn quant_concentration(weights: &[f64]) -> String {
     .unwrap_or_else(|_| "{}".to_string())
 }
 
+/// Nelson-Siegel curve fit plus 10y-3m spread and recession probability.
 pub fn quant_yield_curve(maturities: &[f64], yields: &[f64]) -> String {
     let fit = yieldcurve::fit_nelson_siegel(maturities, yields);
     let spread_10y_3m = {
@@ -178,10 +186,12 @@ pub fn quant_yield_curve(maturities: &[f64], yields: &[f64]) -> String {
     .unwrap_or_else(|_| "{}".to_string())
 }
 
+/// Seed the deterministic PRNG (u64 halves passed as f64 for JS compatibility).
 pub fn quant_seed(s0: f64, s1: f64) {
     rng::seed(s0 as u64, s1 as u64);
 }
 
+/// Solve Black-Scholes implied volatility from a market price.
 pub fn quant_implied_vol(
     market_price: f64,
     spot: f64,

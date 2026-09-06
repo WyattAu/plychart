@@ -1,6 +1,7 @@
 //! Shared types for plychart and plycompute.
 //!
 //! Provides the core data types used across all charting and computation modules.
+#![deny(missing_docs)]
 
 use serde::{Deserialize, Serialize};
 
@@ -25,41 +26,57 @@ pub struct CandleData {
 /// 2D point for scatter plots, line charts, etc.
 #[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
 pub struct Point2D {
+    /// Horizontal coordinate.
     pub x: f64,
+    /// Vertical coordinate.
     pub y: f64,
 }
 
 /// Bounding rectangle for chart rendering.
 #[derive(Debug, Clone, Copy, Default, PartialEq)]
 pub struct ChartArea {
+    /// Left edge.
     pub x: f64,
+    /// Top edge.
     pub y: f64,
+    /// Width.
     pub w: f64,
+    /// Height.
     pub h: f64,
 }
 
 /// Bar data for bar charts.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BarData {
+    /// Category label.
     pub label: String,
+    /// Numeric value.
     pub value: f64,
+    /// Optional CSS color override.
     pub color: Option<String>,
 }
 
 /// Scatter point with size and color.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ScatterPoint {
+    /// Horizontal coordinate.
     pub x: f64,
+    /// Vertical coordinate.
     pub y: f64,
+    /// Marker radius in pixels.
     pub size: f64,
+    /// Optional CSS color override.
     pub color: Option<String>,
 }
 
 /// Heatmap cell.
 #[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
 pub struct HeatmapCell {
+    /// Row index (top = 0).
     pub row: usize,
+    /// Column index (left = 0).
     pub col: usize,
+    /// Cell intensity.
     pub value: f64,
 }
 
@@ -75,6 +92,7 @@ pub struct ChartViewport {
 }
 
 impl Default for ChartViewport {
+    /// Defaults to showing the first 100 points on a linear scale.
     fn default() -> Self {
         Self {
             start: 0,
@@ -87,18 +105,28 @@ impl Default for ChartViewport {
 /// Theme colors for chart rendering.
 #[derive(Debug, Clone, Copy)]
 pub struct ChartTheme {
+    /// Chart background.
     pub bg: &'static str,
+    /// Primary text color.
     pub text: &'static str,
+    /// Secondary/axis text color.
     pub text_muted: &'static str,
+    /// Grid line color.
     pub grid: &'static str,
+    /// Bullish/up-move color.
     pub up: &'static str,
+    /// Bearish/down-move color.
     pub down: &'static str,
+    /// Accent/highlight color.
     pub accent: &'static str,
+    /// Volume bar color.
     pub volume: &'static str,
+    /// Crosshair color.
     pub crosshair: &'static str,
 }
 
 impl ChartTheme {
+    /// Dark theme (near-black background).
     pub const fn dark() -> Self {
         Self {
             bg: "#0a0a0a",
@@ -112,6 +140,7 @@ impl ChartTheme {
             crosshair: "#555555",
         }
     }
+    /// Light theme (white background).
     pub const fn light() -> Self {
         Self {
             bg: "#ffffff",
@@ -125,6 +154,7 @@ impl ChartTheme {
             crosshair: "#999999",
         }
     }
+    /// Midnight theme with cyan accent.
     pub const fn midnight() -> Self {
         Self {
             bg: "#0c0c0c",
@@ -141,6 +171,7 @@ impl ChartTheme {
 }
 
 impl Default for ChartTheme {
+    /// The dark theme.
     fn default() -> Self {
         Self::dark()
     }
@@ -149,9 +180,13 @@ impl Default for ChartTheme {
 /// Chart error type — never panics in production.
 #[derive(Debug, Clone, PartialEq)]
 pub enum ChartError {
+    /// The canvas element could not be located or is not a canvas.
     CanvasNotFound(String),
+    /// Input JSON failed to deserialize.
     DataParseError(String),
+    /// Input parsed but is semantically unusable.
     InvalidData(String),
+    /// The rendering context failed (e.g. context lost).
     RenderError(String),
 }
 

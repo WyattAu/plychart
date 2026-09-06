@@ -25,10 +25,15 @@ pub struct SliceQuotes {
 /// Fitted SVI parameters for one expiry slice.
 #[derive(Debug, Clone, Serialize)]
 pub struct SviParams {
+    /// Base total variance level.
     pub a: f64,
+    /// Slope of the right wing (must be >= 0).
     pub b: f64,
+    /// Asymmetry parameter, |rho| <= 1.
     pub rho: f64,
+    /// Location of the smile apex in log-moneyness.
     pub m: f64,
+    /// Smoothness of the smile apex.
     pub sigma: f64,
 }
 

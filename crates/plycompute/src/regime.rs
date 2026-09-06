@@ -297,12 +297,18 @@ fn gaussian_log(x: f64, mean: f64, var: f64) -> f64 {
 }
 
 #[derive(Debug, Clone)]
+/// Two-state regime detection output.
 pub struct RegimeResult {
+    /// Most likely regime per timestep (0 = low-vol, 1 = high-vol).
     pub states: Vec<usize>,
-    pub transition: Vec<f64>, // [a00, a01, a10, a11]
+    /// Transition matrix as [a00, a01, a10, a11].
+    pub transition: Vec<f64>,
+    /// Fitted mean return per regime.
     pub means: Vec<f64>,
+    /// Fitted return variance per regime.
     pub variances: Vec<f64>,
-    pub probabilities: Vec<f64>, // P(high-vol regime) at each timestep
+    /// Probability of the high-volatility regime at each timestep.
+    pub probabilities: Vec<f64>,
 }
 
 #[cfg(test)]

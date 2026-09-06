@@ -25,6 +25,7 @@ impl WeightMode {
         }
     }
 
+    /// Canonical JSON-facing name (see [`WeightMode::parse`]).
     #[must_use]
     pub fn as_str(self) -> &'static str {
         match self {

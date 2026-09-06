@@ -5,9 +5,14 @@ edition = "2024"
 license = "Apache-2.0"
 description = "Shared types for plychart and plycompute"
 repository = "https://github.com/WyattAu/plychart"
+readme = "README.md"
+keywords = ["charting", "types", "wasm"]
+categories = ["graphics", "wasm"]
+authors = ["Wyatt Au"]
 
 [dependencies]
 serde = { workspace = true }
 serde_json = { workspace = true }
 
 [lints.rust]
+missing_docs = "deny"

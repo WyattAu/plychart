@@ -172,12 +172,19 @@ pub fn analyze(highs: &[f64], lows: &[f64], closes: &[f64], volumes: &[f64]) -> 
 }
 
 #[derive(Debug, Clone)]
+/// Aggregated liquidity metrics for one instrument.
 pub struct LiquidityResult {
+    /// Amihud illiquidity: mean |return| / dollar volume.
     pub amihud: f64,
+    /// Corwin-Schultz high-low spread estimate.
     pub cs_spread: f64,
+    /// Roll implied effective spread from serial covariance.
     pub roll_spread: f64,
+    /// Kyle's lambda: price impact per unit of signed volume.
     pub kyle_lambda: f64,
+    /// Mean dollar volume per observation.
     pub avg_dollar_volume: f64,
+    /// Volume relative to shares outstanding (if provided).
     pub turnover_ratio: f64,
 }
 

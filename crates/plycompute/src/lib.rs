@@ -1,31 +1,65 @@
+//! plycompute — quantitative computation library for Rust/WASM.
+//!
+//! Portfolio analytics, risk metrics, derivatives pricing, and signal
+//! processing. Pure-Rust, allocation-light kernels with a JSON string layer
+//! ([`json`]) for zero-copy WASM/JS interop.
+#![deny(missing_docs)]
+
+/// Strategy backtesting — walk-forward engines, Sharpe attribution, cost models.
 pub mod backtest;
+/// Black-Scholes option pricing, Greeks, and implied volatility.
 pub mod blackscholes;
+/// Engle-Granger cointegration testing and half-life estimation.
 pub mod cointegration;
+/// Portfolio concentration metrics (HHI, Gini, entropy, effective N).
 pub mod concentration;
+/// Tail-dependence copula analysis (Kendall's tau, Spearman's rho).
 pub mod copula;
+/// Drawdown analysis — underwater curve, durations, recovery periods.
 pub mod drawdown;
+/// Multi-factor OLS regression for factor exposure analysis.
 pub mod factor;
+/// Hierarchical Risk Parity portfolio allocation.
 pub mod hrp;
+/// JSON string wrappers — collision-free JS-facing export layer.
 pub mod json;
+/// Liquidity metrics (Amihud, Kyle's lambda, CS spread, Roll spread).
 pub mod liquidity;
+/// Monte Carlo GBM simulation, percentile bands, and log returns.
 pub mod montecarlo;
+/// Holdings overlap analysis between ETFs and portfolios.
 pub mod overlap;
+/// Pairs-trading signal generation from cointegrated pairs.
 pub mod pairs;
+/// Portfolio optimization — efficient frontier, random and tangency portfolios.
 pub mod portfolio;
+/// Multi-asset portfolio backtest with periodic rebalancing.
 pub mod portfolio_backtest;
+/// Realized volatility decomposition — bipower variation, jump detection.
 pub mod realizedvol;
+/// Two-state Gaussian HMM regime detection with Viterbi decoding.
 pub mod regime;
+/// Risk metrics — VaR, Expected Shortfall, Sharpe, Sortino, histograms.
 pub mod risk;
+/// Component VaR decomposition and Kelly position sizing.
 pub mod risk_decomp;
+/// Deterministic xorshift128+ PRNG (seedable, WASM-safe).
 pub mod rng;
+/// SIMD-friendly math helpers.
 pub mod simd_utils;
+/// Matrix and regression statistics — correlation, covariance, inverse, solve.
 pub mod stats;
+/// Historical stress-test scenarios (2008, COVID, rate shocks, ...).
 pub mod stress;
+/// SVI (Stochastic Volatility Inspired) volatility-surface fitting.
 pub mod svi;
+/// Volatility estimators — EWMA, realized volatility, GARCH(1,1).
 pub mod volatility;
+/// Yield-curve fitting (Nelson-Siegel) and recession probability.
 pub mod yieldcurve;
 
 #[cfg(feature = "wasm-exports")]
+/// wasm-bindgen exports for direct JS interop (opt-in `wasm-exports` feature).
 pub mod wasm;
 
 #[cfg(test)]

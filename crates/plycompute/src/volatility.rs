@@ -127,12 +127,19 @@ fn log_likelihood(squared: &[f64], omega: f64, alpha: f64, beta: f64, init_var: 
 }
 
 #[derive(Debug, Clone)]
+/// Fitted GARCH(1,1) model with forecasts.
 pub struct GarchResult {
+    /// Constant variance term.
     pub omega: f64,
+    /// ARCH coefficient (reaction to shocks).
     pub alpha: f64,
+    /// GARCH coefficient (volatility persistence).
     pub beta: f64,
+    /// Unconditional (long-run) variance implied by the parameters.
     pub long_run_var: f64,
+    /// Fitted conditional variance at each timestep.
     pub conditional_vars: Vec<f64>,
+    /// Multi-step-ahead variance forecast.
     pub forecast: Vec<f64>,
 }
 

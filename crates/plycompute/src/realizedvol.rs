@@ -80,15 +80,25 @@ pub fn decompose(returns: &[f64]) -> RealizedVolDecomposition {
 }
 
 #[derive(Debug, Clone)]
+/// Realized-variance decomposition into continuous and jump components.
 pub struct RealizedVolDecomposition {
+    /// Total realized variance over the window.
     pub realized_var: f64,
+    /// Bipower variation (jump-robust variance estimate).
     pub bipower_var: f64,
+    /// Continuous (diffusive) variance component.
     pub continuous_var: f64,
+    /// Jump variance component (realized minus continuous).
     pub jump_var: f64,
+    /// Share of total variance attributable to jumps (0-1).
     pub jump_ratio: f64,
+    /// Annualized volatility derived from the realized variance.
     pub annualized_vol: f64,
+    /// Indices of days flagged as jumps (>4 sigma above the daily mean).
     pub jump_days: Vec<usize>,
+    /// Daily realized variance series.
     pub daily_rv: Vec<f64>,
+    /// Daily bipower variation series.
     pub daily_bv: Vec<f64>,
 }
 

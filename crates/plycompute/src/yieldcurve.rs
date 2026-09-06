@@ -5,10 +5,15 @@
 ///   f2(tau) = f1(tau) - exp(-tau/lambda)
 #[derive(Debug, Clone)]
 pub struct NelsonSiegelFit {
+    /// Long-run yield level.
     pub beta0: f64,
+    /// Short-term component (slope).
     pub beta1: f64,
+    /// Medium-term component (curvature).
     pub beta2: f64,
+    /// Time-constant of the exponential decay.
     pub lambda: f64,
+    /// Model yields at each input maturity.
     pub fitted: Vec<f64>,
 }
 

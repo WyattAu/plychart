@@ -140,14 +140,23 @@ pub fn montecarlo_from_prices(
 }
 
 #[derive(Debug, Clone)]
+/// Monte Carlo GBM forecast output with percentile bands.
 pub struct MonteCarloResult {
+    /// Annualized drift estimated from the input prices.
     pub drift: f64,
+    /// Annualized volatility estimated from the input prices.
     pub volatility: f64,
+    /// Last observed price (simulation starting point).
     pub s0: f64,
+    /// 5th-percentile price path.
     pub p5: Vec<f64>,
+    /// 25th-percentile price path.
     pub p25: Vec<f64>,
+    /// Median price path.
     pub p50: Vec<f64>,
+    /// 75th-percentile price path.
     pub p75: Vec<f64>,
+    /// 95th-percentile price path.
     pub p95: Vec<f64>,
 }
 
