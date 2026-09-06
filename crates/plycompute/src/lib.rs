@@ -12,6 +12,7 @@ pub mod montecarlo;
 pub mod overlap;
 pub mod pairs;
 pub mod portfolio;
+pub mod portfolio_backtest;
 pub mod realizedvol;
 pub mod regime;
 pub mod risk;
@@ -20,6 +21,7 @@ pub mod rng;
 pub mod simd_utils;
 pub mod stats;
 pub mod stress;
+pub mod svi;
 pub mod volatility;
 pub mod yieldcurve;
 

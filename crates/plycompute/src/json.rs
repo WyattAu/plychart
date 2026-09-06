@@ -4,8 +4,8 @@
 
 use crate::{
     backtest, blackscholes, cointegration, concentration, copula, drawdown, factor, hrp, liquidity,
-    montecarlo, overlap, pairs, portfolio, realizedvol, regime, risk, risk_decomp, rng, stats,
-    stress, volatility, yieldcurve,
+    montecarlo, overlap, pairs, portfolio, portfolio_backtest, realizedvol, regime, risk,
+    risk_decomp, rng, stats, stress, svi, volatility, yieldcurve,
 };
 pub fn quant_montecarlo(
     closes: &[f64],
@@ -743,6 +743,32 @@ pub fn quant_backtest(
         slippage_bps,
         commission_bps,
     ) {
+        Ok(r) => serde_json::to_string(&r).unwrap_or_else(|_| "{}".to_string()),
+        Err(e) => serde_json::to_string(&serde_json::json!({ "error": e }))
+            .unwrap_or_else(|_| "{}".to_string()),
+    }
+}
+
+/// Fit SVI volatility surface.
+/// slices_json: `[{t, k: [...], w: [...]}, ...]` (total variance w = iv^2 * t).
+/// Returns JSON SviSurface { slices, k_grid, surface_iv }.
+pub fn quant_svi_surface(slices_json: &str, k_points: usize) -> String {
+    let slices: Vec<svi::SliceQuotes> = serde_json::from_str(slices_json).unwrap_or_default();
+    let surf = svi::fit_surface(&slices, k_points);
+    serde_json::to_string(&surf).unwrap_or_else(|_| "{}".to_string())
+}
+
+/// Multi-asset portfolio backtest with periodic rebalancing.
+/// closes: flat row-major n_assets x n_periods close matrix.
+pub fn quant_portfolio_backtest(
+    closes: &[f64],
+    n_assets: usize,
+    n_periods: usize,
+    mode: &str,
+    rebalance_every: usize,
+    cost_bps: f64,
+) -> String {
+    match portfolio_backtest::run(closes, n_assets, n_periods, mode, rebalance_every, cost_bps) {
         Ok(r) => serde_json::to_string(&r).unwrap_or_else(|_| "{}".to_string()),
         Err(e) => serde_json::to_string(&serde_json::json!({ "error": e }))
             .unwrap_or_else(|_| "{}".to_string()),

@@ -248,3 +248,22 @@ pub fn quant_implied_vol(
 ) -> f64 {
     json::quant_implied_vol(market_price, spot, strike, t, r, is_call)
 }
+
+/// Fit SVI volatility surface. See json::quant_svi_surface.
+#[wasm_bindgen]
+pub fn quant_svi_surface(slices_json: &str, k_points: usize) -> String {
+    json::quant_svi_surface(slices_json, k_points)
+}
+
+/// Multi-asset portfolio backtest. See json::quant_portfolio_backtest.
+#[wasm_bindgen]
+pub fn quant_portfolio_backtest(
+    closes: &[f64],
+    n_assets: usize,
+    n_periods: usize,
+    mode: &str,
+    rebalance_every: usize,
+    cost_bps: f64,
+) -> String {
+    json::quant_portfolio_backtest(closes, n_assets, n_periods, mode, rebalance_every, cost_bps)
+}
