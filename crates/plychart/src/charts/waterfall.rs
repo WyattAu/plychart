@@ -38,10 +38,10 @@ pub fn draw(
         let h = f64::max(y_end - y_start, 1.0);
 
         let color = if b.value >= 0.0 { theme.up } else { theme.down };
-        ctx.set_fill_style(&color.into());
+        ctx.set_fill_style_str(color);
         ctx.fill_rect(x - bar_w / 2.0, y_start, bar_w, h);
 
-        ctx.set_stroke_style(&theme.text_muted.into());
+        ctx.set_stroke_style_str(theme.text_muted);
         ctx.set_line_width(0.5);
         ctx.begin_path();
         ctx.move_to(x - bar_w / 2.0, prev_y);
@@ -51,7 +51,7 @@ pub fn draw(
         );
         ctx.stroke();
 
-        ctx.set_stroke_style(&theme.text_muted.into());
+        ctx.set_stroke_style_str(theme.text_muted);
         ctx.set_line_width(0.5);
         ctx.begin_path();
         ctx.move_to(
@@ -66,7 +66,7 @@ pub fn draw(
 
         prev_y = if b.value >= 0.0 { y_start } else { y_end };
 
-        ctx.set_fill_style(&theme.text.into());
+        ctx.set_fill_style_str(theme.text);
         ctx.set_font("10px sans-serif");
         ctx.fill_text(&b.label, x - bar_w / 2.0, area.y + area.h + 12.0)
             .ok();

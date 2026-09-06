@@ -9,9 +9,9 @@ pub fn draw_price_grid(
     max_y: f64,
     theme: &plycore::ChartTheme,
 ) {
-    ctx.set_stroke_style(&theme.grid.into());
+    ctx.set_stroke_style_str(theme.grid);
     ctx.set_line_width(0.5);
-    ctx.set_fill_style(&theme.text_muted.into());
+    ctx.set_fill_style_str(theme.text_muted);
     ctx.set_font("9px 'JetBrains Mono', monospace");
 
     for i in 0..=4 {
@@ -37,9 +37,9 @@ pub fn draw_time_grid(
         return;
     }
 
-    ctx.set_stroke_style(&theme.grid.into());
+    ctx.set_stroke_style_str(theme.grid);
     ctx.set_line_width(0.5);
-    ctx.set_fill_style(&theme.text_muted.into());
+    ctx.set_fill_style_str(theme.text_muted);
     ctx.set_font("9px 'JetBrains Mono', monospace");
 
     let step = (timestamps.len() / 6).max(1);

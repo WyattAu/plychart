@@ -40,7 +40,7 @@ pub fn draw_lines(
         return;
     }
 
-    let (global_min, global_max, range) = match global_y_range(series) {
+    let (global_min, _global_max, range) = match global_y_range(series) {
         Some(v) => v,
         None => return,
     };
@@ -50,7 +50,7 @@ pub fn draw_lines(
             continue;
         }
 
-        ctx.set_stroke_style(&s.color.into());
+        ctx.set_stroke_style_str(s.color);
         ctx.set_line_width(1.5);
         ctx.begin_path();
 
@@ -79,7 +79,7 @@ pub fn draw_areas(
         return;
     }
 
-    let (global_min, global_max, range) = match global_y_range(series) {
+    let (global_min, _global_max, range) = match global_y_range(series) {
         Some(v) => v,
         None => return,
     };
@@ -92,7 +92,7 @@ pub fn draw_areas(
         }
 
         // Stroke line
-        ctx.set_stroke_style(&s.color.into());
+        ctx.set_stroke_style_str(s.color);
         ctx.set_line_width(1.5);
         ctx.begin_path();
 
@@ -122,9 +122,11 @@ pub fn draw_areas(
         ctx.close_path();
 
         let gradient = ctx.create_linear_gradient(0.0, area.y, 0.0, area.y + area.h);
-        gradient.add_color_stop(0.0, s.color);
-        gradient.add_color_stop(1.0, "transparent");
-        ctx.set_fill_style(&gradient.into());
+        gradient.add_color_stop(0.0, s.color).unwrap_or_default();
+        gradient
+            .add_color_stop(1.0, "transparent")
+            .unwrap_or_default();
+        ctx.set_fill_style_canvas_gradient(&gradient);
         ctx.fill();
     }
 }

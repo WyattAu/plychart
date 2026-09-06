@@ -7,8 +7,6 @@ pub fn draw(
     area: &plycore::ChartArea,
     theme: &plycore::ChartTheme,
 ) {
-    use wasm_bindgen::JsCast;
-
     if items.is_empty() {
         return;
     }
@@ -43,7 +41,7 @@ pub fn draw(
         let color = palette[i % palette.len()];
 
         // Draw slice
-        ctx.set_fill_style(&color.into());
+        ctx.set_fill_style_str(&color);
         ctx.begin_path();
         ctx.move_to(cx, cy);
         ctx.arc(cx, cy, radius, start_angle, end_angle)
@@ -55,21 +53,21 @@ pub fn draw(
     }
 
     // Draw inner circle (donut hole)
-    ctx.set_fill_style(&theme.bg.into());
+    ctx.set_fill_style_str(theme.bg);
     ctx.begin_path();
     ctx.arc(cx, cy, inner_radius, 0.0, std::f64::consts::TAU)
         .unwrap_or_default();
     ctx.fill();
 
     // Center label: total
-    ctx.set_fill_style(&theme.text.into());
+    ctx.set_fill_style_str(theme.text);
     ctx.set_font("bold 14px monospace");
     ctx.set_text_align("center");
     ctx.set_text_baseline("middle");
     let total_str = format_total(total);
     ctx.fill_text(&total_str, cx, cy - 8.0).unwrap_or_default();
 
-    ctx.set_fill_style(&theme.text_muted.into());
+    ctx.set_fill_style_str(theme.text_muted);
     ctx.set_font("10px monospace");
     ctx.fill_text("total", cx, cy + 10.0).unwrap_or_default();
 
@@ -93,10 +91,10 @@ pub fn draw(
             ly -= line_height;
         }
 
-        ctx.set_fill_style(&color.into());
+        ctx.set_fill_style_str(&color);
         ctx.fill_rect(lx, ly - 6.0, 8.0, 8.0);
 
-        ctx.set_fill_style(&theme.text_muted.into());
+        ctx.set_fill_style_str(theme.text_muted);
         ctx.set_font("9px monospace");
         ctx.set_text_align("left");
         ctx.fill_text(&text, lx + 12.0, ly + 1.0)

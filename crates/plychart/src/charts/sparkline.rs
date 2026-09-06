@@ -20,7 +20,7 @@ pub fn draw(
     let h = area.h - pad * 2.0;
 
     // Stroke line
-    ctx.set_stroke_style(&color.into());
+    ctx.set_stroke_style_str(color);
     ctx.set_line_width(1.5);
     ctx.begin_path();
 
@@ -54,9 +54,11 @@ pub fn draw(
 
     // Gradient fill
     let gradient = ctx.create_linear_gradient(0.0, area.y, 0.0, area.y + area.h);
-    gradient.add_color_stop(0.0, color);
-    gradient.add_color_stop(1.0, "transparent");
-    ctx.set_fill_style(&gradient.into());
+    gradient.add_color_stop(0.0, color).unwrap_or_default();
+    gradient
+        .add_color_stop(1.0, "transparent")
+        .unwrap_or_default();
+    ctx.set_fill_style_canvas_gradient(&gradient);
     ctx.fill();
 }
 

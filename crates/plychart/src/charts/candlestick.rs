@@ -34,7 +34,7 @@ pub fn draw(
         let color = if is_up { theme.up } else { theme.down };
 
         // Wick
-        ctx.set_stroke_style(&color.into());
+        ctx.set_stroke_style_str(color);
         ctx.set_line_width(1.0);
         ctx.begin_path();
         ctx.move_to(x, price_to_y(c.high));
@@ -45,7 +45,7 @@ pub fn draw(
         let body_top = price_to_y(c.open.max(c.close));
         let body_bot = price_to_y(c.open.min(c.close));
         let body_h = (body_bot - body_top).max(1.0);
-        ctx.set_fill_style(&color.into());
+        ctx.set_fill_style_str(color);
         ctx.fill_rect(x - candle_width / 2.0, body_top, candle_width, body_h);
     }
 }

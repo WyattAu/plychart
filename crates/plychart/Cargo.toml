@@ -28,14 +28,22 @@ web-sys = { version = "0.3", features = [
     "console",
     "ImageData",
     "Performance",
+    "Node",
 ] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 console_error_panic_hook = "0.1"
 
-[dev-dependencies]
+# Native-only dev-dependencies: criterion does not compile on wasm32, and
+# proptest 1.x pulls rand 0.9 -> getrandom 0.3, which needs the wasm_js
+# backend on wasm32-unknown-unknown. Both are only used by the native test
+# and bench suites; browser tests (tests/wasm.rs) use wasm-bindgen-test.
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }
 proptest = "1"
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+wasm-bindgen-test = "0.3"
 
 [package.metadata.wasm-pack.profile.release]
 wasm-opt = false

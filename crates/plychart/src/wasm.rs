@@ -378,7 +378,7 @@ pub fn update_sparkline(
 pub fn get_tooltip_data(
     canvas_id: &str,
     x: f64,
-    y: f64,
+    _y: f64,
     data_json: &str,
     series_index: usize,
 ) -> Result<String, JsValue> {

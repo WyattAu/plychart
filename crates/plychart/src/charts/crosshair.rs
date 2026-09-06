@@ -9,9 +9,9 @@ pub fn draw_crosshair(
     area: &plycore::ChartArea,
     theme: &plycore::ChartTheme,
 ) {
-    ctx.set_stroke_style(&theme.crosshair.into());
+    ctx.set_stroke_style_str(theme.crosshair);
     ctx.set_line_width(0.5);
-    ctx.set_line_dash(&js_sys::Array::of2(&2.0.into(), &2.0.into()));
+    let _ = ctx.set_line_dash(&js_sys::Array::of2(&2.0.into(), &2.0.into()));
 
     ctx.begin_path();
     ctx.move_to(area.x, my);
@@ -23,7 +23,7 @@ pub fn draw_crosshair(
     ctx.line_to(mx, area.y + area.h);
     ctx.stroke();
 
-    ctx.set_line_dash(&js_sys::Array::new());
+    let _ = ctx.set_line_dash(&js_sys::Array::new());
 }
 
 /// Draw OHLC readout text at top-left for nearest candle.
@@ -55,7 +55,7 @@ pub fn draw_ohlc_readout(
         c.open, c.high, c.low, c.close
     );
     ctx.set_font("10px 'JetBrains Mono', monospace");
-    ctx.set_fill_style(&theme.text.into());
+    ctx.set_fill_style_str(theme.text);
     let _ = ctx.fill_text(&text, 10.0, 16.0);
 }
 

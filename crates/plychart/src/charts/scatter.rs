@@ -17,7 +17,7 @@ pub fn draw(
     let range_x = (max_x - min_x).max(1.0);
     let range_y = (max_y - min_y).max(1.0);
 
-    ctx.set_fill_style(&color.into());
+    ctx.set_fill_style_str(color);
     for (x_val, y_val) in points {
         let x = area.x + (x_val - min_x) / range_x * area.w;
         let y = area.y + area.h - (y_val - min_y) / range_y * area.h;
@@ -65,7 +65,7 @@ pub fn draw_multi(
     let range_y = (max_y - min_y).max(1.0);
 
     for (points, color) in series {
-        ctx.set_fill_style(&(*color).into());
+        ctx.set_fill_style_str(*color);
         for &(x_val, y_val) in points.iter() {
             let x = area.x + (x_val - min_x) / range_x * area.w;
             let y = area.y + area.h - (y_val - min_y) / range_y * area.h;

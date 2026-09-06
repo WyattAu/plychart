@@ -42,7 +42,7 @@ fn draw_impl(
 
     if (max - min).abs() < f64::EPSILON {
         // All values identical — draw single bar
-        ctx.set_fill_style(&theme.accent.into());
+        ctx.set_fill_style_str(theme.accent);
         ctx.fill_rect(area.x, area.y, area.w, area.h);
         return;
     }
@@ -80,12 +80,12 @@ fn draw_impl(
         let is_tail = i as f64 / bin_count as f64 > 0.8;
         let color = if is_tail { theme.down } else { theme.accent };
 
-        ctx.set_fill_style(&color.into());
+        ctx.set_fill_style_str(color);
         ctx.fill_rect(x + gap / 2.0, y, bar_w - gap, bar_h);
     }
 
     // Axis labels
-    ctx.set_fill_style(&theme.text_muted.into());
+    ctx.set_fill_style_str(theme.text_muted);
     ctx.set_font("9px monospace");
     ctx.set_text_align("left");
     ctx.fill_text(&format!("{min:.2}"), area.x + 2.0, area.y + area.h - 2.0)

@@ -27,9 +27,9 @@ pub fn draw(
     for (i, &(price, size)) in bids.iter().enumerate() {
         let y = area.y + i as f64 * level_h;
         let w = (size / max_size) * bar_max_w;
-        ctx.set_fill_style(&theme.up.into());
+        ctx.set_fill_style_str(theme.up);
         ctx.fill_rect(mid_x - w, y, w, level_h - 1.0);
-        ctx.set_fill_style(&theme.text.into());
+        ctx.set_fill_style_str(theme.text);
         ctx.fill_text(
             &format!("{:.2}", price),
             mid_x - w - 48.0,
@@ -47,16 +47,16 @@ pub fn draw(
     for (i, &(price, size)) in asks.iter().enumerate() {
         let y = area.y + i as f64 * level_h;
         let w = (size / max_size) * bar_max_w;
-        ctx.set_fill_style(&theme.down.into());
+        ctx.set_fill_style_str(theme.down);
         ctx.fill_rect(mid_x, y, w, level_h - 1.0);
-        ctx.set_fill_style(&theme.text.into());
+        ctx.set_fill_style_str(theme.text);
         ctx.fill_text(&format!("{:.2}", price), mid_x + 4.0, y + level_h * 0.7)
             .ok();
         ctx.fill_text(&format!("{:.4}", size), mid_x + 52.0, y + level_h * 0.7)
             .ok();
     }
 
-    ctx.set_stroke_style(&theme.grid.into());
+    ctx.set_stroke_style_str(theme.grid);
     ctx.set_line_width(1.0);
     ctx.begin_path();
     ctx.move_to(mid_x, area.y);

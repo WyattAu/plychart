@@ -31,7 +31,7 @@ pub fn draw(
             let norm = ((val - min_val) / range) as f32;
             let g = ((norm * 255.0) as u8).max(1);
             let color = format!("rgb({},{},{})", 30 + g / 3, 30 + g, 30 + g / 2);
-            ctx.set_fill_style(&color.into());
+            ctx.set_fill_style_str(&color);
             ctx.fill_rect(
                 area.x + c as f64 * cell_w,
                 area.y + r as f64 * cell_h,
@@ -76,7 +76,7 @@ pub fn draw_diverging(
             let base = if t >= 0.0 { theme.accent } else { theme.down };
             let a = t.abs() * 0.9;
             let color = format!("{base}{:02x}", (a * 255.0) as u8);
-            ctx.set_fill_style(&color.into());
+            ctx.set_fill_style_str(&color);
             ctx.fill_rect(
                 area.x + c as f64 * cell_w,
                 area.y + r as f64 * cell_h,

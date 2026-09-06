@@ -22,7 +22,7 @@ pub fn draw(
             let red = (norm * 255.0) as u8;
             let blue = ((1.0 - norm) * 255.0) as u8;
             let color = format!("rgb({},{},{})", red, 255 - red.abs_diff(blue) / 2, blue);
-            ctx.set_fill_style(&color.into());
+            ctx.set_fill_style_str(&color);
             ctx.fill_rect(
                 area.x + label_w + c as f64 * cell_w,
                 area.y + r as f64 * cell_h,
@@ -30,7 +30,7 @@ pub fn draw(
                 cell_h - 1.0,
             );
 
-            ctx.set_fill_style(&"#e0e0e0".into());
+            ctx.set_fill_style_str("#e0e0e0");
             ctx.set_font("9px sans-serif");
             ctx.fill_text(
                 &format!("{:.2}", val),
@@ -41,7 +41,7 @@ pub fn draw(
         }
     }
 
-    ctx.set_fill_style(&"#e0e0e0".into());
+    ctx.set_fill_style_str("#e0e0e0");
     ctx.set_font("9px sans-serif");
     for i in 0..n {
         if i < labels.len() {

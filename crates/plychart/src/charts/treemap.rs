@@ -56,12 +56,12 @@ pub fn draw(
 
     for (i, (rx, ry, rw, rh, idx)) in rects.iter().enumerate() {
         let color = palette[i % palette.len()];
-        ctx.set_fill_style(&color.into());
+        ctx.set_fill_style_str(&color);
         ctx.fill_rect(*rx, *ry, *rw, *rh);
 
         let (ref name, val) = items[*idx];
         let text = format!("{} {:.2}", name, val);
-        ctx.set_fill_style(&"#ffffff".into());
+        ctx.set_fill_style_str("#ffffff");
         ctx.set_font("10px sans-serif");
         ctx.fill_text(&text, *rx + 3.0, *ry + 12.0).ok();
     }

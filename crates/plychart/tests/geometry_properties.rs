@@ -1,3 +1,8 @@
+//! Geometry property tests (proptest). These run in the native CI job;
+//! proptest's entropy source is unavailable on wasm32-unknown-unknown, so
+//! the wasm browser job runs tests/wasm.rs instead.
+#![cfg(not(target_arch = "wasm32"))]
+
 use plychart::ChartInteraction;
 use proptest::prelude::*;
 

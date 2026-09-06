@@ -121,6 +121,9 @@ mod tests {
         assert_eq!(chart.chart_type(), ChartType::Candlestick);
     }
 
+    // Native-stub tests: on wasm32 these entry points require a real DOM
+    // canvas and return Err — browser coverage lives in tests/wasm.rs.
+    #[cfg(not(target_arch = "wasm32"))]
     #[test]
     fn create_canvas_chart_native_ok() {
         let result = create_canvas_chart("nonexistent", 800, 600);
@@ -167,12 +170,14 @@ mod tests {
         assert_ne!(ChartType::Candlestick, ChartType::Line);
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     #[test]
     fn canvas_update_empty_data() {
         let chart = CanvasChart::new("c");
         assert!(chart.update(&[]).is_ok());
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     #[test]
     fn canvas_update_single_candle() {
         let chart = CanvasChart::new("c");
@@ -187,6 +192,7 @@ mod tests {
         assert!(chart.update(&data).is_ok());
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     #[test]
     fn canvas_update_line_type() {
         let chart = CanvasChart::new("c").with_chart_type(ChartType::Line);
@@ -201,6 +207,7 @@ mod tests {
         assert!(chart.update(&data).is_ok());
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     #[test]
     fn canvas_update_area_type() {
         let chart = CanvasChart::new("c").with_chart_type(ChartType::Area);
@@ -215,6 +222,7 @@ mod tests {
         assert!(chart.update(&data).is_ok());
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     #[test]
     fn canvas_update_bar_type() {
         let chart = CanvasChart::new("c").with_chart_type(ChartType::Bar);
@@ -229,6 +237,7 @@ mod tests {
         assert!(chart.update(&data).is_ok());
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     #[test]
     fn device_pixel_ratio_native() {
         assert_eq!(canvas::device_pixel_ratio(), 1.0);

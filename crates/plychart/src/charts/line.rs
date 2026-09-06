@@ -27,7 +27,7 @@ pub fn draw(
     let index_to_x =
         |i: usize| -> f64 { area.x + (i as f64 / (points.len() - 1).max(1) as f64) * area.w };
 
-    ctx.set_stroke_style(&color.into());
+    ctx.set_stroke_style_str(color);
     ctx.set_line_width(1.5);
     ctx.begin_path();
     for (i, c) in points.iter().enumerate() {

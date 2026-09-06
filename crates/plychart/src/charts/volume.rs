@@ -20,7 +20,7 @@ pub fn draw_volume(
         let h = (c.volume / max_vol) * area.h;
         let is_up = c.close >= c.open;
         let color = if is_up { theme.up } else { theme.down };
-        ctx.set_fill_style(&color.into());
+        ctx.set_fill_style_str(color);
         ctx.set_global_alpha(0.3);
         ctx.fill_rect(x - bar_w / 2.0, area.y + area.h - h, bar_w, h);
     }

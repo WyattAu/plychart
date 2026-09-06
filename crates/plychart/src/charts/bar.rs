@@ -33,7 +33,7 @@ pub fn draw(
         } else {
             area.y + area.h
         };
-        ctx.set_fill_style(&color.into());
+        ctx.set_fill_style_str(color);
         ctx.fill_rect(x - bar_w / 2.0, y, bar_w, h);
     }
 }

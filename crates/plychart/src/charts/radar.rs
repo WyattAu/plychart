@@ -25,7 +25,7 @@ pub fn draw(
         let ex = cx + angle.cos() * radius;
         let ey = cy + angle.sin() * radius;
 
-        ctx.set_stroke_style(&"#333333".into());
+        ctx.set_stroke_style_str("#333333");
         ctx.set_line_width(0.5);
         ctx.begin_path();
         ctx.move_to(cx, cy);
@@ -35,14 +35,14 @@ pub fn draw(
         let lx = cx + angle.cos() * (radius + 14.0);
         let ly = cy + angle.sin() * (radius + 14.0);
         if i < labels.len() {
-            ctx.set_fill_style(&"#e0e0e0".into());
+            ctx.set_fill_style_str("#e0e0e0");
             ctx.fill_text(labels[i], lx, ly).ok();
         }
     }
 
-    ctx.set_stroke_style(&color.into());
+    ctx.set_stroke_style_str(color);
     ctx.set_line_width(1.5);
-    ctx.set_fill_style(&format!("{}33", color).into());
+    ctx.set_fill_style_str(&format!("{}33", color));
     ctx.begin_path();
     for (i, v) in values.iter().enumerate() {
         let angle = (i as f64 / n as f64) * std::f64::consts::TAU - std::f64::consts::FRAC_PI_2;
@@ -92,7 +92,7 @@ pub fn draw_multi(
         let ex = cx + angle.cos() * radius;
         let ey = cy + angle.sin() * radius;
 
-        ctx.set_stroke_style(&"#333333".into());
+        ctx.set_stroke_style_str("#333333");
         ctx.set_line_width(0.5);
         ctx.begin_path();
         ctx.move_to(cx, cy);
@@ -102,7 +102,7 @@ pub fn draw_multi(
         let lx = cx + angle.cos() * (radius + 14.0);
         let ly = cy + angle.sin() * (radius + 14.0);
         if i < labels.len() {
-            ctx.set_fill_style(&"#e0e0e0".into());
+            ctx.set_fill_style_str("#e0e0e0");
             ctx.fill_text(labels[i], lx, ly).ok();
         }
     }
@@ -110,7 +110,7 @@ pub fn draw_multi(
     // Draw grid rings
     for ring in 1..=5 {
         let r = radius * ring as f64 / 5.0;
-        ctx.set_stroke_style(&"#333333".into());
+        ctx.set_stroke_style_str("#333333");
         ctx.set_line_width(0.3);
         ctx.begin_path();
         for i in 0..n {
@@ -129,9 +129,9 @@ pub fn draw_multi(
 
     // Draw each series
     for (values, color) in series {
-        ctx.set_stroke_style(&(*color).into());
+        ctx.set_stroke_style_str(*color);
         ctx.set_line_width(1.8);
-        ctx.set_fill_style(&format!("{}1F", color).into()); // 0.12 alpha = 0x1F
+        ctx.set_fill_style_str(&format!("{}1F", color)); // 0.12 alpha = 0x1F
         ctx.begin_path();
         for (i, v) in values.iter().enumerate() {
             let angle = (i as f64 / n as f64) * std::f64::consts::TAU - std::f64::consts::FRAC_PI_2;
@@ -149,7 +149,7 @@ pub fn draw_multi(
         ctx.stroke();
 
         // Draw vertices
-        ctx.set_fill_style(&(*color).into());
+        ctx.set_fill_style_str(*color);
         for (i, v) in values.iter().enumerate() {
             let angle = (i as f64 / n as f64) * std::f64::consts::TAU - std::f64::consts::FRAC_PI_2;
             let r = (v / max_val) * radius;

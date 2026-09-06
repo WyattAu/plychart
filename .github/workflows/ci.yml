@@ -74,11 +74,37 @@ jobs:
           test -f pkg/plychart_bg.wasm
           echo "pkg/ output verified"
 
+  wasm-test:
+    name: Wasm Browser Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: wasm-test-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+      - name: Install Chrome
+        id: chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+      - uses: taiki-e/install-action@wasm-pack
+      - name: Run browser tests (tests/wasm.rs)
+        run: wasm-pack test --headless --chrome crates/plychart
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+
   publish-dry-run:
     name: Publish Dry Run
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    needs: [fmt, clippy, test, wasm-pack]
+    needs: [fmt, clippy, test, wasm-pack, wasm-test]
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable

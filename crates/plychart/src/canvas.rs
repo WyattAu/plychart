@@ -52,7 +52,7 @@ pub(crate) fn get_canvas_context(
     // setTransform REPLACES the matrix. ctx.scale() would accumulate across
     // every update_* call (dpr, dpr^2, dpr^3, ...) — the root cause of
     // charts overlapping/ghosting when data changes.
-    ctx.set_transform(dpr, 0.0, 0.0, dpr, 0.0, 0.0);
+    let _ = ctx.set_transform(dpr, 0.0, 0.0, dpr, 0.0, 0.0);
 
     Ok((ctx, width, height))
 }
@@ -85,9 +85,9 @@ pub fn create_chart(canvas_id: &str, width: u32, height: u32) -> Result<(), crat
         .dyn_into::<CanvasRenderingContext2d>()
         .map_err(|_| crate::ChartError::RenderError("Not a CanvasRenderingContext2d".into()))?;
     // Replace (not multiply) the transform — safe on repeat calls.
-    ctx.set_transform(dpr, 0.0, 0.0, dpr, 0.0, 0.0);
+    let _ = ctx.set_transform(dpr, 0.0, 0.0, dpr, 0.0, 0.0);
 
-    ctx.set_fill_style(&"#0a0a0a".into());
+    ctx.set_fill_style_str("#0a0a0a");
     ctx.fill_rect(0.0, 0.0, width as f64, height as f64);
 
     Ok(())
@@ -101,7 +101,7 @@ pub fn create_chart(_canvas_id: &str, _width: u32, _height: u32) -> Result<(), c
 /// Fill canvas with background color.
 #[cfg(target_arch = "wasm32")]
 pub fn clear_canvas(ctx: &web_sys::CanvasRenderingContext2d, bg: &str, w: f64, h: f64) {
-    ctx.set_fill_style(&bg.into());
+    ctx.set_fill_style_str(bg);
     ctx.fill_rect(0.0, 0.0, w, h);
 }
 
@@ -135,7 +135,7 @@ pub fn update_candles(
         1 => {
             let x = area.x + area.w / 2.0;
             let y = area.y + area.h / 2.0;
-            ctx.set_fill_style(&theme.accent.into());
+            ctx.set_fill_style_str(theme.accent);
             ctx.begin_path();
             ctx.arc(x, y, 4.0, 0.0, std::f64::consts::TAU)
                 .unwrap_or_default();
@@ -859,8 +859,8 @@ pub fn destroy_chart(canvas_id: &str) -> Result<(), crate::ChartError> {
                     if let Ok(Some(ctx_obj)) = canvas.get_context("2d") {
                         if let Ok(ctx) = ctx_obj.dyn_into::<web_sys::CanvasRenderingContext2d>() {
                             // Reset transform so clear covers the full device canvas.
-                            ctx.set_transform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0);
-                            ctx.clear_rect(0.0, 0.0, width as f64, height as f64);
+                            let _ = ctx.set_transform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+                            let _ = ctx.clear_rect(0.0, 0.0, width as f64, height as f64);
                         }
                     }
                 }

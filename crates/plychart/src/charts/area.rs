@@ -30,9 +30,9 @@ pub fn draw(
 
     // Area fill
     let grad = ctx.create_linear_gradient(0.0, area.y, 0.0, area.y + area.h);
-    grad.add_color_stop(0.0, color);
-    grad.add_color_stop(1.0, "transparent");
-    ctx.set_fill_style(&grad.into());
+    grad.add_color_stop(0.0, color).unwrap_or_default();
+    grad.add_color_stop(1.0, "transparent").unwrap_or_default();
+    ctx.set_fill_style_canvas_gradient(&grad);
     ctx.begin_path();
     ctx.move_to(index_to_x(0), area.y + area.h);
     for (i, c) in points.iter().enumerate() {

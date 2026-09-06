@@ -49,7 +49,7 @@ pub fn draw(
             } else {
                 ctx.set_global_alpha(0.9);
             }
-            ctx.set_fill_style(&color.into());
+            ctx.set_fill_style_str(color);
             ctx.fill_rect(x, y, bar_w, h);
             ctx.set_global_alpha(1.0);
         }
@@ -57,14 +57,14 @@ pub fn draw(
         // total count on top
         let total: f64 = segs.iter().sum();
         if total > 0.0 {
-            ctx.set_fill_style(&theme.text.into());
+            ctx.set_fill_style_str(theme.text);
             ctx.set_font("bold 9px monospace");
             ctx.set_text_align("center");
             let _ = ctx.fill_text(&format!("{:.0}", total), x + bar_w / 2.0, y - 4.0);
         }
 
         // category label
-        ctx.set_fill_style(&theme.text_muted.into());
+        ctx.set_fill_style_str(theme.text_muted);
         ctx.set_font("8px monospace");
         ctx.set_text_align("center");
         let label = labels[i];
@@ -77,7 +77,7 @@ pub fn draw(
     }
 
     // Y-axis ticks
-    ctx.set_fill_style(&theme.text_muted.into());
+    ctx.set_fill_style_str(theme.text_muted);
     ctx.set_font("8px monospace");
     ctx.set_text_align("right");
     for k in 0..=4 {

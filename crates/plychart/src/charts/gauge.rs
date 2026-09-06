@@ -13,7 +13,7 @@ pub fn draw(
     let radius = (area.w / 2.0 - 20.0).min(area.h * 0.7);
 
     // Background arc
-    ctx.set_stroke_style(&"rgba(255,255,255,0.1)".into());
+    ctx.set_stroke_style_str("rgba(255,255,255,0.1)");
     ctx.set_line_width(8.0);
     ctx.begin_path();
     ctx.arc(cx, cy, radius, std::f64::consts::PI, 0.0)
@@ -22,7 +22,7 @@ pub fn draw(
 
     // Value arc
     let ratio = (value / max).clamp(0.0, 1.0);
-    ctx.set_stroke_style(&color.into());
+    ctx.set_stroke_style_str(color);
     ctx.set_line_width(8.0);
     ctx.begin_path();
     ctx.arc(
@@ -36,7 +36,7 @@ pub fn draw(
     ctx.stroke();
 
     // Value text
-    ctx.set_fill_style(&"#ffffff".into());
+    ctx.set_fill_style_str("#ffffff");
     ctx.set_font("bold 16px monospace");
     let _ = ctx.fill_text(&format!("{:.1}", value), cx - 20.0, cy);
 }
@@ -58,10 +58,10 @@ pub fn draw_zoned(
     let cy = area.y + area.h * 0.8;
     let radius = (area.w / 2.0 - 20.0).min(area.h * 0.7);
 
-    ctx.set_stroke_style(&"rgba(255,255,255,0.4)".into());
+    ctx.set_stroke_style_str("rgba(255,255,255,0.4)");
     ctx.set_line_width(1.0);
     ctx.set_font("8px monospace");
-    ctx.set_fill_style(&"rgba(255,255,255,0.45)".into());
+    ctx.set_fill_style_str("rgba(255,255,255,0.45)");
     ctx.set_text_align("center");
 
     for &z in zones {

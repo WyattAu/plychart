@@ -20,7 +20,7 @@ pub fn draw(
     let max_eq = equity.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
     let eq_range = (max_eq - min_eq).max(1.0);
 
-    ctx.set_stroke_style(&theme.accent.into());
+    ctx.set_stroke_style_str(theme.accent);
     ctx.set_line_width(1.5);
     ctx.begin_path();
     for (i, &val) in equity.iter().enumerate() {
@@ -40,7 +40,7 @@ pub fn draw(
         let max_dd = drawdown.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
         let dd_range = (max_dd - min_dd).abs().max(1.0);
 
-        ctx.set_stroke_style(&theme.down.into());
+        ctx.set_stroke_style_str(theme.down);
         ctx.set_line_width(1.5);
         ctx.begin_path();
         for (i, &val) in drawdown.iter().enumerate() {
