@@ -5,33 +5,7 @@ use wasm_bindgen::prelude::*;
 
 /// Parse a theme JSON string. Empty string or invalid JSON defaults to dark theme.
 fn parse_theme(theme_json: &str) -> ChartTheme {
-    if theme_json.is_empty() {
-        return ChartTheme::dark();
-    }
-    // ChartTheme has &'static str fields, so we deserialize into an owned
-    // helper struct and map to static string constants.
-    #[derive(serde::Deserialize, Default)]
-    struct OwnedTheme {
-        bg: Option<String>,
-        accent: Option<String>,
-        up: Option<String>,
-        down: Option<String>,
-    }
-    let owned: OwnedTheme = serde_json::from_str(theme_json).unwrap_or_default();
-    let mut t = ChartTheme::dark();
-    if let Some(ref bg) = owned.bg {
-        if bg.as_str() == "#ffffff" {
-            t = ChartTheme::light();
-        } else if bg.as_str() == "#0c0c0c" {
-            t = ChartTheme::midnight();
-        }
-    }
-    if let Some(ref accent) = owned.accent {
-        if accent.as_str() == "#00e5ff" {
-            t = ChartTheme::midnight();
-        }
-    }
-    t
+    crate::theme::theme_from_json(theme_json)
 }
 
 /// Input format for multi-series data.

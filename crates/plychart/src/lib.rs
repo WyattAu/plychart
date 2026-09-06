@@ -4,6 +4,7 @@
 
 pub mod canvas;
 pub mod charts;
+pub mod color;
 pub mod interaction;
 pub mod theme;
 pub mod types;
