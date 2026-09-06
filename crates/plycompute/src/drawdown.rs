@@ -58,11 +58,7 @@ pub fn analyze_drawdowns(prices: &[f64]) -> DrawdownResult {
     }
 
     let current_drawdown = *underwater.last().unwrap_or(&0.0);
-    let max_dd_duration = if max_dd_trough > max_dd_peak {
-        max_dd_trough - max_dd_peak
-    } else {
-        0
-    };
+    let max_dd_duration = max_dd_trough.saturating_sub(max_dd_peak);
 
     DrawdownResult {
         underwater,
@@ -151,7 +147,7 @@ mod tests {
         let prices = vec![100.0, 110.0, 90.0, 95.0, 120.0];
         let dd = analyze_drawdowns(&prices);
         // Should have at least 1 recovery period
-        assert!(dd.recovery_periods.len() >= 0);
+        assert!(!dd.recovery_periods.is_empty());
         // Max DD should be (110-90)/110
         assert!((dd.max_drawdown - (20.0 / 110.0)).abs() < 0.001);
     }

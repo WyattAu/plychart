@@ -201,13 +201,13 @@ mod tests {
     fn crosshair_lines_within_area() {
         let mx = AREA.x + AREA.w / 2.0;
         let my = AREA.y + AREA.h / 2.0;
-        assert!(mx >= AREA.x && mx <= AREA.x + AREA.w);
-        assert!(my >= AREA.y && my <= AREA.y + AREA.h);
+        assert!((AREA.x..=AREA.x + AREA.w).contains(&mx));
+        assert!((AREA.y..=AREA.y + AREA.h).contains(&my));
     }
 
     #[test]
     fn ohlc_readout_text_no_nan() {
-        let candles = vec![CandleData {
+        let candles = [CandleData {
             time: 1.0,
             open: 0.001,
             high: 999999.0,

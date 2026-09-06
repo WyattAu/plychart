@@ -48,7 +48,7 @@ pub fn hrp_allocate(returns: &[f64], n_assets: usize, n_periods: usize) -> Vec<f
         variances[i] = cov[i * n_assets + i].max(1e-12);
     }
 
-    recursive_bisection(&order, &mut weights, &variances, &cov, n_assets);
+    recursive_bisection(&order, &mut weights, &cov, n_assets);
 
     weights
 }
@@ -91,13 +91,7 @@ fn cluster(dist: &[f64], n: usize) -> Vec<usize> {
 }
 
 /// Recursive bisection: split the ordered list, allocate inverse-variance weights.
-fn recursive_bisection(
-    order: &[usize],
-    weights: &mut [f64],
-    variances: &[f64],
-    cov: &[f64],
-    n: usize,
-) {
+fn recursive_bisection(order: &[usize], weights: &mut [f64], cov: &[f64], n: usize) {
     if order.len() <= 1 {
         return;
     }
@@ -122,8 +116,8 @@ fn recursive_bisection(
     }
 
     // Recurse
-    recursive_bisection(left, weights, variances, cov, n);
-    recursive_bisection(right, weights, variances, cov, n);
+    recursive_bisection(left, weights, cov, n);
+    recursive_bisection(right, weights, cov, n);
 }
 
 /// Compute the variance of a cluster using inverse-variance weighting.

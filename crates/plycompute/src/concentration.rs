@@ -1,5 +1,4 @@
 /// Concentration metrics for portfolio analysis.
-
 /// Herfindahl-Hirschman Index (HHI).
 /// Sum of squared weights (0-10000 scale for percentages).
 /// <1500 = competitive, 1500-2500 = moderately concentrated, >2500 = highly concentrated.

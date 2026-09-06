@@ -122,11 +122,11 @@ pub fn detect_regimes(returns: &[f64], max_iter: usize) -> RegimeResult {
         }
 
         // M-step: update parameters
-        let mut new_init = vec![0.0; 2];
-        let mut new_means = vec![0.0; 2];
-        let mut new_var = vec![0.0; 2];
-        let mut new_trans_num = vec![0.0; 4];
-        let mut new_trans_den = vec![0.0; 2];
+        let mut new_init = [0.0; 2];
+        let mut new_means = [0.0; 2];
+        let mut new_var = [0.0; 2];
+        let mut new_trans_num = [0.0; 4];
+        let mut new_trans_den = [0.0; 2];
 
         for s in 0..2 {
             new_init[s] = gamma[s * n];
@@ -150,7 +150,7 @@ pub fn detect_regimes(returns: &[f64], max_iter: usize) -> RegimeResult {
         // Update transition matrix
         for t in 0..(n - 1) {
             let mut denom = 0.0;
-            let mut xi = vec![0.0; 4];
+            let mut xi = [0.0; 4];
             for (i, j) in [(0, 0), (0, 1), (1, 0), (1, 1)].iter() {
                 xi[i * 2 + j] = alpha[i * n + t]
                     * trans[i * 2 + j]
@@ -181,7 +181,7 @@ pub fn detect_regimes(returns: &[f64], max_iter: usize) -> RegimeResult {
         for i in 0..2 {
             for j in 0..2 {
                 let val = new_trans_num[i * 2 + j] / new_trans_den[i];
-                trans[i * 2 + j] = trans[i * 2 + j] * 0.7 + val.max(0.001).min(0.999) * 0.3;
+                trans[i * 2 + j] = trans[i * 2 + j] * 0.7 + val.clamp(0.001, 0.999) * 0.3;
             }
         }
 
@@ -265,8 +265,8 @@ fn viterbi(
     // Traceback
     let mut states = vec![0usize; n];
     let mut probs = vec![0.0; n];
-    let final0 = viterbi_log[0 * n + (n - 1)];
-    let final1 = viterbi_log[1 * n + (n - 1)];
+    let final0 = viterbi_log[n - 1];
+    let final1 = viterbi_log[n + (n - 1)];
     states[n - 1] = if final1 > final0 { 1 } else { 0 };
 
     // Probability of being in state 1 (high-vol regime)

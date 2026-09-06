@@ -200,6 +200,7 @@ fn eval_strategy(
 /// # Errors
 ///
 /// Returns `InvalidData` when inputs are too short or malformed.
+#[allow(clippy::too_many_arguments)]
 pub fn walk_forward(
     closes: &[f64],
     strategy: Strategy,

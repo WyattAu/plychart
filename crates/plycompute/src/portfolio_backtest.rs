@@ -166,7 +166,9 @@ pub fn run(
                 .sum();
             let day_cost = turnover * cost_rate;
             total_cost += day_cost;
-            equity.last_mut().map(|e| *e *= 1.0 - day_cost);
+            if let Some(e) = equity.last_mut() {
+                *e *= 1.0 - day_cost;
+            }
             weights = target;
             rebalance_count += 1;
             rebalances.push((t, weights.clone()));

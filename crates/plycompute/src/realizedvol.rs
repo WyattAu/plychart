@@ -53,8 +53,8 @@ pub fn decompose(returns: &[f64]) -> RealizedVolDecomposition {
     };
     let mut jump_days: Vec<usize> = Vec::new();
     if std_daily_rv > 0.0 {
-        for i in 0..n {
-            if daily_rv[i] > mean_daily_rv + 4.0 * std_daily_rv {
+        for (i, &rv_i) in daily_rv.iter().enumerate() {
+            if rv_i > mean_daily_rv + 4.0 * std_daily_rv {
                 jump_days.push(i);
             }
         }
@@ -120,7 +120,7 @@ mod tests {
                 if i == 50 {
                     0.15
                 } else {
-                    ((i as f64 * 0.1).sin() * 0.005)
+                    (i as f64 * 0.1).sin() * 0.005
                 }
             })
             .collect();

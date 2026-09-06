@@ -11,7 +11,7 @@ pub fn tail_dependence(x: &[f64], y: &[f64], q: f64) -> TailDependence {
         };
     }
 
-    let q = q.max(0.01).min(0.20); // clamp
+    let q = q.clamp(0.01, 0.20); // clamp
 
     // Sort copies to find quantile thresholds
     let mut x_sorted = x[..n].to_vec();

@@ -40,11 +40,6 @@ proptest = "1"
 [package.metadata.wasm-pack.profile.release]
 wasm-opt = false
 
-[profile.release]
-opt-level = "s"
-lto = true
-codegen-units = 1
-
 [[bench]]
 name = "chart_render"
 harness = false

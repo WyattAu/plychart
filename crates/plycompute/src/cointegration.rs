@@ -85,7 +85,7 @@ fn adf_test(series: &[f64]) -> f64 {
 
     // Standard error of beta_hat[1] (coefficient on y_lag)
     // se = sqrt(sigma2 * (XtX^{-1})[1,1])
-    let se = (sigma2 * inv[1 * k + 1]).max(1e-20).sqrt();
+    let se = (sigma2 * inv[k + 1]).max(1e-20).sqrt();
 
     // t-statistic
     if se > 0.0 { beta_hat[1] / se } else { 0.0 }
@@ -111,9 +111,7 @@ fn matrix_inverse(m: &[f64], n: usize) -> Option<Vec<f64>> {
         }
         if pivot != col {
             for j in 0..(2 * n) {
-                let tmp = aug[col * 2 * n + j];
-                aug[col * 2 * n + j] = aug[pivot * 2 * n + j];
-                aug[pivot * 2 * n + j] = tmp;
+                aug.swap(col * 2 * n + j, pivot * 2 * n + j);
             }
         }
         let pivot_val = aug[col * 2 * n + col];

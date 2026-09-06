@@ -145,7 +145,7 @@ mod tests {
     fn time_grid_multiple_timestamps() {
         let timestamps: Vec<f64> = (0..12).map(|i| (i * 3600) as f64).collect();
         let positions = time_grid_positions(&timestamps, AREA);
-        assert!(positions.len() > 0, "should produce grid positions");
+        assert!(!positions.is_empty(), "should produce grid positions");
         for (x, hours, mins) in &positions {
             assert!(x.is_finite());
             assert!(*hours >= 0 && *hours < 24);

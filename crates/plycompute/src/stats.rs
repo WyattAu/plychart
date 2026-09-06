@@ -126,9 +126,7 @@ pub fn matrix_inverse(mat: &[f64], n: usize) -> Option<Vec<f64>> {
         // Swap rows
         if pivot != col {
             for j in 0..(2 * n) {
-                let tmp = aug[pivot * 2 * n + j];
-                aug[pivot * 2 * n + j] = aug[col * 2 * n + j];
-                aug[col * 2 * n + j] = tmp;
+                aug.swap(pivot * 2 * n + j, col * 2 * n + j);
             }
         }
         // Scale pivot row

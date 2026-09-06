@@ -141,7 +141,7 @@ mod tests {
 
     #[test]
     fn area_polygon_vertices() {
-        let points = vec![
+        let points = [
             CandleData {
                 time: 1.0,
                 open: 0.0,

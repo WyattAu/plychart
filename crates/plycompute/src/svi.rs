@@ -102,8 +102,9 @@ fn solve_linear(m: f64, sigma: f64, k: &[f64], w: &[f64]) -> (f64, f64, f64) {
         }
         for r in col + 1..3 {
             let f = a[r][col] / a[col][col];
-            for cc in col..3 {
-                a[r][cc] -= f * a[col][cc];
+            let pivot_row = a[col];
+            for (rr, pr) in a[r][col..3].iter_mut().zip(pivot_row[col..3].iter()) {
+                *rr -= f * pr;
             }
             y[r] -= f * y[col];
         }
@@ -262,10 +263,10 @@ fn interp_curve(curve: &[(f64, f64)], k: f64) -> f64 {
     if k <= curve[0].0 {
         return curve[0].1;
     }
-    if let Some(last) = curve.last() {
-        if k >= last.0 {
-            return last.1;
-        }
+    if let Some(last) = curve.last()
+        && k >= last.0
+    {
+        return last.1;
     }
     for pair in curve.windows(2) {
         let (k0, v0) = pair[0];

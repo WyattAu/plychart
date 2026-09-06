@@ -182,7 +182,7 @@ mod tests {
 
     #[test]
     fn nan_and_inf_guard() {
-        let candles = vec![CandleData {
+        let candles = [CandleData {
             time: 1.0,
             open: f64::NAN,
             high: f64::NAN,

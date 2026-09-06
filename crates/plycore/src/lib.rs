@@ -284,7 +284,7 @@ mod tests {
 
     #[test]
     fn point2d_serde_roundtrip() {
-        let p = Point2D { x: 3.14, y: 2.71 };
+        let p = Point2D { x: 3.5, y: 2.71 };
         let json = serde_json::to_string(&p).expect("serialize");
         let back: Point2D = serde_json::from_str(&json).expect("deserialize");
         assert_eq!(p.x, back.x);

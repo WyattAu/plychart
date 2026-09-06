@@ -1,5 +1,4 @@
 /// Holdings overlap analysis between ETFs.
-
 /// Jaccard index: |intersection| / |union| of holdings tickers.
 pub fn jaccard_index(set_a: &[String], set_b: &[String]) -> f64 {
     let intersection = set_a.iter().filter(|t| set_b.contains(t)).count();

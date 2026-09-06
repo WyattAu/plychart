@@ -105,7 +105,7 @@ mod tests {
 
     #[test]
     fn multiple_points_index_mapping() {
-        let points = vec![
+        let points = [
             CandleData {
                 time: 1.0,
                 open: 0.0,

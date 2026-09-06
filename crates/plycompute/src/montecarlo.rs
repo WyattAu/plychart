@@ -194,11 +194,10 @@ mod tests {
         let paths = simulate_gbm(100.0, 0.05, 0.2, 10, 1000, 1.0 / 252.0);
         let bands = percentile_bands(&paths, 1000, 10);
         // At each time step: p5 <= p25 <= p50 <= p75 <= p95
-        for t in 0..10 {
-            assert!(bands[0][t] <= bands[1][t]);
-            assert!(bands[1][t] <= bands[2][t]);
-            assert!(bands[2][t] <= bands[3][t]);
-            assert!(bands[3][t] <= bands[4][t]);
+        for pair in bands.windows(2) {
+            for (lo, hi) in pair[0].iter().zip(&pair[1]) {
+                assert!(lo <= hi);
+            }
         }
     }
 }

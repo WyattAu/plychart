@@ -89,7 +89,7 @@ pub fn draw(
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+
     use plycore::ChartArea;
 
     const AREA: ChartArea = ChartArea {

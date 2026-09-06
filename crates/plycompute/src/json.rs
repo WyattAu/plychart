@@ -28,6 +28,7 @@ pub fn quant_montecarlo(
     .unwrap_or_else(|_| "{}".to_string())
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn quant_greeks(
     spot_min: f64,
     spot_max: f64,
@@ -558,7 +559,7 @@ pub fn quant_full_overlap(
         .map(|s| s.trim().to_string())
         .filter(|s| !s.is_empty())
         .collect();
-    let result = overlap::analyze_overlap(&ta, &weights_a, &tb, &weights_b);
+    let result = overlap::analyze_overlap(&ta, weights_a, &tb, weights_b);
     serde_json::to_string(&serde_json::json!({
         "jaccard": result.jaccard_index,
         "weighted_overlap": result.weighted_overlap,
@@ -607,6 +608,7 @@ pub fn quant_rolling_factor(
 
 /// Black-Litterman portfolio optimization.
 /// Combines market equilibrium prior with investor views.
+#[allow(clippy::too_many_arguments)]
 pub fn quant_black_litterman(
     returns: &[f64],
     n_assets: usize,
@@ -722,6 +724,7 @@ pub fn quant_black_litterman(
 /// Walk-forward strategy backtest with slippage + commission.
 /// `strategy`: "sma_cross" | "momentum" | "mean_reversion".
 /// Returns JSON BacktestResult (equity, buyhold, drawdown, windows, stats).
+#[allow(clippy::too_many_arguments)]
 pub fn quant_backtest(
     closes: &[f64],
     strategy: &str,

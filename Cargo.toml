@@ -22,3 +22,8 @@ web-sys = "0.3"
 console_error_panic_hook = "0.1"
 criterion = { version = "0.5", features = ["html_reports"] }
 proptest = "1"
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1

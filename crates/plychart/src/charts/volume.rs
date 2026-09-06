@@ -54,7 +54,7 @@ mod tests {
 
     #[test]
     fn zero_max_volume_no_draw() {
-        let _candles = vec![CandleData {
+        let _candles = [CandleData {
             time: 1.0,
             open: 100.0,
             high: 105.0,
@@ -143,7 +143,7 @@ mod tests {
 
     #[test]
     fn volume_bars_within_area_x() {
-        let candles = vec![
+        let candles = [
             CandleData {
                 time: 1.0,
                 open: 100.0,

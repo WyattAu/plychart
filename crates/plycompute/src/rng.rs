@@ -1,7 +1,7 @@
 use std::cell::Cell;
 
 thread_local! {
-    static STATE: Cell<(u64, u64)> = Cell::new((0x9E3779B97F4A7C15, 0xBF58476D1CE4E5B9));
+    static STATE: Cell<(u64, u64)> = const { Cell::new((0x9E3779B97F4A7C15, 0xBF58476D1CE4E5B9)) };
 }
 
 /// Seed the PRNG.
@@ -52,7 +52,7 @@ mod tests {
     fn test_uniform_range() {
         for _ in 0..10000 {
             let u = uniform();
-            assert!(u >= 0.0 && u < 1.0, "uniform out of range: {}", u);
+            assert!((0.0..1.0).contains(&u), "uniform out of range: {}", u);
         }
     }
 

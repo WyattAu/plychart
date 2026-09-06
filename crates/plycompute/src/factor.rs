@@ -1,6 +1,5 @@
 /// Multi-factor regression (OLS) for factor exposure analysis.
 /// Supports Fama-French 3-factor model and custom factor sets.
-
 /// OLS regression: y = alpha + beta * X + epsilon.
 /// X is a matrix of factors (n_factors x n_obs), y is returns (n_obs).
 /// Returns alphas, betas, R-squared, F-statistic, t-statistics.
@@ -41,10 +40,10 @@ pub fn ols_regression(
 
     // Compute X'y (k x 1)
     let mut xty = vec![0.0; k];
-    for i in 0..n_obs {
+    for (i, &yi) in y.iter().enumerate() {
         let row = build_design_row(x, i, n_factors, n_obs);
         for a in 0..k {
-            xty[a] += row[a] * y[i];
+            xty[a] += row[a] * yi;
         }
     }
 
@@ -177,9 +176,7 @@ fn matrix_inverse(mat: &[f64], n: usize) -> Option<Vec<f64>> {
         }
         if pivot != col {
             for j in 0..(2 * n) {
-                let tmp = aug[pivot * 2 * n + j];
-                aug[pivot * 2 * n + j] = aug[col * 2 * n + j];
-                aug[col * 2 * n + j] = tmp;
+                aug.swap(pivot * 2 * n + j, col * 2 * n + j);
             }
         }
         let pv = aug[col * 2 * n + col];
@@ -251,9 +248,9 @@ mod tests {
         for i in 0..n {
             let x1 = ((i as f64) * 0.37).sin();
             let x2 = ((i as f64) * 0.23).cos();
-            x[0 * n + i] = x1;
-            x[1 * n + i] = x2;
-            y[i] = 1.0 * x1 + 0.5 * x2 + 0.001 * (i as f64 % 7.0 - 3.0);
+            x[i] = x1;
+            x[n + i] = x2;
+            y[i] = x1 + 0.5 * x2 + 0.001 * (i as f64 % 7.0 - 3.0);
         }
         let result = ols_regression(&y, &x, 2, n);
         assert!(

@@ -62,11 +62,10 @@ pub fn draw(
 
 #[cfg(test)]
 mod tests {
-    use super::*;
 
     #[test]
     fn sparkline_constant_value() {
-        let values = vec![5.0; 10];
+        let values = [5.0; 10];
         let min = values.iter().cloned().fold(f64::INFINITY, f64::min);
         let max = values.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
         let range = (max - min).abs();
@@ -81,7 +80,7 @@ mod tests {
 
     #[test]
     fn sparkline_two_points() {
-        let values = vec![1.0, 5.0];
+        let values = [1.0, 5.0];
         assert_eq!(values.len(), 2);
     }
 }
