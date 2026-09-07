@@ -110,13 +110,8 @@ fn target_position(
 ) -> f64 {
     match strategy {
         Strategy::SmaCross => match (sma(closes, fast, i), sma(closes, slow, i)) {
-            (Some(fv), Some(sv)) => {
-                if fv > sv {
-                    1.0
-                } else {
-                    0.0
-                }
-            }
+            (Some(fv), Some(sv)) if fv > sv => 1.0,
+            (Some(_), Some(_)) => 0.0,
             _ => 0.0,
         },
         Strategy::Momentum => {
