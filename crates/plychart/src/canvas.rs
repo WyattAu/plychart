@@ -113,6 +113,31 @@ pub fn get_canvas_context_wasm(
     get_canvas_context(canvas_id)
 }
 
+/// Shared: draw close-price axis labels for a slice of CandleData.
+#[cfg(target_arch = "wasm32")]
+fn draw_close_axis_labels(
+    ctx: &web_sys::CanvasRenderingContext2d,
+    data: &[plycore::CandleData],
+    area: &ChartArea,
+    theme: &ChartTheme,
+) {
+    if data.len() < 2 {
+        return;
+    }
+    let mut min_c = f64::INFINITY;
+    let mut max_c = f64::NEG_INFINITY;
+    for c in data {
+        if c.close < min_c {
+            min_c = c.close;
+        }
+        if c.close > max_c {
+            max_c = c.close;
+        }
+    }
+    let times = Some((data[0].time, data[data.len() - 1].time));
+    crate::charts::grid::draw_axis_labels(ctx, area, theme, min_c, max_c, times);
+}
+
 /// Update chart with OHLCV candle data.
 #[cfg(target_arch = "wasm32")]
 pub fn update_candles(
@@ -147,6 +172,19 @@ pub fn update_candles(
         }
     }
 
+    // Axis labels (JS-facing path): close-price range + x time span.
+    if let (Some(min_c), Some(max_c)) = (
+        data.iter()
+            .map(|c| c.low)
+            .fold(None, |acc, v| Some(acc.map_or(v, |a: f64| a.min(v)))),
+        data.iter()
+            .map(|c| c.high)
+            .fold(None, |acc, v| Some(acc.map_or(v, |a: f64| a.max(v)))),
+    ) {
+        let times = data.first().map(|c| (c.time, data[data.len() - 1].time));
+        crate::charts::grid::draw_axis_labels(&ctx, &area, theme, min_c, max_c, times);
+    }
+
     Ok(())
 }
 
@@ -176,6 +214,8 @@ pub fn update_line(
         h: height,
     };
     crate::charts::line::draw(&ctx, data, &area, theme.accent);
+
+    draw_close_axis_labels(&ctx, data, &area, theme);
 
     Ok(())
 }
@@ -207,6 +247,8 @@ pub fn update_bar(
     };
     crate::charts::bar::draw(&ctx, data, &area, theme);
 
+    draw_close_axis_labels(&ctx, data, &area, theme);
+
     Ok(())
 }
 
@@ -236,6 +278,8 @@ pub fn update_area(
         h: height,
     };
     crate::charts::area::draw(&ctx, data, &area, theme.accent);
+
+    draw_close_axis_labels(&ctx, data, &area, theme);
 
     Ok(())
 }

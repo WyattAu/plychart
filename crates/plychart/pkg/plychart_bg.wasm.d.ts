@@ -27,6 +27,12 @@ export const update_sparkline: (a: number, b: number, c: number, d: number, e: n
 export const update_stacked_bar: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number];
 export const update_treemap: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
 export const update_waterfall: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
+export const view_drop: (a: number, b: number) => void;
+export const view_pan_end: (a: number, b: number) => void;
+export const view_pan_move: (a: number, b: number, c: number, d: number) => [number, number, number, number];
+export const view_pan_start: (a: number, b: number, c: number, d: number, e: number) => void;
+export const view_reset: (a: number, b: number, c: number) => [number, number, number, number];
+export const view_zoom: (a: number, b: number, c: number, d: number) => [number, number, number, number];
 export const __wbindgen_exn_store: (a: number) => void;
 export const __externref_table_alloc: () => number;
 export const __wbindgen_externrefs: WebAssembly.Table;

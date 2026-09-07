@@ -149,6 +149,36 @@ export function update_treemap(canvas_id: string, data_json: string, theme_json:
  */
 export function update_waterfall(canvas_id: string, data_json: string, theme_json: string): void;
 
+/**
+ * Drop the interaction state for a canvas (call from destroy_chart path).
+ */
+export function view_drop(canvas_id: string): void;
+
+/**
+ * End a pan drag.
+ */
+export function view_pan_end(canvas_id: string): void;
+
+/**
+ * Continue a pan drag; returns the updated viewport JSON `{start, count}`.
+ */
+export function view_pan_move(canvas_id: string, x: number, total: number): string;
+
+/**
+ * Begin a pan drag at mouse position (x, y).
+ */
+export function view_pan_start(canvas_id: string, x: number, y: number, total: number): void;
+
+/**
+ * Reset the viewport to show all data. Returns the viewport JSON.
+ */
+export function view_reset(canvas_id: string, total: number): string;
+
+/**
+ * Wheel-zoom the viewport for a canvas. Returns JSON `{start, count}`.
+ */
+export function view_zoom(canvas_id: string, delta_y: number, total: number): string;
+
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
@@ -179,6 +209,12 @@ export interface InitOutput {
     readonly update_stacked_bar: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number];
     readonly update_treemap: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
     readonly update_waterfall: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
+    readonly view_drop: (a: number, b: number) => void;
+    readonly view_pan_end: (a: number, b: number) => void;
+    readonly view_pan_move: (a: number, b: number, c: number, d: number) => [number, number, number, number];
+    readonly view_pan_start: (a: number, b: number, c: number, d: number, e: number) => void;
+    readonly view_reset: (a: number, b: number, c: number) => [number, number, number, number];
+    readonly view_zoom: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly __wbindgen_exn_store: (a: number) => void;
     readonly __externref_table_alloc: () => number;
     readonly __wbindgen_externrefs: WebAssembly.Table;

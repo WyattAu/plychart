@@ -186,3 +186,70 @@ mod tests {
         assert_eq!(hours, 1, "25 hours wraps to 01");
     }
 }
+
+/// Draw axis labels for a time-series chart: 5 y-value ticks (left) and
+/// 3 x-time ticks (bottom). Values are close-price based; times are unix
+/// seconds formatted as MM-DD (or HH:MM for intraday spans < 2 days).
+///
+/// Called from the JS-facing canvas path (update_line/update_area/etc.)
+/// so every WASM-consumed chart gets readable axes without changing the
+/// bare `draw()` signatures used by native Rust consumers.
+#[cfg(target_arch = "wasm32")]
+pub fn draw_axis_labels(
+    ctx: &web_sys::CanvasRenderingContext2d,
+    area: &crate::types::ChartArea,
+    theme: &crate::types::ChartTheme,
+    min_val: f64,
+    max_val: f64,
+    times: Option<(f64, f64)>,
+) {
+    let range = (max_val - min_val).abs().max(1e-9);
+
+    // Y ticks: 5 values, top to bottom.
+    ctx.set_fill_style(&theme.text_muted.into());
+    ctx.set_font("9px monospace");
+    ctx.set_text_align("left");
+    for i in 0..5 {
+        let frac = i as f64 / 4.0;
+        let val = max_val - range * frac;
+        let y = area.y + area.h * frac;
+        let label = if range >= 1000.0 {
+            format!("{:.0}", val)
+        } else if range >= 1.0 {
+            format!("{:.2}", val)
+        } else {
+            format!("{:.4}", val)
+        };
+        let _ = ctx.fill_text(&label, area.x + 4.0, y + 3.0);
+    }
+
+    // X ticks: 3 time labels if timestamps are available.
+    if let Some((t0, t1)) = times {
+        let span_days = (t1 - t0).abs() / 86400.0;
+        ctx.set_text_align("center");
+        for i in 0..=2 {
+            let frac = i as f64 / 2.0;
+            let t = t0 + (t1 - t0) * frac;
+            let x = area.x + area.w * frac;
+            let label = if span_days < 2.0 {
+                // HH:MM
+                let h = (t / 3600.0).floor() % 24.0;
+                let m = (t / 60.0).floor() % 60.0;
+                format!("{:02.0}:{:02.0}", h, m)
+            } else {
+                // MM-DD from unix seconds
+                let days = (t / 86400.0).floor() as i64;
+                // days since epoch → month/day via civil-from-days algorithm
+                let z = days + 719_468;
+                let era = if z >= 0 { z } else { z - 145 } / 1461;
+                let doe = z - era * 1461;
+                let yoe = (doe - doe / 365 + doe / 1460) / 365;
+                let mp = (5 * doe + 2) / 153;
+                let month = if mp < 10 { mp + 3 } else { mp - 9 };
+                let day = doe - (153 * mp + 2) / 5 + 1;
+                format!("{:02}-{:02}", month, day)
+            };
+            let _ = ctx.fill_text(&label, x, area.y + area.h + 12.0);
+        }
+    }
+}

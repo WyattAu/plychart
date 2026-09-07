@@ -577,3 +577,98 @@ pub fn update_gauge_zoned(
     crate::canvas::update_gauge_zoned(canvas_id, value, max, color, zones_json, &theme)
         .map_err(|e| JsValue::from_str(&e.to_string()))
 }
+
+// ---------------------------------------------------------------------------
+// Interaction bridge — per-canvas viewport state, driven by JS DOM events.
+// JS forwards wheel/drag events here, receives the visible window back,
+// and re-renders with the sliced data. The renderers stay unchanged.
+// ---------------------------------------------------------------------------
+
+use crate::ChartInteraction;
+use std::cell::RefCell;
+use std::collections::HashMap;
+
+thread_local! {
+    static INTERACTIONS: RefCell<HashMap<String, ChartInteraction>> =
+        RefCell::new(HashMap::new());
+}
+
+fn viewport_json(inter: &ChartInteraction, total: usize) -> String {
+    let (start, end) = inter.visible_range(total);
+    let count = end.saturating_sub(start);
+    serde_json::to_string(&serde_json::json!({
+        "start": start,
+        "count": count.max(1),
+    }))
+    .unwrap_or_else(|_| "{}".to_string())
+}
+
+/// Wheel-zoom the viewport for a canvas. Returns JSON `{start, count}`.
+#[wasm_bindgen]
+pub fn view_zoom(canvas_id: &str, delta_y: f64, total: usize) -> Result<String, JsValue> {
+    if total == 0 {
+        return Ok("{\"start\":0,\"count\":0}".to_string());
+    }
+    INTERACTIONS.with(|reg| {
+        let mut reg = reg.borrow_mut();
+        let inter = reg.entry(canvas_id.to_string()).or_default();
+        inter.on_wheel(delta_y, total);
+        Ok(viewport_json(inter, total))
+    })
+}
+
+/// Begin a pan drag at mouse position (x, y).
+#[wasm_bindgen]
+pub fn view_pan_start(canvas_id: &str, x: f64, y: f64, total: usize) {
+    INTERACTIONS.with(|reg| {
+        let mut reg = reg.borrow_mut();
+        let inter = reg.entry(canvas_id.to_string()).or_default();
+        inter.on_mouse_down(x, y, total);
+    });
+}
+
+/// Continue a pan drag; returns the updated viewport JSON `{start, count}`.
+#[wasm_bindgen]
+pub fn view_pan_move(canvas_id: &str, x: f64, total: usize) -> Result<String, JsValue> {
+    if total == 0 {
+        return Ok("{\"start\":0,\"count\":0}".to_string());
+    }
+    INTERACTIONS.with(|reg| {
+        let mut reg = reg.borrow_mut();
+        let inter = reg.entry(canvas_id.to_string()).or_default();
+        inter.on_mouse_drag(x, total);
+        Ok(viewport_json(inter, total))
+    })
+}
+
+/// End a pan drag.
+#[wasm_bindgen]
+pub fn view_pan_end(canvas_id: &str) {
+    INTERACTIONS.with(|reg| {
+        if let Some(mut inter) = reg.borrow_mut().get_mut(canvas_id) {
+            inter.on_mouse_up();
+        }
+    });
+}
+
+/// Reset the viewport to show all data. Returns the viewport JSON.
+#[wasm_bindgen]
+pub fn view_reset(canvas_id: &str, total: usize) -> Result<String, JsValue> {
+    if total == 0 {
+        return Ok("{\"start\":0,\"count\":0}".to_string());
+    }
+    INTERACTIONS.with(|reg| {
+        let mut reg = reg.borrow_mut();
+        let inter = reg.entry(canvas_id.to_string()).or_default();
+        inter.reset_viewport(total);
+        Ok(viewport_json(inter, total))
+    })
+}
+
+/// Drop the interaction state for a canvas (call from destroy_chart path).
+#[wasm_bindgen]
+pub fn view_drop(canvas_id: &str) {
+    INTERACTIONS.with(|reg| {
+        reg.borrow_mut().remove(canvas_id);
+    });
+}

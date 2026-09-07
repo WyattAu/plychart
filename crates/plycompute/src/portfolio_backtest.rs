@@ -136,8 +136,7 @@ fn min_var_weights(returns: &[Vec<f64>], upto: usize, n_assets: usize) -> Vec<f6
     let max_eig = (0..n_assets)
         .map(|i| cov[i * n_assets + i])
         .fold(0.0_f64, f64::max)
-        * (n_assets as f64)
-        .max(1.0);
+        * (n_assets as f64).max(1.0);
     let lr = 1.0 / max_eig.max(1e-12);
     let mut w = vec![1.0 / n_assets as f64; n_assets];
     for _ in 0..300 {
@@ -308,7 +307,9 @@ pub fn run(
         .iter()
         .enumerate()
         .map(|(i, (start, w))| {
-            let end_idx = windows.get(i + 1).map_or(equity.len() - 1, |(next_start, _)| *next_start);
+            let end_idx = windows
+                .get(i + 1)
+                .map_or(equity.len() - 1, |(next_start, _)| *next_start);
             let e0 = equity.get(*start).copied().unwrap_or(1.0);
             let e1 = equity.get(end_idx).copied().unwrap_or(e0);
             PortfolioWindow {
