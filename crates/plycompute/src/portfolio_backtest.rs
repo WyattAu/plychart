@@ -64,6 +64,21 @@ pub struct PortfolioBacktestResult {
     pub total_cost: f64,
     /// Rebalances executed per year.
     pub rebalances_per_year: f64,
+    /// Per-rebalance-period stats: one window per OOS segment.
+    pub windows: Vec<PortfolioWindow>,
+}
+
+/// Stats for one rebalance period.
+#[derive(Debug, Clone, Serialize)]
+pub struct PortfolioWindow {
+    /// First day index of the window.
+    pub start: usize,
+    /// One-past-last day index.
+    pub end: usize,
+    /// Simple return of the portfolio over the window (fraction).
+    pub ret: f64,
+    /// Weights held during the window (post-rebalance targets).
+    pub weights: Vec<f64>,
 }
 
 const TRADING_DAYS: f64 = 252.0;
@@ -236,6 +251,7 @@ pub fn run(
     let mut weights = vec![1.0 / n_assets as f64; n_assets];
     let mut equity = vec![1.0_f64];
     let mut rebalances: Vec<(usize, Vec<f64>)> = Vec::new();
+    let mut windows: Vec<(usize, Vec<f64>)> = Vec::new();
     let mut total_cost = 0.0_f64;
     let mut rebalance_count = 0usize;
 
@@ -277,6 +293,7 @@ pub fn run(
             weights = target;
             rebalance_count += 1;
             rebalances.push((t, weights.clone()));
+            windows.push((t, weights.clone()));
         }
 
         // Portfolio return for day t.
@@ -284,6 +301,24 @@ pub fn run(
         let prev = *equity.last().ok_or("equity underflow")?;
         equity.push(prev * (1.0 + port_ret));
     }
+
+    // Per-window returns from the completed equity curve. Window i spans
+    // windows[i].start ..= windows[i].end - 1 in equity indices.
+    let portfolio_windows: Vec<PortfolioWindow> = windows
+        .iter()
+        .enumerate()
+        .map(|(i, (start, w))| {
+            let end_idx = windows.get(i + 1).map_or(equity.len() - 1, |(next_start, _)| *next_start);
+            let e0 = equity.get(*start).copied().unwrap_or(1.0);
+            let e1 = equity.get(end_idx).copied().unwrap_or(e0);
+            PortfolioWindow {
+                start: *start,
+                end: end_idx,
+                ret: if e0.abs() > 1e-12 { e1 / e0 - 1.0 } else { 0.0 },
+                weights: w.clone(),
+            }
+        })
+        .collect();
 
     // Asset buy-and-hold curves.
     let mut asset_equity: Vec<Vec<f64>> = Vec::with_capacity(n_assets);
@@ -338,6 +373,7 @@ pub fn run(
         max_drawdown: max_dd,
         total_cost,
         rebalances_per_year: rebalance_count as f64 / years.max(1e-9),
+        windows: portfolio_windows,
     })
 }
 
