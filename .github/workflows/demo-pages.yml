@@ -1,0 +1,55 @@
+name: Deploy Demo
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'crates/plychart/src/**'
+      - 'examples/demo/**'
+      - 'scripts/build-wasm.sh'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: demo-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: taiki-e/install-action@wasm-pack
+      - name: Build WASM (with export guard)
+        run: bash scripts/build-wasm.sh
+      - name: Stage demo
+        run: |
+          mkdir -p demo-site
+          cp -r examples/demo/* demo-site/
+          cp -r crates/plychart/pkg/* demo-site/pkg/ 2>/dev/null || true
+          # demo imports ./pkg/plychart.js — pkg dir already inside demo
+      - name: Verify demo wasm present
+        run: |
+          test -f demo-site/pkg/plychart_bg.wasm
+          test -f demo-site/pkg/plychart.js
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: demo-site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
