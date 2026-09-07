@@ -70,9 +70,13 @@ jobs:
       - run: bash scripts/build-wasm.sh
       - name: Verify pkg/ output
         run: |
-          ls pkg/
-          test -f pkg/plychart_bg.wasm
+          ls crates/plychart/pkg/
+          test -f crates/plychart/pkg/plychart_bg.wasm
+          test -f crates/plychart/pkg/plychart.js
           echo "pkg/ output verified"
+          echo "Exports: $(grep -c '^export function' crates/plychart/pkg/plychart.js)"
+          # Guard: fail if fewer than 20 exports (catches wasm-bindgen schema mismatch)
+          test "$(grep -c '^export function' crates/plychart/pkg/plychart.js)" -ge 20
 
   wasm-test:
     name: Wasm Browser Tests
