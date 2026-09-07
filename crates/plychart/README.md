@@ -4,7 +4,8 @@ Full-featured graphing library for Rust/WASM. Zero dependencies, zero watermarks
 
 ## Features
 
-- **13 chart types**: Candlestick, Line, Area, Bar, Heatmap, Scatter, Gauge, Radar, Treemap, Waterfall, OrderBook, Backtest, Correlation
+- **17 chart types**: Candlestick, Line, Area, Bar, Heatmap, Scatter, Gauge, Radar, Treemap, Waterfall, OrderBook, Backtest, Correlation, Pie, Histogram, Sparkline, StackedBar
+- **Multi-series variants**: multiline, radar-multi, scatter-multi, diverging heatmap, zoned gauge, log histogram
 - **Canvas2D rendering**: Direct Canvas2D via web-sys, no JS dependencies
 - **DPR-aware**: HiDPI/Retina support via devicePixelRatio
 - **Interaction state machine**: Zoom, pan, crosshair, touch events, pinch-to-zoom
@@ -67,7 +68,7 @@ update_candles("my-canvas", JSON.stringify(candles));
 plycore (shared types)
   └── plychart (charting library)
         ├── canvas.rs — Canvas2D lifecycle
-        ├── charts/ — 13 chart renderers + grid, crosshair, volume
+        ├── charts/ — 17 chart renderers + grid, crosshair, volume, multiline
         ├── interaction.rs — Zoom, pan, crosshair, touch state machine
         └── wasm.rs — 14 #[wasm_bindgen] exports
 ```

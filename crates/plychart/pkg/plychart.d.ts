@@ -26,7 +26,7 @@ export function get_click_data(canvas_id: string, x: number, y: number, data_len
  * `series_index` selects which series in multi-series mode (default 0).
  * Returns JSON: `{index, time, open, high, low, close, volume}` or `{}` if no data.
  */
-export function get_tooltip_data(canvas_id: string, x: number, y: number, data_json: string, series_index: number): string;
+export function get_tooltip_data(canvas_id: string, x: number, _y: number, data_json: string, series_index: number): string;
 
 /**
  * Update chart with area data.

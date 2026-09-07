@@ -13,6 +13,10 @@ pub enum WeightMode {
     Equal,
     /// Inverse trailing volatility (vol-weighted risk parity proxy).
     InvVol,
+    /// Minimum-variance weights fitted from the trailing covariance matrix
+    /// (long-only, simplex-projected). The true walk-forward mode: weights
+    /// are *fitted* per rebalance from data, not fixed by rule.
+    MinVar,
 }
 
 impl WeightMode {
@@ -21,6 +25,7 @@ impl WeightMode {
     pub fn parse(s: &str) -> Self {
         match s {
             "inv_vol" | "inverse_vol" | "invvol" => Self::InvVol,
+            "min_var" | "minvar" | "min_variance" => Self::MinVar,
             _ => Self::Equal,
         }
     }
@@ -31,6 +36,7 @@ impl WeightMode {
         match self {
             Self::Equal => "equal",
             Self::InvVol => "inv_vol",
+            Self::MinVar => "min_var",
         }
     }
 }
@@ -78,11 +84,105 @@ fn trailing_vols(returns: &[Vec<f64>], upto: usize) -> Vec<f64> {
         .collect()
 }
 
+/// Long-only minimum-variance weights from the trailing covariance matrix
+/// over `returns[..=upto]` (VOL_WINDOW days, no look-ahead).
+///
+/// Solver: projected gradient descent on the simplex (min wᵀΣw s.t. Σw = 1,
+/// w >= 0). Simplex projection via sort-based algorithm. Deterministic.
+fn min_var_weights(returns: &[Vec<f64>], upto: usize, n_assets: usize) -> Vec<f64> {
+    // Trailing covariance matrix Σ (n_assets x n_assets).
+    let start = upto.saturating_sub(VOL_WINDOW).max(1);
+    let end = upto.min(returns[0].len().saturating_sub(1));
+    let n_obs = end.saturating_sub(start) + 1;
+    if n_obs < 10 {
+        return vec![1.0 / n_assets as f64; n_assets];
+    }
+
+    // Demeaned return matrix.
+    let mut means = vec![0.0_f64; n_assets];
+    for (a, r) in returns.iter().enumerate() {
+        let seg = &r[start..=end];
+        means[a] = seg.iter().sum::<f64>() / n_obs as f64;
+    }
+    let mut cov = vec![0.0_f64; n_assets * n_assets];
+    for i in 0..n_assets {
+        for j in i..n_assets {
+            let mut c = 0.0_f64;
+            for t in start..=end {
+                c += (returns[i][t] - means[i]) * (returns[j][t] - means[j]);
+            }
+            let v = c / (n_obs - 1) as f64;
+            cov[i * n_assets + j] = v;
+            cov[j * n_assets + i] = v;
+        }
+    }
+
+    // Projected gradient descent: w <- proj_simplex(w - lr * Σw).
+    let max_eig = (0..n_assets)
+        .map(|i| cov[i * n_assets + i])
+        .fold(0.0_f64, f64::max)
+        * (n_assets as f64)
+        .max(1.0);
+    let lr = 1.0 / max_eig.max(1e-12);
+    let mut w = vec![1.0 / n_assets as f64; n_assets];
+    for _ in 0..300 {
+        // grad = Σw
+        let mut grad = vec![0.0_f64; n_assets];
+        for i in 0..n_assets {
+            for j in 0..n_assets {
+                grad[i] += cov[i * n_assets + j] * w[j];
+            }
+        }
+        // Step + project onto simplex.
+        let mut next: Vec<f64> = w
+            .iter()
+            .zip(&grad)
+            .map(|(wi, gi)| (wi - lr * gi).max(0.0))
+            .collect();
+        project_simplex(&mut next);
+        // Converged?
+        let shift: f64 = w.iter().zip(&next).map(|(a, b)| (a - b).abs()).sum();
+        w = next;
+        if shift < 1e-10 {
+            break;
+        }
+    }
+    // Renormalize against float drift.
+    let sum: f64 = w.iter().sum();
+    if sum > 1e-12 {
+        w.iter().map(|x| x / sum).collect()
+    } else {
+        vec![1.0 / n_assets as f64; n_assets]
+    }
+}
+
+/// Project a vector onto the probability simplex (sum = 1, all >= 0).
+/// Sort-based O(n log n) algorithm (Duchi et al. 2008).
+fn project_simplex(v: &mut [f64]) {
+    let n = v.len() as f64;
+    let mut sorted: Vec<f64> = v.to_vec();
+    sorted.sort_by(|a, b| b.partial_cmp(a).unwrap_or(std::cmp::Ordering::Equal));
+    let mut cumsum = 0.0_f64;
+    let mut theta = 0.0_f64;
+    for (i, &x) in sorted.iter().enumerate() {
+        let t = (cumsum + x - 1.0) / (i as f64 + 1.0);
+        if x - t > 0.0 {
+            cumsum += x;
+            theta = t;
+        } else {
+            break;
+        }
+    }
+    for x in v.iter_mut() {
+        *x = (*x - theta).max(0.0);
+    }
+}
+
 /// Run the portfolio backtest.
 ///
 /// * `closes` — flat row-major matrix, n_assets x n_periods close prices.
 /// * `n_assets`, `n_periods` — matrix dims (n_periods >= 90).
-/// * `mode_str` — `"equal"` or `"inv_vol"`.
+/// * `mode_str` — `"equal"`, `"inv_vol"`, or `"min_var"`.
 /// * `rebalance_every` — trading days between rebalances (>= 1).
 /// * `cost_bps` — one-way cost in basis points applied to turnover.
 ///
@@ -140,25 +240,29 @@ pub fn run(
     let mut rebalance_count = 0usize;
 
     // Normalize initial weights (equal or first trailing estimate after
-    // VOL_WINDOW so inv-vol has data; before that, equal).
+    // VOL_WINDOW so inv-vol/min-var have data; before that, equal).
     if mode == WeightMode::InvVol && n_ret > VOL_WINDOW {
         let vols = trailing_vols(&returns, VOL_WINDOW);
         let inv: Vec<f64> = vols.iter().map(|v| 1.0 / v).collect();
         let sum: f64 = inv.iter().sum();
         weights = inv.iter().map(|x| x / sum).collect();
+    } else if mode == WeightMode::MinVar && n_ret > VOL_WINDOW {
+        weights = min_var_weights(&returns, VOL_WINDOW, n_assets);
     }
     rebalances.push((0, weights.clone()));
 
     for t in 0..n_ret {
         // Rebalance check (day 0 weights already set).
         if t > 0 && t % rebalance_every == 0 {
-            let target = if mode == WeightMode::InvVol {
-                let vols = trailing_vols(&returns, t);
-                let inv: Vec<f64> = vols.iter().map(|v| 1.0 / v).collect();
-                let sum: f64 = inv.iter().sum();
-                inv.iter().map(|x| x / sum).collect()
-            } else {
-                vec![1.0 / n_assets as f64; n_assets]
+            let target = match mode {
+                WeightMode::InvVol => {
+                    let vols = trailing_vols(&returns, t);
+                    let inv: Vec<f64> = vols.iter().map(|v| 1.0 / v).collect();
+                    let sum: f64 = inv.iter().sum();
+                    inv.iter().map(|x| x / sum).collect()
+                }
+                WeightMode::MinVar => min_var_weights(&returns, t, n_assets),
+                WeightMode::Equal => vec![1.0 / n_assets as f64; n_assets],
             };
             let turnover: f64 = target
                 .iter()
@@ -312,6 +416,36 @@ mod tests {
         let r = run(&closes, 4, 200, "inv_vol", 60, 1.0).unwrap();
         let (_, w) = &r.rebalances[0];
         assert!((w.iter().sum::<f64>() - 1.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn min_var_runs_and_sums() {
+        let closes = synthetic(4, 300);
+        let r = run(&closes, 4, 300, "min_var", 20, 2.0).unwrap();
+        assert_eq!(r.mode, "min_var");
+        assert!(r.rebalances.len() > 1);
+        for (_, w) in &r.rebalances {
+            let sum: f64 = w.iter().sum();
+            assert!((sum - 1.0).abs() < 1e-6, "weights must sum to 1, got {sum}");
+            assert!(w.iter().all(|x| *x >= 0.0), "long-only violated");
+        }
+        assert!(r.equity.iter().all(|e| e.is_finite() && *e > 0.0));
+    }
+
+    #[test]
+    fn min_var_parse() {
+        assert_eq!(WeightMode::parse("min_var"), WeightMode::MinVar);
+        assert_eq!(WeightMode::parse("minvar"), WeightMode::MinVar);
+        assert_eq!(WeightMode::parse("x"), WeightMode::Equal);
+    }
+
+    #[test]
+    fn project_simplex_basics() {
+        let mut v = vec![2.0, -1.0, 0.5];
+        project_simplex(&mut v);
+        let sum: f64 = v.iter().sum();
+        assert!((sum - 1.0).abs() < 1e-9);
+        assert!(v.iter().all(|x| *x >= 0.0));
     }
 
     #[test]

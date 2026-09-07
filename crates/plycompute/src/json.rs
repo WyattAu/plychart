@@ -787,3 +787,16 @@ pub fn quant_portfolio_backtest(
             .unwrap_or_else(|_| "{}".to_string()),
     }
 }
+
+/// Multi-asset portfolio backtest with periodic rebalancing (v2: adds
+/// min-variance mode). See portfolio_backtest::run.
+pub fn quant_portfolio_backtest_v2(
+    closes: &[f64],
+    n_assets: usize,
+    n_periods: usize,
+    mode: &str,
+    rebalance_every: usize,
+    cost_bps: f64,
+) -> String {
+    quant_portfolio_backtest(closes, n_assets, n_periods, mode, rebalance_every, cost_bps)
+}
