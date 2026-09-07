@@ -122,10 +122,11 @@ fn min_var_weights(returns: &[Vec<f64>], upto: usize, n_assets: usize) -> Vec<f6
     let mut cov = vec![0.0_f64; n_assets * n_assets];
     for i in 0..n_assets {
         for j in i..n_assets {
-            let mut c = 0.0_f64;
-            for t in start..=end {
-                c += (returns[i][t] - means[i]) * (returns[j][t] - means[j]);
-            }
+            let c: f64 = returns[i][start..=end]
+                .iter()
+                .zip(&returns[j][start..=end])
+                .map(|(&ri, &rj)| (ri - means[i]) * (rj - means[j]))
+                .sum();
             let v = c / (n_obs - 1) as f64;
             cov[i * n_assets + j] = v;
             cov[j * n_assets + i] = v;
@@ -173,7 +174,6 @@ fn min_var_weights(returns: &[Vec<f64>], upto: usize, n_assets: usize) -> Vec<f6
 /// Project a vector onto the probability simplex (sum = 1, all >= 0).
 /// Sort-based O(n log n) algorithm (Duchi et al. 2008).
 fn project_simplex(v: &mut [f64]) {
-    let n = v.len() as f64;
     let mut sorted: Vec<f64> = v.to_vec();
     sorted.sort_by(|a, b| b.partial_cmp(a).unwrap_or(std::cmp::Ordering::Equal));
     let mut cumsum = 0.0_f64;
