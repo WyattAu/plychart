@@ -196,9 +196,10 @@ fn interaction_zoom_pan_reset_transitions() {
     let mut i = ChartInteraction::new();
     assert_eq!(i.viewport.count, 100);
 
-    // Zoom in: 100 -> 90 candles.
+    // First tick initializes from the full range shown by the initial
+    // render, then zooms in proportionally: 500 -> 400 candles.
     i.on_wheel(-10.0, 500);
-    assert_eq!(i.viewport.count, 90);
+    assert_eq!(i.viewport.count, 400);
 
     // Drag start inside the price area begins a pan.
     i.on_mouse_down(400.0, 100.0, 500);

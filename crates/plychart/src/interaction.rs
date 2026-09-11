@@ -29,6 +29,13 @@ pub struct ChartInteraction {
     pub drag_start_x: f64,
     /// Viewport start when drag started (for pan delta calculation).
     pub drag_start_viewport_start: usize,
+    /// Whether the viewport has been initialized from real data.
+    ///
+    /// The initial render always draws the FULL dataset, so the first
+    /// wheel/pan event must snap the viewport to the full range first —
+    /// otherwise the first tick in either direction collapses to the
+    /// default 100-point window (looks like "both directions zoom in").
+    pub viewport_init: bool,
 }
 
 /// Chart area bounds (updated on resize).
@@ -75,6 +82,7 @@ impl ChartInteraction {
             dragging: false,
             drag_start_x: 0.0,
             drag_start_viewport_start: 0,
+            viewport_init: false,
         }
     }
 
@@ -87,11 +95,23 @@ impl ChartInteraction {
         }
     }
 
+    /// Snap the viewport to the full data range on first user interaction.
+    /// The initial render always shows all points; without this the first
+    /// wheel tick collapses to the default 100-point window.
+    fn ensure_init(&mut self, total_data_points: usize) {
+        if !self.viewport_init {
+            self.viewport.start = 0;
+            self.viewport.count = total_data_points.max(1);
+            self.viewport_init = true;
+        }
+    }
+
     /// Handle scroll wheel event for zooming.
     ///
     /// `delta_y`: positive = zoom out (more candles), negative = zoom in (fewer candles).
     /// `total_data_points`: total number of data points available.
     pub fn on_wheel(&mut self, delta_y: f64, total_data_points: usize) {
+        self.ensure_init(total_data_points);
         // Proportional zoom: 25% change per tick (feels faster than fixed 10).
         let factor = if delta_y > 0.0 { 1.25 } else { 0.8 };
         let new_count = ((self.viewport.count as f64 * factor) as usize)
@@ -140,6 +160,7 @@ impl ChartInteraction {
 
     /// Handle mouse down event (start drag for pan).
     pub fn on_mouse_down(&mut self, x: f64, y: f64, total_data_points: usize) {
+        self.ensure_init(total_data_points);
         let price_area = self.price_area();
         if x >= price_area.x
             && x <= price_area.x + price_area.w
@@ -150,7 +171,6 @@ impl ChartInteraction {
             self.drag_start_x = x;
             self.drag_start_viewport_start = self.viewport.start;
         }
-        let _ = total_data_points;
     }
 
     /// Handle mouse up event (end drag).
@@ -245,6 +265,7 @@ impl ChartInteraction {
     pub fn reset_viewport(&mut self, total_data_points: usize) {
         self.viewport.start = 0;
         self.viewport.count = total_data_points;
+        self.viewport_init = true;
     }
 
     /// Get the price chart area (excluding volume, padding).
@@ -358,25 +379,47 @@ mod tests {
     }
 
     #[test]
+    fn on_wheel_first_tick_starts_from_full_range() {
+        // The initial render shows ALL points, so the first wheel tick must
+        // initialize from the full range — never collapse to the default
+        // 100-point window (that made both scroll directions "zoom in").
+        let mut i = ChartInteraction::new();
+        i.on_wheel(-10.0, 500);
+        assert!(i.viewport_init);
+        assert_eq!(i.viewport.count, 400); // 500 * 0.8
+    }
+
+    #[test]
+    fn on_wheel_first_tick_out_is_noop_at_full_range() {
+        let mut i = ChartInteraction::new();
+        i.on_wheel(10.0, 500);
+        assert_eq!(i.viewport.count, 500);
+        assert_eq!(i.viewport.start, 0);
+    }
+
+    #[test]
     fn on_wheel_zoom_in() {
         let mut i = ChartInteraction::new();
         i.viewport.count = 100;
+        i.viewport_init = true;
         i.on_wheel(-10.0, 500);
-        assert_eq!(i.viewport.count, 90);
+        assert_eq!(i.viewport.count, 80); // 100 * 0.8
     }
 
     #[test]
     fn on_wheel_zoom_out() {
         let mut i = ChartInteraction::new();
         i.viewport.count = 100;
+        i.viewport_init = true;
         i.on_wheel(10.0, 500);
-        assert_eq!(i.viewport.count, 110);
+        assert_eq!(i.viewport.count, 125); // 100 * 1.25
     }
 
     #[test]
     fn on_wheel_min_count() {
         let mut i = ChartInteraction::new();
         i.viewport.count = 5;
+        i.viewport_init = true;
         i.on_wheel(-10.0, 500);
         assert!(i.viewport.count >= 10);
     }
@@ -385,6 +428,7 @@ mod tests {
     fn on_wheel_max_count() {
         let mut i = ChartInteraction::new();
         i.viewport.count = 490;
+        i.viewport_init = true;
         i.on_wheel(10.0, 500);
         assert_eq!(i.viewport.count, 500);
     }
