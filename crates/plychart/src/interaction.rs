@@ -92,13 +92,15 @@ impl ChartInteraction {
     /// `delta_y`: positive = zoom out (more candles), negative = zoom in (fewer candles).
     /// `total_data_points`: total number of data points available.
     pub fn on_wheel(&mut self, delta_y: f64, total_data_points: usize) {
-        let step = if delta_y > 0.0 { 10 } else { -10 };
-        let new_count = (self.viewport.count as i64 + step).max(10) as usize;
-        let count = new_count.min(total_data_points.max(1));
+        // Proportional zoom: 25% change per tick (feels faster than fixed 10).
+        let factor = if delta_y > 0.0 { 1.25 } else { 0.8 };
+        let new_count = ((self.viewport.count as f64 * factor) as usize)
+            .max(10)
+            .min(total_data_points.max(1));
+        let count = new_count;
 
-        // Center-anchored zoom: keep the viewport center fixed so zooming
-        // out recovers data on both sides equally (the old code anchored
-        // the left edge, making zoom-out unable to recover the left tail).
+        // Center-anchored: keep the viewport center fixed so zooming
+        // out recovers data on both sides equally.
         let center = self.viewport.start + self.viewport.count / 2;
         let half = count / 2;
         let start = center
