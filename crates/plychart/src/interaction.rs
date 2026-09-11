@@ -95,8 +95,16 @@ impl ChartInteraction {
         let step = if delta_y > 0.0 { 10 } else { -10 };
         let new_count = (self.viewport.count as i64 + step).max(10) as usize;
         let count = new_count.min(total_data_points.max(1));
-        let start = (self.viewport.start + self.viewport.count.saturating_sub(count))
+
+        // Center-anchored zoom: keep the viewport center fixed so zooming
+        // out recovers data on both sides equally (the old code anchored
+        // the left edge, making zoom-out unable to recover the left tail).
+        let center = self.viewport.start + self.viewport.count / 2;
+        let half = count / 2;
+        let start = center
+            .saturating_sub(half)
             .min(total_data_points.saturating_sub(count));
+
         self.viewport.start = start;
         self.viewport.count = count;
     }
