@@ -114,10 +114,21 @@ impl ChartInteraction {
         self.ensure_init(total_data_points);
         // Proportional zoom: 25% change per tick (feels faster than fixed 10).
         let factor = if delta_y > 0.0 { 1.25 } else { 0.8 };
-        let new_count = ((self.viewport.count as f64 * factor) as usize)
+        // Round, not truncate: floor drifts downward on in/out round-trips
+        // (501 -> 400 -> 500, never 501 again).
+        let new_count = ((self.viewport.count as f64 * factor).round() as usize)
             .max(10)
             .min(total_data_points.max(1));
         let count = new_count;
+
+        // Zooming out must always be able to reach the FULL graph: once the
+        // grown window covers the dataset, snap to it instead of anchoring
+        // near the edges where saturating math can pin start > 0.
+        if count >= total_data_points {
+            self.viewport.start = 0;
+            self.viewport.count = total_data_points;
+            return;
+        }
 
         // Center-anchored: keep the viewport center fixed so zooming
         // out recovers data on both sides equally.
@@ -431,6 +442,36 @@ mod tests {
         i.viewport_init = true;
         i.on_wheel(10.0, 500);
         assert_eq!(i.viewport.count, 500);
+        assert_eq!(i.viewport.start, 0);
+    }
+
+    #[test]
+    fn on_wheel_deep_zoom_out_converges_to_full_range() {
+        // Zoom in 15 ticks from the full range, then zoom out 25 ticks:
+        // the viewport must land exactly back on {0, total}, never plateau
+        // one point short (truncation drift) or stay edge-anchored.
+        let total = 501;
+        let mut i = ChartInteraction::new();
+        i.ensure_init(total);
+        for _ in 0..15 {
+            i.on_wheel(-10.0, total);
+        }
+        for _ in 0..25 {
+            i.on_wheel(10.0, total);
+        }
+        assert_eq!(i.viewport.start, 0, "start must return to 0");
+        assert_eq!(i.viewport.count, total, "count must return to full range");
+    }
+
+    #[test]
+    fn on_wheel_zoom_out_snaps_when_window_covers_total() {
+        let total = 400;
+        let mut i = ChartInteraction::new();
+        i.ensure_init(total);
+        i.on_wheel(-10.0, total); // 320
+        i.on_wheel(10.0, total); // 400 -> snap
+        assert_eq!(i.viewport.start, 0);
+        assert_eq!(i.viewport.count, 400);
     }
 
     #[test]
