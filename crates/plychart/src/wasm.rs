@@ -8,6 +8,55 @@ fn parse_theme(theme_json: &str) -> ChartTheme {
     crate::theme::theme_from_json(theme_json)
 }
 
+/// Optional chart labels riding in the theme JSON:
+/// `{"title":"...", "y_unit":"USD", "x_unit":"day"}`.
+#[derive(serde::Deserialize, Default)]
+struct ChartLabels {
+    title: Option<String>,
+    y_unit: Option<String>,
+    x_unit: Option<String>,
+}
+
+impl ChartLabels {
+    fn any(&self) -> bool {
+        self.title.is_some() || self.y_unit.is_some() || self.x_unit.is_some()
+    }
+}
+
+fn parse_labels(theme_json: &str) -> ChartLabels {
+    serde_json::from_str(theme_json).unwrap_or_default()
+}
+
+/// Draw overlay labels on a finished chart: title top-left, y-unit top-right,
+/// x-unit bottom-right. Logical coordinates (the DPR transform is applied).
+fn draw_labels(canvas_id: &str, labels: &ChartLabels, theme: &ChartTheme) {
+    if !labels.any() {
+        return;
+    }
+    let Ok((ctx, width, height)) = crate::canvas::get_canvas_context_wasm(canvas_id) else {
+        return;
+    };
+    if labels.title.is_some() {
+        ctx.set_font("600 11px 'JetBrains Mono', monospace");
+        ctx.set_fill_style_str(theme.text);
+        if let Some(title) = &labels.title {
+            let _ = ctx.fill_text(title, 8.0, 16.0);
+        }
+    }
+    ctx.set_font("10px 'JetBrains Mono', monospace");
+    ctx.set_fill_style_str(theme.text_muted);
+    if let Some(y) = &labels.y_unit {
+        if let Ok(m) = ctx.measure_text(y) {
+            let _ = ctx.fill_text(y, width - m.width() - 8.0, 16.0);
+        }
+    }
+    if let Some(x) = &labels.x_unit {
+        if let Ok(m) = ctx.measure_text(x) {
+            let _ = ctx.fill_text(x, width - m.width() - 8.0, height - 6.0);
+        }
+    }
+}
+
 /// Input format for multi-series data.
 #[derive(serde::Deserialize)]
 struct MultiSeriesInput {
@@ -29,7 +78,9 @@ pub fn update_candles(canvas_id: &str, data_json: &str, theme_json: &str) -> Res
         serde_json::from_str(data_json).map_err(|e| JsValue::from_str(&e.to_string()))?;
     let theme = parse_theme(theme_json);
     crate::canvas::update_candles(canvas_id, &data, &theme)
-        .map_err(|e| JsValue::from_str(&e.to_string()))
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+    draw_labels(canvas_id, &parse_labels(theme_json), &theme);
+    Ok(())
 }
 
 /// Update chart with line data.
@@ -61,6 +112,7 @@ pub fn update_line(canvas_id: &str, data_json: &str, theme_json: &str) -> Result
                 h: height,
             };
             crate::charts::multiline::draw_lines(&ctx, &series, &area);
+            draw_labels(canvas_id, &parse_labels(theme_json), &theme);
             return Ok(());
         }
     }
@@ -69,7 +121,9 @@ pub fn update_line(canvas_id: &str, data_json: &str, theme_json: &str) -> Result
     let data: Vec<CandleData> =
         serde_json::from_str(data_json).map_err(|e| JsValue::from_str(&e.to_string()))?;
     crate::canvas::update_line(canvas_id, &data, &theme)
-        .map_err(|e| JsValue::from_str(&e.to_string()))
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+    draw_labels(canvas_id, &parse_labels(theme_json), &theme);
+    Ok(())
 }
 
 /// Update chart with heatmap matrix data.
@@ -146,6 +200,7 @@ pub fn update_scatter_multi(
         })
         .collect();
     crate::charts::scatter::draw_multi(&ctx, &series_refs, &area);
+    draw_labels(canvas_id, &parse_labels(theme_json), &theme);
 
     Ok(())
 }
@@ -171,7 +226,9 @@ pub fn update_bar(canvas_id: &str, data_json: &str, theme_json: &str) -> Result<
         serde_json::from_str(data_json).map_err(|e| JsValue::from_str(&e.to_string()))?;
     let theme = parse_theme(theme_json);
     crate::canvas::update_bar(canvas_id, &data, &theme)
-        .map_err(|e| JsValue::from_str(&e.to_string()))
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+    draw_labels(canvas_id, &parse_labels(theme_json), &theme);
+    Ok(())
 }
 
 /// Update chart with backtest equity + drawdown data.
@@ -216,6 +273,7 @@ pub fn update_area(canvas_id: &str, data_json: &str, theme_json: &str) -> Result
                 h: height,
             };
             crate::charts::multiline::draw_areas(&ctx, &series, &area);
+            draw_labels(canvas_id, &parse_labels(theme_json), &theme);
             return Ok(());
         }
     }
@@ -224,7 +282,9 @@ pub fn update_area(canvas_id: &str, data_json: &str, theme_json: &str) -> Result
     let data: Vec<CandleData> =
         serde_json::from_str(data_json).map_err(|e| JsValue::from_str(&e.to_string()))?;
     crate::canvas::update_area(canvas_id, &data, &theme)
-        .map_err(|e| JsValue::from_str(&e.to_string()))
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+    draw_labels(canvas_id, &parse_labels(theme_json), &theme);
+    Ok(())
 }
 
 /// Update chart with radar data.
