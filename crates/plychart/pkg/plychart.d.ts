@@ -161,23 +161,32 @@ export function view_pan_end(canvas_id: string): void;
 
 /**
  * Continue a pan drag; returns the updated viewport JSON `{start, count}`.
+ * Params as JSON: `{"x":120,"total":501}`.
  */
-export function view_pan_move(canvas_id: string, x: number, total: number): string;
+export function view_pan_move(canvas_id: string, params_json: string): string;
 
 /**
  * Begin a pan drag at mouse position (x, y).
+ * Params as JSON: `{"x":120,"y":80,"total":501}`.
  */
-export function view_pan_start(canvas_id: string, x: number, y: number, total: number): void;
+export function view_pan_start(canvas_id: string, params_json: string): void;
 
 /**
  * Reset the viewport to show all data. Returns the viewport JSON.
+ * Params as JSON: `{"total":501}`.
  */
-export function view_reset(canvas_id: string, total: number): string;
+export function view_reset(canvas_id: string, params_json: string): string;
 
 /**
  * Wheel-zoom the viewport for a canvas. Returns JSON `{start, count}`.
+ *
+ * All numeric parameters travel as ONE JSON string (`{"delta_y":-300,"total":501}`).
+ * The previous `(canvas_id, delta_y: f64, total: usize)` ABI was observed to
+ * desync in bundled consumers — the f64/i32 slots got crossed and `total`
+ * received the bit-wrapped delta, producing 2^32-scale viewports. A single
+ * string parameter cannot be mis-slotted.
  */
-export function view_zoom(canvas_id: string, delta_y: number, total: number): string;
+export function view_zoom(canvas_id: string, params_json: string): string;
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
@@ -212,8 +221,8 @@ export interface InitOutput {
     readonly view_drop: (a: number, b: number) => void;
     readonly view_pan_end: (a: number, b: number) => void;
     readonly view_pan_move: (a: number, b: number, c: number, d: number) => [number, number, number, number];
-    readonly view_pan_start: (a: number, b: number, c: number, d: number, e: number) => void;
-    readonly view_reset: (a: number, b: number, c: number) => [number, number, number, number];
+    readonly view_pan_start: (a: number, b: number, c: number, d: number) => void;
+    readonly view_reset: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly view_zoom: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly __wbindgen_exn_store: (a: number) => void;
     readonly __externref_table_alloc: () => number;

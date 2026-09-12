@@ -604,8 +604,21 @@ fn viewport_json(inter: &ChartInteraction, total: usize) -> String {
 }
 
 /// Wheel-zoom the viewport for a canvas. Returns JSON `{start, count}`.
+///
+/// All numeric parameters travel as ONE JSON string (`{"delta_y":-300,"total":501}`).
+/// The previous `(canvas_id, delta_y: f64, total: usize)` ABI was observed to
+/// desync in bundled consumers — the f64/i32 slots got crossed and `total`
+/// received the bit-wrapped delta, producing 2^32-scale viewports. A single
+/// string parameter cannot be mis-slotted.
 #[wasm_bindgen]
-pub fn view_zoom(canvas_id: &str, delta_y: f64, total: usize) -> Result<String, JsValue> {
+pub fn view_zoom(canvas_id: &str, params_json: &str) -> Result<String, JsValue> {
+    let parsed: serde_json::Value = serde_json::from_str(params_json).unwrap_or(serde_json::Value::Null);
+    let delta_y = parsed.get("delta_y").and_then(|v| v.as_f64()).unwrap_or(0.0);
+    let total = parsed.get("total").and_then(|v| v.as_u64()).unwrap_or(0) as usize;
+    view_zoom_impl(canvas_id, delta_y, total)
+}
+
+fn view_zoom_impl(canvas_id: &str, delta_y: f64, total: usize) -> Result<String, JsValue> {
     if total == 0 {
         return Ok("{\"start\":0,\"count\":0}".to_string());
     }
@@ -618,8 +631,14 @@ pub fn view_zoom(canvas_id: &str, delta_y: f64, total: usize) -> Result<String, 
 }
 
 /// Begin a pan drag at mouse position (x, y).
+/// Params as JSON: `{"x":120,"y":80,"total":501}`.
 #[wasm_bindgen]
-pub fn view_pan_start(canvas_id: &str, x: f64, y: f64, total: usize) {
+pub fn view_pan_start(canvas_id: &str, params_json: &str) {
+    let parsed: serde_json::Value =
+        serde_json::from_str(params_json).unwrap_or(serde_json::Value::Null);
+    let x = parsed.get("x").and_then(|v| v.as_f64()).unwrap_or(0.0);
+    let y = parsed.get("y").and_then(|v| v.as_f64()).unwrap_or(0.0);
+    let total = parsed.get("total").and_then(|v| v.as_u64()).unwrap_or(0) as usize;
     INTERACTIONS.with(|reg| {
         let mut reg = reg.borrow_mut();
         let inter = reg.entry(canvas_id.to_string()).or_default();
@@ -628,8 +647,13 @@ pub fn view_pan_start(canvas_id: &str, x: f64, y: f64, total: usize) {
 }
 
 /// Continue a pan drag; returns the updated viewport JSON `{start, count}`.
+/// Params as JSON: `{"x":120,"total":501}`.
 #[wasm_bindgen]
-pub fn view_pan_move(canvas_id: &str, x: f64, total: usize) -> Result<String, JsValue> {
+pub fn view_pan_move(canvas_id: &str, params_json: &str) -> Result<String, JsValue> {
+    let parsed: serde_json::Value =
+        serde_json::from_str(params_json).unwrap_or(serde_json::Value::Null);
+    let x = parsed.get("x").and_then(|v| v.as_f64()).unwrap_or(0.0);
+    let total = parsed.get("total").and_then(|v| v.as_u64()).unwrap_or(0) as usize;
     if total == 0 {
         return Ok("{\"start\":0,\"count\":0}".to_string());
     }
@@ -652,8 +676,12 @@ pub fn view_pan_end(canvas_id: &str) {
 }
 
 /// Reset the viewport to show all data. Returns the viewport JSON.
+/// Params as JSON: `{"total":501}`.
 #[wasm_bindgen]
-pub fn view_reset(canvas_id: &str, total: usize) -> Result<String, JsValue> {
+pub fn view_reset(canvas_id: &str, params_json: &str) -> Result<String, JsValue> {
+    let parsed: serde_json::Value =
+        serde_json::from_str(params_json).unwrap_or(serde_json::Value::Null);
+    let total = parsed.get("total").and_then(|v| v.as_u64()).unwrap_or(0) as usize;
     if total == 0 {
         return Ok("{\"start\":0,\"count\":0}".to_string());
     }
