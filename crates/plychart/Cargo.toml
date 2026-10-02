@@ -51,3 +51,6 @@ wasm-opt = false
 [[bench]]
 name = "chart_render"
 harness = false
+
+[package.metadata.layers]
+tier = "L1"

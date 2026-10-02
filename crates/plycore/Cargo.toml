@@ -16,3 +16,6 @@ serde_json = { workspace = true }
 
 [lints.rust]
 missing_docs = "deny"
+
+[package.metadata.layers]
+tier = "L0"
