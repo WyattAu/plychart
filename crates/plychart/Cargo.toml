@@ -1,9 +1,9 @@
 [package]
 name = "plychart"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024"
 license = "Apache-2.0"
-description = "Full-featured graphing library for Rust/WASM — Canvas2D rendering, zero dependencies, zero watermarks"
+description = "High-performance WASM charting library for Rust"
 repository = "https://github.com/WyattAu/plychart"
 keywords = ["charting", "canvas", "wasm", "visualization", "data"]
 categories = ["wasm", "visualization", "graphics"]
