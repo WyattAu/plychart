@@ -4,13 +4,13 @@ Shared types for the plychart ecosystem. Provides the core data types used acros
 
 ## Types
 
-- `CandleData` — OHLCV candle data point (time, open, high, low, close, volume)
-- `ChartArea` — Bounding rectangle for chart rendering
-- `ChartViewport` — Zoom + pan state (start, count, log_scale)
-- `ChartTheme` — Theme colors (dark, light, midnight)
-- `ChartError` — Error type (CanvasNotFound, DataParseError, InvalidData, RenderError)
-- `ChartOpts` — Render configuration (show_grid, show_crosshair, show_volume, show_axis_labels)
-- `BarData`, `ScatterPoint`, `HeatmapCell`, `Point2D` — Additional data types
+- `CandleData`; OHLCV candle data point (time, open, high, low, close, volume)
+- `ChartArea`; Bounding rectangle for chart rendering
+- `ChartViewport`; Zoom + pan state (start, count, log_scale)
+- `ChartTheme`; Theme colors (dark, light, midnight)
+- `ChartError`; Error type (CanvasNotFound, DataParseError, InvalidData, RenderError)
+- `ChartOpts`; Render configuration (show_grid, show_crosshair, show_volume, show_axis_labels)
+- `BarData`, `ScatterPoint`, `HeatmapCell`, `Point2D`; Additional data types
 
 ## Usage
 

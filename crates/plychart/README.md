@@ -67,10 +67,10 @@ update_candles("my-canvas", JSON.stringify(candles));
 ```text
 plycore (shared types)
   └── plychart (charting library)
-        ├── canvas.rs — Canvas2D lifecycle
-        ├── charts/ — 17 chart renderers + grid, crosshair, volume, multiline
-        ├── interaction.rs — Zoom, pan, crosshair, touch state machine
-        └── wasm.rs — 14 #[wasm_bindgen] exports
+        ├── canvas.rs; Canvas2D lifecycle
+        ├── charts/; 17 chart renderers + grid, crosshair, volume, multiline
+        ├── interaction.rs; Zoom, pan, crosshair, touch state machine
+        └── wasm.rs; 14 #[wasm_bindgen] exports
 ```
 
 ## License

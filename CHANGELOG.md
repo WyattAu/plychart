@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.2.0] — 2026-09-05
+## [0.2.0]: 2026-09-05
 
 ### plychart
 
@@ -16,15 +16,15 @@ All notable changes to this project will be documented in this file.
   (charts overlapped/ghosted on data change); proper retina backing store
 - **Quality:** multiline Y-range helper deduplicated; pie legend wraps;
   theme threading through all render paths; DOM lookup helper extracted
-- **Fix:** `mod wasm` was never declared — all `#[wasm_bindgen]` exports were
+- **Fix:** `mod wasm` was never declared; all `#[wasm_bindgen]` exports were
   silently absent from the binary until declared
 
 ### plycompute
 
-- **New engines:** `backtest.rs` — walk-forward strategy backtester
+- **New engines:** `backtest.rs`; walk-forward strategy backtester
   (SMA-cross, momentum, mean-reversion) with slippage/commission and no
-  look-ahead; `portfolio_backtest.rs` — multi-asset rebalancing portfolio
-  (equal-weight / inverse-vol) with turnover costs; `svi.rs` — Quasi-explicit
+  look-ahead; `portfolio_backtest.rs`; multi-asset rebalancing portfolio
+  (equal-weight / inverse-vol) with turnover costs; `svi.rs`; Quasi-explicit
   SVI volatility-surface fitting
 - **New exports:** `quant_backtest`, `quant_portfolio_backtest`,
   `quant_svi_surface`
@@ -42,7 +42,7 @@ All notable changes to this project will be documented in this file.
 - `examples/demo`: 22 chart cards covering every export
 - 280 tests passing across the workspace
 
-## [0.1.0] — 2026-08-31
+## [0.1.0]: 2026-08-31
 
 - Initial release: 13 chart types, 15 exports, Canvas2D via web-sys,
   interaction state machine (zoom/pan/pinch/keyboard), DPR-aware, 145 tests
