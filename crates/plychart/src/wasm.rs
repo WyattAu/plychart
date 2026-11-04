@@ -672,8 +672,12 @@ fn viewport_json(inter: &ChartInteraction, total: usize) -> String {
 /// string parameter cannot be mis-slotted.
 #[wasm_bindgen]
 pub fn view_zoom(canvas_id: &str, params_json: &str) -> Result<String, JsValue> {
-    let parsed: serde_json::Value = serde_json::from_str(params_json).unwrap_or(serde_json::Value::Null);
-    let delta_y = parsed.get("delta_y").and_then(|v| v.as_f64()).unwrap_or(0.0);
+    let parsed: serde_json::Value =
+        serde_json::from_str(params_json).unwrap_or(serde_json::Value::Null);
+    let delta_y = parsed
+        .get("delta_y")
+        .and_then(|v| v.as_f64())
+        .unwrap_or(0.0);
     let total = parsed.get("total").and_then(|v| v.as_u64()).unwrap_or(0) as usize;
     view_zoom_impl(canvas_id, delta_y, total)
 }
