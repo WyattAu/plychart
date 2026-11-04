@@ -34,4 +34,13 @@ HASH=$(sha256sum "$PKG/plychart_bg.wasm" | cut -c1-8)
 echo "p$HASH" > "$PKG/version.txt"
 echo "version: p$HASH"
 
+# Stage pkg for the Solid wrapper (its import is relative: ./pkg/plychart.js),
+# mirroring how demo-pages.yml copies pkg into the demo site.
+SOLID_PKG="$ROOT/packages/solid-chart/pkg"
+mkdir -p "$SOLID_PKG"
+cp "$PKG"/plychart.js "$PKG"/plychart.d.ts "$PKG"/plychart_bg.wasm \
+   "$PKG"/plychart_bg.wasm.d.ts "$PKG"/package.json "$PKG"/types.d.ts \
+   "$PKG"/version.txt "$SOLID_PKG"/
+echo "solid wrapper pkg ready: $SOLID_PKG"
+
 echo "pkg ready: $PKG"

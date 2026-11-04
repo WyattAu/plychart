@@ -1,0 +1,31 @@
+{
+  "name": "@wyattau/plychart-solid",
+  "version": "0.2.1",
+  "description": "SolidJS component wrapper for @wyattau/plychart — Canvas2D charting in Rust/WASM",
+  "type": "module",
+  "main": "src/index.tsx",
+  "types": "src/index.tsx",
+  "files": [
+    "src",
+    "pkg"
+  ],
+  "keywords": [
+    "charting",
+    "canvas",
+    "wasm",
+    "rust",
+    "solid",
+    "solidjs",
+    "visualization",
+    "finance"
+  ],
+  "license": "Apache-2.0",
+  "peerDependencies": {
+    "solid-js": ">=1.8"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WyattAu/plychart",
+    "directory": "packages/solid-chart"
+  }
+}

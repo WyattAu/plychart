@@ -73,6 +73,8 @@ jobs:
           ls crates/plychart/pkg/
           test -f crates/plychart/pkg/plychart_bg.wasm
           test -f crates/plychart/pkg/plychart.js
+          # Solid wrapper staging (build-wasm.sh copies pkg into the package)
+          test -f packages/solid-chart/pkg/plychart_bg.wasm
           echo "pkg/ output verified"
           echo "Exports: $(grep -c '^export function' crates/plychart/pkg/plychart.js)"
           # Guard: fail if fewer than 20 exports (catches wasm-bindgen schema mismatch)
