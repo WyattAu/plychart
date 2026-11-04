@@ -1,3 +1,4 @@
 /target
 /pkg
 /packages/solid-chart/pkg/
+/.cargo/config.toml
