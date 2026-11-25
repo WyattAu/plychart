@@ -65,3 +65,14 @@ v4.36.0; matches the installed elan toolchain).
 Elaboration-order caveat discovered: `Nat.mul_le_mul`'s implicit {n₂ m₂}
 unify from whichever argument is elaborated first — state hR2 as a trans
 chain instead of a direct two-sided application.
+
+## First convergence attempt (2026-11-25, not converged)
+
+A calc-chain proof of `hhi_bounded_bp` was drafted (IH tail bound, head
+square via `Nat.mul_le_mul_left`, tail-square trans, commutation facts,
+distributivity `hSS`) and closed with `omega` over the commuted atoms.
+It did not converge in core Lean 4.36: the `Nat.mul_le_mul_left`
+signature takes `k` explicitly before the inequality, and the implicit
+{n m} unification order across chained `have`s fought the elaborator.
+The sketch above is the completion map; the empirical half (property
+tests + fuzz) carries the enforcement meanwhile.
