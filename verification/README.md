@@ -44,3 +44,24 @@ Nat-arithmetic inductions:
 
 No Mathlib dependency — Lean 4 core only (`lean-toolchain` pins
 v4.36.0; matches the installed elan toolchain).
+
+## Proof completion sketch (certificate 1)
+
+`hhi_bounded_bp` induction over the weight list, S = sumBp ws:
+
+- nil case: closes by `simp`/`omega` (0 ≤ 0 * 0).
+- cons case (w, rest, R = sumBp rest):
+  - `hR : hhiBp rest ≤ R * R` — IH at S = R (`ih (sumBp rest) rfl`).
+  - `hw : w * w ≤ w * (w + R)` — `Nat.mul_le_mul_left w (Nat.le_add_right w R)`.
+  - `hR2 : hhiBp rest ≤ R * (w + R)` — trans of hR and
+    `Nat.mul_le_mul_left R (Nat.le_add_left R w)`.
+  - `hk1 : w * (w + R) = (w + R) * w` — mul_comm.
+  - `hR2b : hhiBp rest ≤ (w + R) * R` — trans hR2 + mul_comm.
+  - `hSS : (w + R) * w + (w + R) * R = (w + R) * (w + R)` —
+    `(Nat.mul_add (w + R) w R).symm`.
+  - Close with `omega` over the commuted atoms: goal `b + a ≤ c4 + c5`
+    follows from `a ≤ c4` (hw+hk1), `b ≤ c5` (hR2b), `c4 + c5 = c3` (hSS).
+
+Elaboration-order caveat discovered: `Nat.mul_le_mul`'s implicit {n₂ m₂}
+unify from whichever argument is elaborated first — state hR2 as a trans
+chain instead of a direct two-sided application.
