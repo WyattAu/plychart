@@ -66,6 +66,18 @@ Elaboration-order caveat discovered: `Nat.mul_le_mul`'s implicit {n₂ m₂}
 unify from whichever argument is elaborated first — state hR2 as a trans
 chain instead of a direct two-sided application.
 
+## Status (2026-11-25, final for this cycle)
+
+- **Certificate 1 (hhi_bounded_bp): FULLY PROVED** — induction + calc
+  chain (commuted atoms + distributivity), zero sorry.
+- **Certificate 2 (sumSqDev_nonneg): statement final, cons-case proof
+  blocked** on a `List.foldl` accumulator-unfolding detail
+  (`simp only [sumSqDev, List.foldl_cons]` leaves the foldl; the
+  `show`/`exact` route needs the `List.foldl_cons` equation applied in
+  the direction that exposes the accumulator). Two-line completion
+  once the right simp lemma form is found. Empirically enforced
+  meanwhile by parity_tests.rs + fuzz targets.
+
 ## First convergence attempt (2026-11-25, not converged)
 
 A calc-chain proof of `hhi_bounded_bp` was drafted (IH tail bound, head
