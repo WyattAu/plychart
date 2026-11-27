@@ -78,9 +78,11 @@ theorem hhi_bounded_bp (S : Nat) (ws : List Nat) (hsum : sumBp ws = S) :
     variance, volatility, and drawdown computations). -/
 def sqDev (center x : Int) : Int := (x - center) * (x - center)
 
-/-- Sum of squared deviations over an Int sample. -/
-def sumSqDev (center : Int) (xs : List Int) : Int :=
-  xs.foldl (fun acc x => acc + sqDev center x) 0
+/-- Sum of squared deviations over an Int sample (explicit recursion
+    rather than foldl: the cons equation is then definitional). -/
+def sumSqDev (center : Int) : List Int → Int
+  | [] => 0
+  | x :: xs => sqDev center x + sumSqDev center xs
 
 theorem sqDev_nonneg (center x : Int) : 0 ≤ sqDev center x := by
   rcases Int.le_total 0 (x - center) with h | h
@@ -100,10 +102,7 @@ it for all non-NaN inputs.
 theorem sumSqDev_nonneg (center : Int) (xs : List Int) : 0 ≤ sumSqDev center xs := by
   induction xs with
   | nil => simp [sumSqDev]
-  | cons x rest ih =>
-    simp only [sumSqDev, List.foldl_cons]
-    -- induction step blocked: foldl accumulator shape vs add_nonneg form
-    sorry
+  | cons x rest ih => simp [sumSqDev]; exact Int.add_nonneg (sqDev_nonneg center x) ih
 
 /--
 **Certificate 2 — squared terms never negative.** Every squared term

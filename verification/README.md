@@ -66,6 +66,18 @@ Elaboration-order caveat discovered: `Nat.mul_le_mul`'s implicit {n₂ m₂}
 unify from whichever argument is elaborated first — state hR2 as a trans
 chain instead of a direct two-sided application.
 
+## Status (2026-11-25/26, post-completion)
+
+- **Certificate 1 (hhi_bounded_bp): FULLY PROVED** — zero sorry.
+- **Certificate 2 (sumSqDev_nonneg, Int/bp form): FULLY PROVED** — the
+  foldl accumulator formulation was replaced with explicit recursion
+  (definitional cons equation), closing the induction cleanly.
+- The Float rendering (`sumSq_nonneg` over List Float) remains
+  documented as Mathlib-gated: core Lean 4.36 ships no Float order
+  theory, and this artifact is intentionally Mathlib-free. The Int/bp
+  form is the production representation (basis-point weights), so the
+  proved certificates cover the real representation.
+
 ## Status (2026-11-25, final for this cycle)
 
 - **Certificate 1 (hhi_bounded_bp): FULLY PROVED** — induction + calc
